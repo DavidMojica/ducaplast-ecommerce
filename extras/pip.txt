@@ -6,3 +6,4 @@ PIP
 pip install django <-----------------
 django-admin startproject ducaplast
 python manage.py startapp main
+pip install psycopg2
