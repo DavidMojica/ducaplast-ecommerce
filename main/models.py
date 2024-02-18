@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
 # Create your models here.
@@ -39,7 +40,6 @@ class Usuarios(AbstractUser):
             self.set_unusable_password()
         super(Usuarios, self).save(*args, **kwargs)
 
-
 class Pedido(models.Model):
     id = models.AutoField(primary_key=True)
     vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
@@ -50,6 +50,23 @@ class Pedido(models.Model):
     valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
     
+    def calcular_valor_pedido(self):
+        productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
+        return sum([Producto.id_Producto.precio * Producto.cantidad for producto in productos_pedido]) #Valor del pedido
+    
+    def descontar_cantidad_producto(self):
+        productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
+        for producto_pedido in productos_pedido:
+            producto = producto_pedido.id_producto
+            if producto.cantidad < producto_pedido.cantidad:
+                raise ValidationError(f"No hay suficiente cantidad disponible para el producto {producto.nombre}.")
+            producto.cantidad -= producto_pedido.cantidad
+            producto.save()
+            
+    def actualizar_dinero_generado_cliente(self):
+        self.cliente.dinero_generado += self.valor
+        self.cliente.save()
+            
 class Producto(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=400)
