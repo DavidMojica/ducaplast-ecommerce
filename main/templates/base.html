@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ducaplast</title>
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    <link rel="stylesheet" href="{% static 'styles/base.css' %}">
+</head>
+<body>
+    <header class="p-3 bg-dark text-white">
+        <section class="container">
+            <section class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                    <img src="{% static 'global/logo.jpeg' %}" alt="logo_ducaplast" class="logo">
+                </a>
+            </section>
+        </section>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+    
+</body>
+</html>
