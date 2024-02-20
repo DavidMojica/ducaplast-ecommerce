@@ -8,12 +8,42 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/bg-grid.css' %}">
     <link rel="stylesheet" href="{% static 'styles/home.css' %}">
 
 </head>
-<body>
-    <section>
-        <img src="{% static 'global/logo.jpeg' %}" alt="">
+<body class="bg-grid">
+    <section class="sectionZone">
+        <form action="" method="POST" class="d-flex flex-column p-4 text-center gap-2">
+            {% csrf_token %}
+            <img src="{% static 'global/logo.jpeg' %}" alt="">
+
+            <input type="text" name="username" class="form-control" placeholder="Documento de identidad">
+            <input type="text" name="password" class="form-control" placeholder="Contraseña">
+            <input type="submit" value="Ingresar" class="btn btn-primary">
+
+        </form>
     </section>
+
+    <footer class="d-flex justify-content-evenly py-4 bg-dark w-100 text-light text-center">
+        <section class="p-2">
+            <p class="">Horarios de atención: <br>
+                Lunes - Viernes: 8am - 6pm
+                Sabados: 8am - 2pm
+            </p>
+        </section>
+        <section>
+            <p class="">Dirección: <br>
+                Calle 54D #10a-12   
+            </p>
+        </section>
+
+        <section>
+            <p>Correo electrónico: <br>
+                ducaplast@gmail.com
+            </p>
+        </section>
+
+    </footer>
 </body>
 </html>
