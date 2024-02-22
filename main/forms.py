@@ -2,9 +2,14 @@ from django import forms
 from .models import TipoUsuario, Usuarios
 
 class registroUsuariosForm(forms.ModelForm):
-    nombre = forms.CharField(
+    first_name = forms.CharField(
         label="Nombre",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador'})
+    )
+    
+    last_name = forms.CharField(
+        label="Apellidos",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese los apellidos'})
     )
     
     documento=forms.CharField(
@@ -30,7 +35,15 @@ class registroUsuariosForm(forms.ModelForm):
         empty_label="Seleccione tipo de usuario..."
     )
     
+    email = forms.EmailField(
+        label="Correo electrónico",
+        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Correo electrónico'})
+    )
+    
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    
     class Meta:
         model = Usuarios
-        fields = ('nombre', 'documento', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
+        fields = ('first_name', 'last_name', 'documento', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
     

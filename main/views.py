@@ -26,36 +26,30 @@ def Registro(request):
                 if isinstance(form.cleaned_data[campo], str):
                     form.cleaned_data[campo] = form.cleaned_data[campo].strip()
             
-            try:
-                # instancia del modelo y asignacion de datos del formulario
-                user = form.save(commit=False)
-                user.set_password(form.cleaned_data['password'])
-                usuario, creado = Usuarios.objects.get_or_create(documento=user.documento)
+            
+            # instancia del modelo y asignacion de datos del formulario
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            usuario, creado = Usuarios.objects.get_or_create(documento=user.documento)
+            
+            if creado:
+                usuario.tipo_usuario = user.tipo_usuario
+                usuario.save()
                 
-                if creado:
-                    usuario.nombre = user.nombre
-                    usuario.tipo_usuario = user.tipo_usuario
-                    usuario.save()
-                    
-                    return render(request, "registro.html", {
-                        "form": form,
-                        "evento": EXITO_1,
-                        "exito": True,
-                        "documento": form.documento,
-                        "password": form.password
-                    })
-                else:
-                    return render(request, "registro.html", {
-                        "form": form,
-                        "evento": ERROR_1,
-                        "exito": False,
-                    })
-            except IntegrityError:
                 return render(request, "registro.html", {
                     "form": form,
+                    "evento": EXITO_1,
+                    "exito": True,
+                    "documento": form.documento,
+                    "password": form.password
+                })
+            else:
+                return render(request, "registro.html", {
+                    "form": form,
+                    "evento": ERROR_1,
                     "exito": False,
-                    "evento": "Integrity error",
-                })  
+                })
+
     #GET
     else:
         form = registroUsuariosForm()
