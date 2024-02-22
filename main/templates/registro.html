@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+    <form action="" method="POST">
+        <ul class="list-group">
+            {% for field in form %}
+              <li class="list-group-item">
+                  <span class="badge bg-success mb-1">{{ field.label_tag }}</span>
+                  {{ field }}
+              </li>
+            {% endfor %}
+        </ul>
+        {{ event }} <br>
+      <button type="submit" class="btn btn-primary mt-3">Crear usuario</button>
+    </form>
+</main>
+
+{% endblock %}
