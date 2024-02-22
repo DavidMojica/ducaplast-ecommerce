@@ -21,9 +21,10 @@ def Registro(request):
     if request.method == "POST":
         form = registroUsuariosForm(request.POST)
         if form.is_valid():
-            #Quitar espacios al principio y al final
+            #Quitar espacios al principio y al final de los campos de texto
             for campo in form.fields:
-                form.cleaned_data[campo] = form.cleaned_data[campo].strip()
+                if isinstance(form.cleaned_data[campo], str):
+                    form.cleaned_data[campo] = form.cleaned_data[campo].strip()
             
             try:
                 # instancia del modelo y asignacion de datos del formulario
@@ -39,6 +40,7 @@ def Registro(request):
                     return render(request, "registro.html", {
                         "form": form,
                         "evento": EXITO_1,
+                        "exito": True,
                         "documento": form.documento,
                         "password": form.password
                     })
@@ -46,10 +48,12 @@ def Registro(request):
                     return render(request, "registro.html", {
                         "form": form,
                         "evento": ERROR_1,
+                        "exito": False,
                     })
             except IntegrityError:
                 return render(request, "registro.html", {
                     "form": form,
+                    "exito": False,
                     "evento": "Integrity error",
                 })  
     #GET

@@ -5,6 +5,7 @@
 
 <main class="d-flex justify-content-center align-items-center">
     <form action="" method="POST" class="card p-4">
+        {% csrf_token %}
         <h2 class="text-primary text-bold text-center">Registro de usuarios</h2>
         <p class="text-info">En este registro, usted puede registrar a otros usuarios para que tengan acceso a la plataforma.</p>
         <ul class="list-group">
@@ -15,7 +16,10 @@
               </li>
             {% endfor %}
         </ul>
-        {{ event }} <br>
+        <span class="badge {% if exito %} bg-success {% else %} bg-danger {% endif %} my-1">{{ evento }}</span><br>
+        <span class="badge bg-success my-1">{{ documento }}</span><br>
+        <span class="badge bg-success my-1">{{ password }}</span><br>
+
       <button type="submit" class="btn btn-primary mt-3">Crear usuario</button>
     </form>
 </main>

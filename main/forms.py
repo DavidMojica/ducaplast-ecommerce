@@ -1,7 +1,7 @@
 from django import forms
 from .models import TipoUsuario, Usuarios
 
-class registroUsuariosForm(forms.Form):
+class registroUsuariosForm(forms.ModelForm):
     nombre = forms.CharField(
         label="Nombre",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador'})
