@@ -3,9 +3,15 @@
     width: 25%;
     min-width: 200px;
 }
+main{
+    min-height: 100vh;
+}
 
 @media (max-width:768px) {
     .card{
         width: 100%;
+    }
+    main{
+        min-height: 0;
     }
 }
