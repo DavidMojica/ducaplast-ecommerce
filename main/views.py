@@ -12,6 +12,8 @@ adminIds = [0, 1]
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
 ERROR_1 = "El usuario que intentó crear ya existe."
+ERROR_2 = "Formulario inválido."
+ERROR_3 = "Error desconocido."
 
 # Create your views here.
 def Home(request):
@@ -26,32 +28,40 @@ def Registro(request):
                 if isinstance(form.cleaned_data[campo], str):
                     form.cleaned_data[campo] = form.cleaned_data[campo].strip()
             
-            
             # instancia del modelo y asignacion de datos del formulario
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            usuario, creado = Usuarios.objects.get_or_create(documento=user.documento)
-            
-            if creado:
-                usuario.tipo_usuario = user.tipo_usuario
-                usuario.save()
+            try:
+                user = form.save(commit=False)
+                user.set_password(form.cleaned_data['password'])
+                user.username = form.cleaned_data['username']
+                user.save()
                 
                 return render(request, "registro.html", {
                     "form": form,
                     "evento": EXITO_1,
                     "exito": True,
-                    "documento": form.documento,
-                    "password": form.password
+                    "documento": f"Usuario login: {form.cleaned_data['username']}",  # Acceder a los datos del formulario correctamente
+                    "password": f"Contraseña: {form.cleaned_data['password']}"    # Acceder a los datos del formulario correctamente
                 })
-            else:
+            except IntegrityError:
                 return render(request, "registro.html", {
                     "form": form,
                     "evento": ERROR_1,
                     "exito": False,
                 })
-
-    #GET
+            except:
+                return render(request, "registro.html", {
+                    "form": form,
+                    "evento": ERROR_3,
+                    "exito": False,
+                })
+        else:
+            return render(request, "registro.html", {
+                "form": form,
+                "evento": ERROR_2,
+                "exito": False,
+            })
     else:
         form = registroUsuariosForm()
         
-    return(render(request, "registro.html", {'form': form }))
+    return render(request, "registro.html", {'form': form })
+

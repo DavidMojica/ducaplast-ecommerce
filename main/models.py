@@ -29,7 +29,6 @@ class Clientes(models.Model):
 # Login model
 class Usuarios(AbstractUser):
     id = models.AutoField(primary_key=True)
-    documento = models.CharField(max_length=20, unique=True)
     tipo_usuario = models.ForeignKey(TipoUsuario, on_delete=models.CASCADE)
     groups = models.ManyToManyField(Group, related_name="customuser_set")
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_set")

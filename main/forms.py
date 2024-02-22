@@ -12,7 +12,7 @@ class registroUsuariosForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese los apellidos'})
     )
     
-    documento=forms.CharField(
+    username=forms.CharField(
         label='Documento',
         widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento del usuario'})
     )
@@ -40,10 +40,7 @@ class registroUsuariosForm(forms.ModelForm):
         widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Correo electrónico'})
     )
     
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    
     class Meta:
         model = Usuarios
-        fields = ('first_name', 'last_name', 'documento', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
+        fields = ('first_name', 'last_name', 'username', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
     
