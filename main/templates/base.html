@@ -12,12 +12,20 @@
     <link rel="stylesheet" href="{% static 'styles/base.css' %}">
 </head>
 <body>
-    <header class="p-3 bg-dark text-white">
+    <header class="p-3 bg-dark bg-gradient text-white">
         <section class="container">
             <section class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
-                    <img src="{% static 'global/logo.jpeg' %}" alt="logo_ducaplast" class="logo">
-                </a>
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none fs-3 fw-bold font-monospace">DUCAPLAST</a>
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li class=""><a href="" class="nav-link px-2 text-white">Catálogo</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Facturas</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Pedidos</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Registrar</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Estadísticas</a></li>
+                </ul>
+                <article class="text-end">
+                    <button class="btn btn-warning">Cerrar sesion</button>
+                </article>
             </section>
         </section>
     </header>
@@ -26,7 +34,7 @@
     {% endblock %}
 
     <!-- Footer -->
-    <footer class="bg-body-tertiary text-center text-lg-start">
+    <footer class="bg-body-tertiary text-center text-lg-start bg-dark text-white">
         <section class="container p-4">
           <article class="row">
             <article class="col-lg-6 col-md-12 mb-4 mb-md-0"> 

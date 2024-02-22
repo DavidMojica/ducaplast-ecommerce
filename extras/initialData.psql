@@ -1,5 +1,7 @@
 -- Tipos de usuarios
-insert into main_tipousuario (desc) values('Administrador');
-insert into main_tipousuario (desc) values('Vendedor');
-insert into main_tipousuario (desc) values('Despachador');
-insert into main_tipousuario (desc) values('Repartidor');
+insert into main_tipousuario (id, description) values(0, 'Gerente');
+insert into main_tipousuario (id, description) values(1, 'Administrador');
+insert into main_tipousuario (id, description) values(2, 'Vendedor');
+insert into main_tipousuario (id, description) values(3, 'Despachador');
+insert into main_tipousuario (id, description) values(4, 'Repartidor');
+--select * from main_tipousuario

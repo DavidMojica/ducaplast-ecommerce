@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<main>
-    <form action="" method="POST">
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/registro.css' %}">
+
+<main class="min-vh-100 d-flex justify-content-center align-items-center">
+    <form action="" method="POST" class="card p-4">
         <ul class="list-group">
             {% for field in form %}
               <li class="list-group-item">
