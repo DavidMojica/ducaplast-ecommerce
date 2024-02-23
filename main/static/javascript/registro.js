@@ -5,6 +5,8 @@ const spanEvento = document.getElementById('spanEvento');
 const copyUsername = document.getElementById('copyUsername');
 const documento = document.getElementById('documento');
 const password = document.getElementById('password');
+const tipoUsuario = document.getElementById('tipoUsuario');
+const selectSpan = tipoUsuario.parentElement.querySelector('.badge');
 const spanCopy = copyUsername.parentElement.querySelector('.badge');
 
 //Evento de escucha para submit
@@ -29,17 +31,27 @@ const validarFormulario = () => {
 
 //Cuando el usuario ingrese 4 carácteres o más, el respectivo badge
 //cambiará a color verde.
-camposFormulario.forEach(campo => {
-    campo.addEventListener('input', function() {
-        const spanBadge = this.parentElement.querySelector('.badge');
-        if (this.value.trim().length >= 4) {
+formRegistro.addEventListener('input', function(event) {
+    if (event.target.tagName === 'INPUT') {
+        const spanBadge = event.target.parentElement.querySelector('.badge');
+        if (event.target.value.trim().length >= 4) {
             spanBadge.classList.remove('bg-danger');
             spanBadge.classList.add('bg-success');
         } else {
             spanBadge.classList.remove('bg-success');
             spanBadge.classList.add('bg-danger');
         }
-    });
+    }
+});
+
+tipoUsuario.addEventListener('change', () => {
+    if (tipoUsuario.value !== '') {
+        selectSpan.classList.remove('bg-danger');
+        selectSpan.classList.add('bg-success');
+    } else {
+        selectSpan.classList.remove('bg-success');
+        selectSpan.classList.add('bg-danger');
+    }
 });
 
 //Copiar documento a password
