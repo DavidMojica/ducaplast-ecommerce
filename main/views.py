@@ -1,7 +1,5 @@
-from django.db import IntegrityError
 from django.shortcuts import render
 
-from main.models import Usuarios
 from .forms import registroUsuariosForm
 
 # Variables

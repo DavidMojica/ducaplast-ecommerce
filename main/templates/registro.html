@@ -2,9 +2,9 @@
 {% block content %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/registro.css' %}">
-
+<script src="{% static 'javascript/registro.js' %}" defer></script>
 <main class="d-flex justify-content-center align-items-center">
-    <form action="" method="POST" class="card p-4">
+    <form action="" method="POST" class="card p-4" id="formRegistro">
         {% csrf_token %}
         <h2 class="text-primary text-bold text-center">Registro de usuarios</h2>
         <p class="text-info">En este registro, usted puede registrar a otros usuarios para que tengan acceso a la plataforma.</p>
@@ -17,7 +17,7 @@
             {% endfor %}
         </ul>
         <button type="submit" class="btn btn-primary my-2">Crear usuario</button>
-        <span class="badge mx-auto {% if exito %} bg-success {% else %} bg-danger {% endif %} mb-2">{{evento}}</span>
+        <span class="badge mx-auto {% if exito %} bg-success {% else %} bg-danger {% endif %} mb-2" id="spanEvento">{{evento}}</span>
         <section class="d-inline-flex justify-content-evenly">
             <span class="badge bg-success my-1">{{documento}}</span>
             <span class="badge bg-success my-1">{{password}}</span>

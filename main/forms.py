@@ -3,21 +3,25 @@ from .models import TipoUsuario, Usuarios
 
 class registroUsuariosForm(forms.ModelForm):
     first_name = forms.CharField(
+        required=False,
         label="Nombre",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador'})
     )
     
     last_name = forms.CharField(
+        required=False,
         label="Apellidos",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese los apellidos'})
     )
     
     username=forms.CharField(
+        required=False,
         label='Documento',
         widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento del usuario'})
     )
     
     password = forms.CharField(
+        required=False,
         label="Contraseña",
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Nueva contraseña'})
     )
@@ -29,6 +33,7 @@ class registroUsuariosForm(forms.ModelForm):
     )
     
     tipo_usuario=forms.ModelChoiceField(
+        required=False,
         label="Tipo de usuario",
         queryset=TipoUsuario.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
@@ -36,6 +41,7 @@ class registroUsuariosForm(forms.ModelForm):
     )
     
     email = forms.EmailField(
+        required=False,
         label="Correo electrónico",
         widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Correo electrónico'})
     )
