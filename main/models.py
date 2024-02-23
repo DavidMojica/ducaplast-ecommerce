@@ -4,18 +4,18 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 
 # Create your models here.
 class TipoUsuario(models.Model):
-    id = models.AutoField(primary_key=True)
-    desc = models.CharField(max_length=25)
+    id = models.IntegerField(primary_key=True)
+    description = models.CharField(max_length=25)
     
     def __str__(self):
-        return self.desc
+        return self.description
 
 class Estados(models.Model):
     id = models.AutoField(primary_key=True)
-    desc = models.CharField(max_length=25)
+    description = models.CharField(max_length=25)
 
     def __str__(self):
-            return self.desc
+            return self.description
         
 class Clientes(models.Model):
     id = models.AutoField(primary_key=True)
@@ -24,13 +24,11 @@ class Clientes(models.Model):
     dinero_generado = models.BigIntegerField(default=0)
     
     def __str__(self):
-            return self.desc
+            return self.nombre
         
 # Login model
 class Usuarios(AbstractUser):
     id = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
-    documento = models.CharField(max_length=20, unique=True)
     tipo_usuario = models.ForeignKey(TipoUsuario, on_delete=models.CASCADE)
     groups = models.ManyToManyField(Group, related_name="customuser_set")
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_set")

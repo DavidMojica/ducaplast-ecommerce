@@ -8,22 +8,57 @@
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-
+    <link rel="stylesheet" href="{% static 'styles/bg-grid.css' %}">
     <link rel="stylesheet" href="{% static 'styles/base.css' %}">
 </head>
-<body>
-    <header class="p-3 bg-dark text-white">
+<body class="bg-grid">
+    <header class="p-3 bg-dark bg-gradient text-white">
         <section class="container">
             <section class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
-                    <img src="{% static 'global/logo.jpeg' %}" alt="logo_ducaplast" class="logo">
-                </a>
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none fs-3 fw-bold font-monospace">DUCAPLAST</a>
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li class=""><a href="" class="nav-link px-2 text-white">Catálogo</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Facturas</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Pedidos</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Registrar</a></li>
+                    <li class=""><a href="" class="nav-link px-2 text-white">Estadísticas</a></li>
+                </ul>
+                <article class="text-end">
+                    <button class="btn btn-warning">Cerrar sesion</button>
+                </article>
             </section>
         </section>
     </header>
 
     {% block content %}
     {% endblock %}
+
+    <!-- Footer -->
+    <footer class="bg-body-tertiary text-center text-lg-start bg-dark text-white">
+        <section class="container p-4">
+          <article class="row">
+            <article class="col-lg-6 col-md-12 mb-4 mb-md-0"> 
+              <h5 class="text-uppercase">DUCAPLAST</h5>   
+              <p>
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste atque ea quis
+                molestias. Fugiat pariatur maxime quis culpa corporis vitae repudiandae aliquam
+                voluptatem veniam, est atque cumque eum delectus sint!
+              </p>
+            </article>
+            <article class="col-lg-6 col-md-12 mb-4 mb-md-0">
+              <h5 class="text-uppercase">HORARIOS...</h5>
+              <p>
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste atque ea quis
+                molestias. Fugiat pariatur maxime quis culpa corporis vitae repudiandae aliquam
+                voluptatem veniam, est atque cumque eum delectus sint!
+              </p>
+            </article>
+          </article>
+        </section>
+        <section class="text-center p-3 bg" style="background-color: rgba(0, 0, 0, 0.05);">
+          <p>© 2024 Copyright</p>
+        </section>
+    </footer>
     
 </body>
 </html>
