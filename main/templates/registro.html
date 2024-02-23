@@ -16,11 +16,13 @@
               </li>
             {% endfor %}
         </ul>
-        <span class="badge {% if exito %} bg-success {% else %} bg-danger {% endif %} my-1">{{evento}}</span><br>
-        <span class="badge bg-success my-1">{{documento}}</span><br>
-        <span class="badge bg-success my-1">{{password}}</span><br>
+        <button type="submit" class="btn btn-primary my-2">Crear usuario</button>
+        <span class="badge mx-auto {% if exito %} bg-success {% else %} bg-danger {% endif %} mb-2">{{evento}}</span>
+        <section class="d-inline-flex justify-content-evenly">
+            <span class="badge bg-success my-1">{{documento}}</span>
+            <span class="badge bg-success my-1">{{password}}</span>
+        </section>
 
-        <button type="submit" class="btn btn-primary mt-3">Crear usuario</button>
     </form>
 </main>
 
