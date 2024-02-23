@@ -24,7 +24,7 @@ class registroUsuariosForm(forms.ModelForm):
     
     usarDocumentoComoPassword = forms.BooleanField(
         required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'id':'copyUsername'}),
         label="Usar documento como contraseña"
     )
     
