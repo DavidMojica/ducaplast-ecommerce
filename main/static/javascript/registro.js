@@ -3,6 +3,9 @@ const camposFormulario = document.querySelectorAll('#formRegistro input');
 const formRegistro = document.getElementById('formRegistro');
 const spanEvento = document.getElementById('spanEvento');
 const copyUsername = document.getElementById('copyUsername');
+const documento = document.getElementById('documento');
+const password = document.getElementById('password');
+const spanCopy = copyUsername.parentElement.querySelector('.badge');
 
 //Evento de escucha para submit
 formRegistro.addEventListener('submit', (e)=>{
@@ -37,4 +40,16 @@ camposFormulario.forEach(campo => {
             spanBadge.classList.add('bg-danger');
         }
     });
+});
+
+//Copiar documento a password
+copyUsername.addEventListener('change', (event) => {
+    if (event.target.checked) {
+        spanCopy.classList.remove('bg-danger');
+        spanCopy.classList.add('bg-success');
+        password.value = documento.value;
+    } else {
+        spanCopy.classList.remove('bg-success');
+        spanCopy.classList.add('bg-danger');
+    }
 });

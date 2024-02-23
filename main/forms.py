@@ -14,12 +14,12 @@ class registroUsuariosForm(forms.ModelForm):
     
     username=forms.CharField(
         label='Documento',
-        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento del usuario'})
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento del usuario', 'id':'documento'})
     )
     
     password = forms.CharField(
         label="Contraseña",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Nueva contraseña'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Nueva contraseña', 'id': 'password'})
     )
     
     usarDocumentoComoPassword = forms.BooleanField(
