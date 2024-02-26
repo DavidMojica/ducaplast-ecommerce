@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.urls import reverse
 from .forms import registroUsuariosForm, inicioSesionForm
 
 
@@ -51,17 +52,18 @@ def Home(request):
                                                     'error':ERROR_4})
             else:
                 login(request, logedUser)
-                userType = logedUser.tipo_usuario
-                if userType == '10':
-                    return redirect()
-                elif userType == '11':
-                    return redirect()
-                elif userType == '12':
-                    return redirect()
-                elif userType == '13':
-                    return redirect()
-                elif userType == '14':
-                    return redirect()
+                userType = logedUser.tipo_usuario_id
+                print(f"-------------->usertype {userType}")
+                if userType == 0:
+                    return redirect(reverse('registro'))
+                elif userType == 1:
+                    return redirect(reverse('registro'))
+                elif userType == 2:
+                    return redirect(reverse('registro'))
+                elif userType == 3:
+                    return redirect(reverse('registro'))
+                elif userType == 4:
+                    return redirect(reverse('registro'))
                 else:
                     logout(request)
                     return render(request, "home.html", {'form': newForm,
@@ -71,7 +73,6 @@ def Home(request):
                                                 'error': ERROR_2})
     return render(request, "home.html", {'form': newForm})
 
-       
 def Registro(request):
     newForm = registroUsuariosForm()
     if request.method == "POST":
@@ -127,3 +128,7 @@ def Registro(request):
                 })
     #GET
     return render(request, "registro.html", {'form': newForm })
+
+def Logout(request):
+    logout(request)
+    return redirect(reverse('home'))
