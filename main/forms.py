@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from .models import TipoUsuario, Usuarios
 
@@ -44,3 +46,17 @@ class registroUsuariosForm(forms.ModelForm):
         model = Usuarios
         fields = ('first_name', 'last_name', 'username', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
     
+    
+class inicioSesionForm(forms.Form):
+    documento = forms.CharField(
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento', 'id':'documento'}),
+        required=True
+    )
+    
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder': 'Contraseña', 'id':'passwod'}),
+        required=True
+    )   
+    
+    class Meta:
+        fields = ('documento','password')

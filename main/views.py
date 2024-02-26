@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from .forms import registroUsuariosForm
+from .forms import registroUsuariosForm, inicioSesionForm
 
 # Variables
 
@@ -13,9 +13,28 @@ ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
 
+#-----------Functions----------#
+def stripForm(form):
+    for campo in form.fields:
+        if isinstance(form.cleaned_data[campo], str):
+            form.cleaned_data[campo] = form.cleaned_data[campo].strip()
+    return form 
+
+
 # Create your views here.
 def Home(request):
-    return render(request, "home.html")
+    newForm = inicioSesionForm()
+    if request.method == 'POST':
+        form = inicioSesionForm(request.POST)
+        if form.is_valid():
+            form = stripForm(form)
+            
+        
+    return render(request, "home.html", {'form': newForm})
+
+       
+    
+    
 
 def Registro(request):
     newForm = registroUsuariosForm()
@@ -32,9 +51,7 @@ def Registro(request):
         #Verificar la validez del formulario (campos en blanco, tipos de datos correctos)
         if form.is_valid():
             #Quitar espacios al principio y al final de los campos de texto
-            for campo in form.fields:
-                if isinstance(form.cleaned_data[campo], str):
-                    form.cleaned_data[campo] = form.cleaned_data[campo].strip()
+            form = stripForm(form)
             #Guardar el usuario nuevo
             try:
                 user = form.save(commit=False)
