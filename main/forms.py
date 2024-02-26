@@ -46,6 +46,24 @@ class registroUsuariosForm(forms.ModelForm):
         model = Usuarios
         fields = ('first_name', 'last_name', 'username', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
     
+class editarCuentaForm(forms.ModelForm):
+    nombre = forms.CharField(
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Ingrese su nombre', 'id':'nombre'}),
+        required=True
+    )
+    apellidos = forms.CharField(
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Ingrese sus apellidos', 'id':'apellidos'}),
+        required=True
+    )
+    email = forms.CharField(
+        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Ingrese su nombre', 'id':'nombre'}),
+        required=True
+    )
+
+    class Meta:
+        model = Usuarios
+        fields = ('nombre', 'apellidos', 'email')
+ 
     
 class inicioSesionForm(forms.Form):
     documento = forms.CharField(

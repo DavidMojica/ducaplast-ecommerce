@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
-from .forms import registroUsuariosForm, inicioSesionForm
+from .forms import registroUsuariosForm, inicioSesionForm, editarCuentaForm
 
 
 # Variables
@@ -24,6 +24,12 @@ def stripForm(form):
         if isinstance(form.cleaned_data[campo], str):
             form.cleaned_data[campo] = form.cleaned_data[campo].strip()
     return form 
+
+def EditarCuenta(request):
+    
+    return render(request, "editar_cuenta.html", {
+        'form': editarCuentaForm()
+    })
 
 
 # Create your views here.
@@ -128,6 +134,8 @@ def Registro(request):
                 })
     #GET
     return render(request, "registro.html", {'form': newForm })
+
+
 
 def Logout(request):
     logout(request)
