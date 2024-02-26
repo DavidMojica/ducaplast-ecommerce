@@ -72,9 +72,6 @@ def Home(request):
     return render(request, "home.html", {'form': newForm})
 
        
-    
-    
-
 def Registro(request):
     newForm = registroUsuariosForm()
     if request.method == "POST":
