@@ -1,15 +1,17 @@
+import re
+
 from django import forms
 from .models import TipoUsuario, Usuarios
 
 class registroUsuariosForm(forms.ModelForm):
     first_name = forms.CharField(
         label="Nombre",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador', 'id': 'nombre'})
     )
     
     last_name = forms.CharField(
         label="Apellidos",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese los apellidos'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese los apellidos', 'id':'apellidos'})
     )
     
     username=forms.CharField(
@@ -37,10 +39,24 @@ class registroUsuariosForm(forms.ModelForm):
     
     email = forms.EmailField(
         label="Correo electrónico",
-        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Correo electrónico'})
+        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Correo electrónico', 'id': 'email'})
     )
     
     class Meta:
         model = Usuarios
         fields = ('first_name', 'last_name', 'username', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
     
+    
+class inicioSesionForm(forms.Form):
+    documento = forms.CharField(
+        widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento', 'id':'documento'}),
+        required=True
+    )
+    
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder': 'Contraseña', 'id':'password'}),
+        required=True
+    )   
+    
+    class Meta:
+        fields = ('documento','password')
