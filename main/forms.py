@@ -54,7 +54,7 @@ class inicioSesionForm(forms.Form):
     )
     
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder': 'Contraseña', 'id':'passwod'}),
+        widget=forms.PasswordInput(attrs={'class':'form-control', 'placeholder': 'Contraseña', 'id':'password'}),
         required=True
     )   
     
