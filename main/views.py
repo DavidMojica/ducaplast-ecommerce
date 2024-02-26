@@ -1,6 +1,7 @@
-from django.shortcuts import render
-
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
 from .forms import registroUsuariosForm, inicioSesionForm
+
 
 # Variables
 
@@ -12,6 +13,8 @@ EXITO_1 = "El usuario ha sido creado correctamente."
 ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
+ERROR_4 = "Usuario o contraseña incorrecta."
+ERROR_5 = "Este usuario no pudo ser redireccionado. \nComunique este error."
 
 #-----------Functions----------#
 def stripForm(form):
@@ -29,7 +32,36 @@ def Home(request):
         if form.is_valid():
             form = stripForm(form)
             
-        
+            documento = form.cleaned_data['documento']
+            password = form.cleaned_data['password']
+            
+            logedUser = authenticate(request, username=documento, password=password)
+            
+            #Verificar que el usuario exista y su contraseña sea correcta
+            if logedUser is None:
+                recycledForm = inicioSesionForm(initial={'documento': documento})
+                return render(request, "home.html", {'form': recycledForm,
+                                                    'error':ERROR_4})
+            else:
+                login(request, logedUser)
+                userType = logedUser.tipo_usuario
+                if userType == '10':
+                    return redirect()
+                elif userType == '11':
+                    return redirect()
+                elif userType == '12':
+                    return redirect()
+                elif userType == '13':
+                    return redirect()
+                elif userType == '14':
+                    return redirect()
+                else:
+                    logout(request)
+                    return render(request, "home.html", {'form': newForm,
+                                                         'error': ERROR_5})
+        else:
+            return render(request, "home.html",{'form':newForm,
+                                                'error': ERROR_2})
     return render(request, "home.html", {'form': newForm})
 
        

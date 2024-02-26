@@ -21,11 +21,7 @@
             {{form.documento}}
             {{form.password}}
             <input type="submit" value="Ingresar" class="btn btn-primary">
-            <ul class="list-group">
-              {% for e in errors %}
-                  <li class="list-group-item"><span class="badge bg-danger">{{ e }}</span></li>
-              {% endfor %}
-            </ul>
+            <span class="badge bg-danger">{{error}}</span>
             <p class="text-primary mx-auto text-bold">¿Olvidó la contraseña?</p>
         
           </form>
