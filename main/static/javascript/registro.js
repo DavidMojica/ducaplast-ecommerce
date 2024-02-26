@@ -2,18 +2,46 @@
 const camposFormulario = document.querySelectorAll('#formRegistro input');
 const formRegistro = document.getElementById('formRegistro');
 const spanEvento = document.getElementById('spanEvento');
-const copyUsername = document.getElementById('copyUsername');
+
+// Input elements
+const nombre = document.getElementById('nombre');
+const apellido = document.getElementById('apellidos');
 const documento = document.getElementById('documento');
 const password = document.getElementById('password');
+const copyUsername = document.getElementById('copyUsername');
 const tipoUsuario = document.getElementById('tipoUsuario');
+const email = document.getElementById('email');
+
+//Input badges
 const selectSpan = tipoUsuario.parentElement.querySelector('.badge');
 const spanCopy = copyUsername.parentElement.querySelector('.badge');
+
+//Variables
+const nombreMinLength = 2;
+const apellidosMinLength = 3;
+const documentoMinLength = 6;
+const passwordMinLegth = 8;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+let validationState = undefined;
+
+// ----------Functions---------- //
+const changeBadgeColor = (type, badge) => {
+    if (type == 0) {
+        badge.classList.remove('bg-danger');
+        badge.classList.add('bg-success');
+    } else if(type == 1) {
+        badge.classList.remove('bg-success');
+        badge.classList.add('bg-danger');
+    }
+}
 
 //Evento de escucha para submit
 formRegistro.addEventListener('submit', (e)=>{
     e.preventDefault();
-    if (!validarFormulario()){
-        spanEvento.innerText = "Algún campo tiene datos muy cortos.";
+    validationState = validarFormulario();
+    if (validationState !== '0'){
+        spanEvento.innerText = validationState;
         return;
     }
     else formRegistro.submit();
@@ -21,47 +49,60 @@ formRegistro.addEventListener('submit', (e)=>{
 
 //Valida que el formulario no tenga campos vacios y menores a 4 letras
 const validarFormulario = () => {
-    for (let campo of camposFormulario) {
-        if (campo.value.trim().length <= 4) {
-            return false;
-        }
-    }
-    return true;
+    if (nombre.value.trim().length < nombreMinLength) return "Nombre demasiado corto.";
+    if (apellido.value.trim().length < apellidosMinLength) return "Apellidos demasiado cortos";
+    if (documento.value.trim().length < documentoMinLength) return "Documento demasiado corto";
+    if (password.value.trim().length < passwordMinLegth) return "Contraseña demasiado corta";
+    if (tipoUsuario.value == '') return "Seleccione el tipo de usuario";
+    if (!emailRegex.test(email.value.trim())) return "Ingrese un correo electrónico válido.";
+
+    return '0';
 }
 
-//Cuando el usuario ingrese 4 carácteres o más, el respectivo badge
-//cambiará a color verde.
-formRegistro.addEventListener('input', function(event) {
-    if (event.target.tagName === 'INPUT') {
-        const spanBadge = event.target.parentElement.querySelector('.badge');
-        if (event.target.value.trim().length >= 4) {
-            spanBadge.classList.remove('bg-danger');
-            spanBadge.classList.add('bg-success');
-        } else {
-            spanBadge.classList.remove('bg-success');
-            spanBadge.classList.add('bg-danger');
-        }
-    }
+//Cuando el ingrese el minimo de carácteres o más, el respectivo badge
+//del campo cambiará a color verde.
+
+nombre.addEventListener('input', (e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= nombreMinLength) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
 });
 
-tipoUsuario.addEventListener('change', () => {
-    if (tipoUsuario.value !== '') {
-        selectSpan.classList.remove('bg-danger');
-        selectSpan.classList.add('bg-success');
-    } else {
-        selectSpan.classList.remove('bg-success');
-        selectSpan.classList.add('bg-danger');
-    }
+apellido.addEventListener('input', (e)=> {
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= apellidosMinLength) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
 });
 
-//Copiar documento a password
-copyUsername.addEventListener('change', (event) => {
-    if (event.target.checked) {
-        spanCopy.classList.remove('bg-danger');
-        spanCopy.classList.add('bg-success');
+documento.addEventListener('input', (e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= documentoMinLength) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
+});
+
+password.addEventListener('input', (e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= passwordMinLegth) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
+});
+
+copyUsername.addEventListener('change', (e) => {
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+
+    if (e.target.checked) {
+        changeBadgeColor(0, spanBadge);
         password.value = documento.value;
-    } else {
-        spanCopy.classList.remove('bg-success');
-        spanCopy.classList.add('bg-danger');
-    }
+    } else changeBadgeColor(1, spanBadge);
+});
+
+tipoUsuario.addEventListener('change', (e) => {
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (tipoUsuario.value !== '') changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
+});
+
+email.addEventListener('input', (e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if(emailRegex.test(email.value)) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
 });

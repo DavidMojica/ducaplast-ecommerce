@@ -6,12 +6,12 @@ from .models import TipoUsuario, Usuarios
 class registroUsuariosForm(forms.ModelForm):
     first_name = forms.CharField(
         label="Nombre",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador', 'id': 'nombre'})
     )
     
     last_name = forms.CharField(
         label="Apellidos",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese los apellidos'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese los apellidos', 'id':'apellidos'})
     )
     
     username=forms.CharField(
@@ -39,7 +39,7 @@ class registroUsuariosForm(forms.ModelForm):
     
     email = forms.EmailField(
         label="Correo electrónico",
-        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Correo electrónico'})
+        widget=forms.EmailInput(attrs={'class':'form-control', 'placeholder': 'Correo electrónico', 'id': 'email'})
     )
     
     class Meta:

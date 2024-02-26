@@ -4,7 +4,8 @@ from .forms import registroUsuariosForm, inicioSesionForm
 
 
 # Variables
-
+DOCLENGTHMIN = 6 #Minimo de carácteres para el documento
+PASSLENGTHMIN = 8 #Minimo de carácteres para la contraseña
 #Arrays - listas
 adminIds = [0, 1]
 
@@ -36,7 +37,7 @@ def Home(request):
             password = form.cleaned_data['password']
             
             #Verificar el minimo de carácteres para cada campo
-            if len(documento) < 6 or len(password) < 8:
+            if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
                 recycledForm = inicioSesionForm(initial={'documento': documento})
                 return render(request, "home.html", {'form': recycledForm,
                                                      'error': ERROR_6})
@@ -92,9 +93,19 @@ def Registro(request):
             form = stripForm(form)
             #Guardar el usuario nuevo
             try:
+                documento = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                
+                if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
+                    return render(request, "registro.html", {
+                      "form": form,
+                      "evento": ERROR_6,
+                      "exito": False  
+                    })
+                
                 user = form.save(commit=False)
-                user.username = form.cleaned_data['username']
-                user.set_password(form.cleaned_data['password'])
+                user.username = documento
+                user.set_password(password)
                 user.email = form.cleaned_data['email']
                 user.save()
                 
@@ -102,7 +113,7 @@ def Registro(request):
                     "form": newForm,
                     "evento": EXITO_1,
                     "exito": True,
-                    "documento": f"Usuario login: {form.cleaned_data['username']}",
+                    "documento": f"Usuario login: {documento}",
                     "password": f"Contraseña: {form.cleaned_data['password']}"
                 })
             except Exception as e:
