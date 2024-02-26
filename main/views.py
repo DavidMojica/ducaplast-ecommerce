@@ -14,8 +14,8 @@ ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
 ERROR_4 = "Usuario o contraseña incorrecta."
-ERROR_5 = "Este usuario no pudo ser redireccionado. \nComunique este error."
-
+ERROR_5 = "Este usuario no pudo ser redireccionado. Comunique este error."
+ERROR_6 = "Usuario o documento demasiado corto(s)."
 #-----------Functions----------#
 def stripForm(form):
     for campo in form.fields:
@@ -34,6 +34,12 @@ def Home(request):
             
             documento = form.cleaned_data['documento']
             password = form.cleaned_data['password']
+            
+            #Verificar el minimo de carácteres para cada campo
+            if len(documento) < 6 or len(password) < 8:
+                recycledForm = inicioSesionForm(initial={'documento': documento})
+                return render(request, "home.html", {'form': recycledForm,
+                                                     'error': ERROR_6})
             
             logedUser = authenticate(request, username=documento, password=password)
             
