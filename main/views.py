@@ -66,6 +66,7 @@ def EditarCuenta(request):
     user = get_object_or_404(Usuarios, pk=str(request.user.id))
     if request.method == "POST":
         print("acc_data" in request.POST)
+        print("name" in request.POST)
         print("pass_data" in request.POST)
         if "acc_data" in request.POST:
             nombre = request.POST.get("nombre", "").strip()

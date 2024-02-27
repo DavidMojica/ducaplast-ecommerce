@@ -1,4 +1,4 @@
-const accountForm = document.getElementById('accountForm');
+const accountForm = document.getElementById('accountForm"');
 const passForm = document.getElementById('passForm');
 
 const nombre = document.getElementById('nombre');
@@ -22,7 +22,10 @@ accountForm.addEventListener('submit', (e)=>{
     e.preventDefault();
 
     validationResult = accountValidations();
-    if (validationResult === "0") accountForm.submit();
+    if (validationResult === "0") {
+        accountForm.submit();
+
+    }
     else account_event.innerText = validationResult;
 });
 
@@ -38,7 +41,9 @@ passForm.addEventListener('submit', (e)=>{
     e.preventDefault();
 
     validationResult = passValidations();
-    if(validationResult === "0") passForm.submit();
+    if(validationResult === "0") {
+        passForm.submit();
+    }
     else pass_event.innerText = validationResult;
 })
 
