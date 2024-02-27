@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <main>
-    <form action="" method="POST">
+    <form action="" method="POST" id="accountForm">
         {% csrf_token %}
         <input type="text" name="nombre" id="nombre" placeholder="Ingrese su nombre" value="{{user.first_name}}">
         <input type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" value="{{user.last_name}}">
@@ -9,7 +9,7 @@
         <input type="submit" value="Guardar cambios" name="account_data">
         <span class="badge bg-danger">{{account_data_event}}</span>
     </form>
-    <form action="" method="POST">
+    <form action="" method="POST" id="passForm">
         {% csrf_token %}
         <span class="badge bg-danger">Cambiar contraseña <br>
         (Si actualiza la contraseña, esto cerrará su sesión)</span>        
