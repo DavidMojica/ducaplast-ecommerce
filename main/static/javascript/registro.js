@@ -52,7 +52,7 @@ const validarFormulario = () => {
     if (nombre.value.trim().length < nombreMinLength) return "Nombre demasiado corto.";
     if (apellido.value.trim().length < apellidosMinLength) return "Apellidos demasiado cortos";
     if (documento.value.trim().length < documentoMinLength) return "Documento demasiado corto";
-    if (password.value.trim().length < passwordMinLegth) return "Contraseña demasiado corta";
+    if (password.value.length < passwordMinLegth) return "Contraseña demasiado corta";
     if (tipoUsuario.value == '') return "Seleccione el tipo de usuario";
     if (!emailRegex.test(email.value.trim())) return "Ingrese un correo electrónico válido.";
 
@@ -82,7 +82,7 @@ documento.addEventListener('input', (e)=>{
 
 password.addEventListener('input', (e)=>{
     const spanBadge = e.target.parentElement.querySelector('.badge');
-    if (e.target.value.trim().length >= passwordMinLegth) changeBadgeColor(0, spanBadge);
+    if (e.target.value.length >= passwordMinLegth) changeBadgeColor(0, spanBadge);
     else changeBadgeColor(1, spanBadge);
 });
 
