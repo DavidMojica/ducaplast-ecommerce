@@ -65,11 +65,13 @@ def unloginRequired(view_func):
 def EditarCuenta(request):
     user = get_object_or_404(Usuarios, pk=str(request.user.id))
     if request.method == "POST":
-        if "account_data" in request.POST:
+        print("acc_data" in request.POST)
+        print("pass_data" in request.POST)
+        if "acc_data" in request.POST:
             nombre = request.POST.get("nombre", "").strip()
             apellidos = request.POST.get("apellidos", "").strip()
             email = request.POST.get("email", "").strip()
-
+            print(f"nombre {nombre}")
             if isEmpty([nombre, apellidos, email]):
                 return render(request, HTMLEDITARCUENTA,{"account_data_event": ERROR_7})
             
@@ -87,6 +89,7 @@ def EditarCuenta(request):
             return render(request, HTMLEDITARCUENTA, {"account_data_event": EXITO_2})
             
         elif "pass_data" in request.POST:
+            
             oldPassword = request.POST.get('oldPassword')
             newPassword = request.POST.get('password')
             newPassword1 = request.POST.get('password1')

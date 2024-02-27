@@ -28,7 +28,7 @@ accountForm.addEventListener('submit', (e)=>{
 
 const accountValidations = () => {
     if (nombre.value.trim().length < nombreMinLength) return "Nombre demasiado corto.";
-    if (apellido.value.trim().length < apellidosMinLength) return "Apellidos demasiado cortos";
+    if (apellidos.value.trim().length < apellidosMinLength) return "Apellidos demasiado cortos";
     if (!emailRegex.test(email.value.trim())) return "Ingrese un correo electrónico válido.";
     return '0';
 }
@@ -38,7 +38,7 @@ passForm.addEventListener('submit', (e)=>{
 
     validationResult = passValidations();
     if(validationResult === "0") passForm.submit();
-    else pass_event.innerText = validationResult();
+    else pass_event.innerText = validationResult;
 })
 
 const passValidations = () =>{
