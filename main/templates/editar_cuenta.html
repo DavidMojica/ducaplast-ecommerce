@@ -1,13 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
 <main>
-    <form action="">
-        {{form.nombre}}
-        {{form.apellidos}}
-        {{form.email}}
-
-        
-        {{form.password}}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <input type="text" name="nombre" id="nombre" placeholder="Ingrese su nombre">
+        <input type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos">
+        <input type="text" name="email" id="email" placeholder="Ingrese su email">
+        <input type="submit" value="Guardar cambios">
+        {{d}}
+    </form>
+    <form action="" method="POST">
+        <span class="badge bg-danger">Cambiar contraseña</span>        
+        <input type="password" name="oldPassword" id="oldPassword" placeholder="Contraseña anterior">
+        <input type="password" name="password" id="password" placeholder="Contraseña nueva">
+        <input type="password" name="password1" id="password1" placeholder="Confirme contraseña nueva">
+        <input type="submit" value="Guardar contraseña">
     </form>
 </main>
 
