@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .forms import registroUsuariosForm, inicioSesionForm, editarCuentaForm
+from .forms import registroUsuariosForm, inicioSesionForm
 from .models import Usuarios
 
 import re
@@ -32,7 +33,7 @@ ERROR_4 = "Usuario o contraseña incorrecta."
 ERROR_5 = "Este usuario no pudo ser redireccionado. Comunique este error."
 ERROR_6 = "Usuario o documento demasiado corto(s)."
 ERROR_7 = "Algun campo quedó vacío."
-ERROR_8 = "La vieja contraseña NO es la correcta."
+ERROR_8 = "La contraseña anterior no es la correcta."
 ERROR_9 = "Alguna(s) de las contraseñas no cumplen con la longitud minima."
 ERROR_10 = "Las contraseñas nuevas no coinciden"
 ERROR_11 = "Nombre o apellidos no cumplen con la longitud minima."
@@ -52,6 +53,15 @@ def isValidEmail(email):
         return True
     return False
 
+def unloginRequired(view_func):
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('registro')
+        else:
+            return view_func(request, *args, **kwargs)
+    return wrapper
+
+@login_required
 def EditarCuenta(request):
     user = get_object_or_404(Usuarios, pk=str(request.user.id))
     if request.method == "POST":
@@ -69,31 +79,35 @@ def EditarCuenta(request):
             if not isValidEmail(email):
                 return render(request, HTMLEDITARCUENTA, {"account_data_event":ERROR_12})
        
-            user.nombre = nombre
-            user.apellidos = apellidos
+            user.first_name = nombre
+            user.last_name = apellidos
             user.email = email
             user.save()
             
             return render(request, HTMLEDITARCUENTA, {"account_data_event": EXITO_2})
             
         elif "pass_data" in request.POST:
-            oldPassword = request.POST.get('old_password').strip()
-            newPassword = request.POST.get('password').strip()
-            newPassword1 = request.POST.get('password1').strip()
+            oldPassword = request.POST.get('oldPassword')
+            newPassword = request.POST.get('password')
+            newPassword1 = request.POST.get('password1')
             
             if user.check_password(oldPassword):
-                if len(newPassword) < PASSLENGTHMIN or len(newPassword1) < PASSLENGTHMIN:
+                if len(newPassword) >= PASSLENGTHMIN or len(newPassword1) >= PASSLENGTHMIN:
                     if newPassword == newPassword1:
                         user.set_password(newPassword)
-                        return render(request, HTMLEDITARCUENTA, { "password_change_event": EXITO_3 })
+                        user.save()
+                        return redirect(reverse('home'))
                     else:
                         return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_10 })
                 else:
                     return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_9 })
             else:
                 return render(request, HTMLEDITARCUENTA, { "password_change_event": ERROR_8 })
-    return render(request, HTMLEDITARCUENTA, { 'form': editarCuentaForm() })
+    
+    
+    return render(request, HTMLEDITARCUENTA)
 
+@unloginRequired
 def Home(request):
     newForm = inicioSesionForm()
     if request.method == 'POST':
@@ -140,6 +154,7 @@ def Home(request):
                                                 'error': ERROR_2})
     return render(request, HTMLHOME, {'form': newForm})
 
+@login_required
 def Registro(request):
     newForm = registroUsuariosForm()
     if request.method == "POST":
@@ -196,8 +211,7 @@ def Registro(request):
     #GET
     return render(request, HTMLREGISTRO, {'form': newForm })
 
-
-
+@login_required
 def Logout(request):
     logout(request)
     return redirect(reverse('home'))
