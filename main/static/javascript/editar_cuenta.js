@@ -26,7 +26,6 @@ accountForm.addEventListener('submit', (e)=>{
     else account_event.innerText = validationResult;
 });
 
-
 const accountValidations = () => {
     if (nombre.value.trim().length < nombreMinLength) return "Nombre demasiado corto.";
     if (apellido.value.trim().length < apellidosMinLength) return "Apellidos demasiado cortos";
@@ -49,5 +48,4 @@ const passValidations = () =>{
     if (password.value !== password1.value) return "Las contraseñas no coinciden";
 
     return "0";
-
 }

@@ -1,25 +1,63 @@
 {% extends 'base.html' %}
 {% block content %}
-<main>
-    <form action="" method="POST" id="accountForm">
-        {% csrf_token %}
-        <input type="text" name="nombre" id="nombre" placeholder="Ingrese su nombre" value="{{user.first_name}}">
-        <input type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" value="{{user.last_name}}">
-        <input type="text" name="email" id="email" placeholder="Ingrese su email" value="{{user.email}}">
-        <input type="submit" value="Guardar cambios" name="account_data">
-        <span class="badge bg-danger" id="account_event">{{account_data_event}}</span>
-    </form>
-    <form action="" method="POST" id="passForm">
-        {% csrf_token %}
-        <span class="badge bg-danger">Cambiar contraseña <br>
-        (Si actualiza la contraseña, esto cerrará su sesión)</span>        
-        <input type="password" name="oldPassword" id="oldPassword" placeholder="Contraseña anterior">
-        <input type="password" name="password" id="password" placeholder="Contraseña nueva">
-        <input type="password" name="password1" id="password1" placeholder="Confirme contraseña nueva">
-        <input type="submit" value="Guardar contraseña" name="pass_data">
-        <span class="badge bg-danger" id="pass_event">{{password_change_event}}</span>
-    </form>
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/editar_cuenta.css' %}">
+<script src="{% static 'javascript/editar_cuenta.js' %}" defer></script>
+<main class="d-flex justify-content-center align-items-center">
+    <section class="card p-4">
+        <form action="" method="POST" id="accountForm">
+            {% csrf_token %}
+            <h2 class="text-primary text-bold text-center">Editar perfil</h2>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="nombre">Nombre</label>
+                    </span>
+                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ingrese su nombre" value="{{user.first_name}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="apellidos">Apellidos</label>
+                    </span>
+                    <input type="text" name="apellidos" id="apellidos" class="form-control" placeholder="Ingrese sus apellidos" value="{{user.last_name}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="email">Correo electrónico</label>
+                    </span>
+                    <input type="text" name="email" id="email" class="form-control" placeholder="Ingrese su email" value="{{user.email}}">
+                </li>
+            </ul>
+            <input type="submit" value="Guardar cambios" name="account_data" class="btn btn-warning">
+            <span class="badge bg-danger" id="account_event">{{account_data_event}}</span>
+        </form>
+        <form action="" method="POST" id="passForm">
+            {% csrf_token %}
+            <span class="badge bg-danger">Cambiar contraseña <br>
+            (Si actualiza la contraseña, se cerrará su sesión)</span>    
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="oldPassword">Contraseña anterior</label>
+                    </span>
+                    <input type="password" name="oldPassword" class="form-control" id="oldPassword" placeholder="Contraseña anterior">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="password">Contraseña nueva</label>
+                    </span>
+                    <input type="password" name="password" class="form-control" id="password" placeholder="Contraseña nueva">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="password1">Confirmar contraseña</label>
+                    </span>
+                    <input type="password" name="password1" class="form-control" id="password1" placeholder="Confirme contraseña nueva">
+                </li>
+            </ul>    
+            <input type="submit" value="Guardar contraseña" name="pass_data" class="btn btn-danger">
+            <span class="badge bg-danger" id="pass_event">{{password_change_event}}</span>
+        </form>
+    </section>
 </main>
-
-
 {% endblock %}
