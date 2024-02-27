@@ -7,7 +7,7 @@
         <input type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" value="{{user.last_name}}">
         <input type="text" name="email" id="email" placeholder="Ingrese su email" value="{{user.email}}">
         <input type="submit" value="Guardar cambios" name="account_data">
-        <span class="badge bg-danger">{{account_data_event}}</span>
+        <span class="badge bg-danger" id="account_event">{{account_data_event}}</span>
     </form>
     <form action="" method="POST" id="passForm">
         {% csrf_token %}
@@ -17,7 +17,7 @@
         <input type="password" name="password" id="password" placeholder="Contraseña nueva">
         <input type="password" name="password1" id="password1" placeholder="Confirme contraseña nueva">
         <input type="submit" value="Guardar contraseña" name="pass_data">
-        <span class="badge bg-danger">{{password_change_event}}</span>
+        <span class="badge bg-danger" id="pass_event">{{password_change_event}}</span>
     </form>
 </main>
 

@@ -22,7 +22,7 @@ accountForm.addEventListener('submit', (e)=>{
     e.preventDefault();
 
     validationResult = accountValidations();
-    if (validationResult === "0") e.submit();
+    if (validationResult === "0") accountForm.submit();
     else account_event.innerText = validationResult;
 });
 
@@ -38,10 +38,16 @@ passForm.addEventListener('submit', (e)=>{
     e.preventDefault();
 
     validationResult = passValidations();
-    if(validationResult === "0") e.submit();
+    if(validationResult === "0") passForm.submit();
     else pass_event.innerText = validationResult();
 })
 
 const passValidations = () =>{
-    if (password.value.trim().length < passwordMinLegth) return "Contraseña demasiado corta";
+    if (oldPassword.value.length < passwordMinLegth) return "La contraseña antigua es demasiado corta";
+    if (password.value.length < passwordMinLegth) return "La contraseña nueva es demasiado corta";
+    if (password1.value.length < passwordMinLegth) return "Confimar contraseña es demasiado corta";
+    if (password.value !== password1.value) return "Las contraseñas no coinciden";
+
+    return "0";
+
 }
