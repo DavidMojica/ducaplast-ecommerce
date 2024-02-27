@@ -26,12 +26,13 @@ accountForm.addEventListener('submit', (e)=>{
     else account_event.innerText = validationResult;
 });
 
-const accountValidations = () => {
+function accountValidations() {
     if (nombre.value.trim().length < nombreMinLength) return "Nombre demasiado corto.";
     if (apellidos.value.trim().length < apellidosMinLength) return "Apellidos demasiado cortos";
     if (!emailRegex.test(email.value.trim())) return "Ingrese un correo electrónico válido.";
     return '0';
 }
+
 
 passForm.addEventListener('submit', (e)=>{
     e.preventDefault();
@@ -41,10 +42,10 @@ passForm.addEventListener('submit', (e)=>{
     else pass_event.innerText = validationResult;
 })
 
-const passValidations = () =>{
+function passValidations() {
     if (oldPassword.value.length < passwordMinLegth) return "La contraseña antigua es demasiado corta";
     if (password.value.length < passwordMinLegth) return "La contraseña nueva es demasiado corta";
-    if (password1.value.length < passwordMinLegth) return "Confimar contraseña es demasiado corta";
+    if (password1.value.length < passwordMinLegth) return "Confirmar contraseña es demasiado corta";
     if (password.value !== password1.value) return "Las contraseñas no coinciden";
 
     return "0";
