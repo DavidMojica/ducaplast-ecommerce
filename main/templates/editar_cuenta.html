@@ -3,18 +3,19 @@
 <main>
     <form action="" method="POST">
         {% csrf_token %}
-        <input type="text" name="nombre" id="nombre" placeholder="Ingrese su nombre">
-        <input type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos">
-        <input type="text" name="email" id="email" placeholder="Ingrese su email">
-        <input type="submit" value="Guardar cambios">
-        {{d}}
+        <input type="text" name="nombre" id="nombre" placeholder="Ingrese su nombre" value="{{User.nombre}}">
+        <input type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" value="{{User.apellidos}}">
+        <input type="text" name="email" id="email" placeholder="Ingrese su email" value="{{user.email}}">
+        <input type="submit" value="Guardar cambios" name="account_data">
+        <span class="badge bg-danger">{{account_data_event}}</span>
     </form>
     <form action="" method="POST">
         <span class="badge bg-danger">Cambiar contraseña</span>        
         <input type="password" name="oldPassword" id="oldPassword" placeholder="Contraseña anterior">
         <input type="password" name="password" id="password" placeholder="Contraseña nueva">
         <input type="password" name="password1" id="password1" placeholder="Confirme contraseña nueva">
-        <input type="submit" value="Guardar contraseña">
+        <input type="submit" value="Guardar contraseña" name="pass_data">
+        <span class="badge bg-danger">{{password_change_event}}</span>
     </form>
 </main>
 
