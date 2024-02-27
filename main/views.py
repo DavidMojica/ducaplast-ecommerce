@@ -16,8 +16,15 @@ EMAILREGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 #Arrays - listas
 adminIds = [0, 1]
 
+#HTTDOCS
+HTMLEDITARCUENTA = "editar_cuenta.html"
+HTMLHOME = "home.html"
+HTMLREGISTRO = "registro.html"
+
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
+EXITO_2 = "Sus datos fueron actualizados correctamente"
+EXITO_3 = "Contraseña actualizada correctamente"
 ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
@@ -29,6 +36,7 @@ ERROR_8 = "La vieja contraseña NO es la correcta."
 ERROR_9 = "Alguna(s) de las contraseñas no cumplen con la longitud minima."
 ERROR_10 = "Las contraseñas nuevas no coinciden"
 ERROR_11 = "Nombre o apellidos no cumplen con la longitud minima."
+ERROR_12 = "Formato de email no válido"
 #-----------Functions----------#
 def stripForm(form):
     for campo in form.fields:
@@ -53,12 +61,21 @@ def EditarCuenta(request):
             email = request.POST.get("email", "").strip()
 
             if isEmpty([nombre, apellidos, email]):
-                return render(request, "editar_cuenta.html",{
-                         "account_data_event": ERROR_7
-                })
+                return render(request, HTMLEDITARCUENTA,{"account_data_event": ERROR_7})
+            
             if len(nombre) < NOMBRELENGTHMIN or len(apellidos) < APELLIDOSLENGTHMIN:
-                return render(request, apellidos, {"account_data_event": ERROR_11})
-                
+                return render(request, HTMLEDITARCUENTA, {"account_data_event": ERROR_11})
+            
+            if not isValidEmail(email):
+                return render(request, HTMLEDITARCUENTA, {"account_data_event":ERROR_12})
+       
+            user.nombre = nombre
+            user.apellidos = apellidos
+            user.email = email
+            user.save()
+            
+            return render(request, HTMLEDITARCUENTA, {"account_data_event": EXITO_2})
+            
         elif "pass_data" in request.POST:
             oldPassword = request.POST.get('old_password').strip()
             newPassword = request.POST.get('password').strip()
@@ -68,24 +85,15 @@ def EditarCuenta(request):
                 if len(newPassword) < PASSLENGTHMIN or len(newPassword1) < PASSLENGTHMIN:
                     if newPassword == newPassword1:
                         user.set_password(newPassword)
+                        return render(request, HTMLEDITARCUENTA, { "password_change_event": EXITO_3 })
                     else:
-                        return render(request, "editar_cuenta.html",{
-                            "password_change_event": ERROR_10
-                        })
+                        return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_10 })
                 else:
-                    return render(request, "editar_cuenta.html",{
-                        "password_change_event": ERROR_9
-                    })
+                    return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_9 })
             else:
-                return render(request, "editar_cuenta.html", {
-                    "password_change_event": ERROR_8
-                })
-    return render(request, "editar_cuenta.html", {
-        'form': editarCuentaForm()
-    })
+                return render(request, HTMLEDITARCUENTA, { "password_change_event": ERROR_8 })
+    return render(request, HTMLEDITARCUENTA, { 'form': editarCuentaForm() })
 
-
-# Create your views here.
 def Home(request):
     newForm = inicioSesionForm()
     if request.method == 'POST':
@@ -99,7 +107,7 @@ def Home(request):
             #Verificar el minimo de carácteres para cada campo
             if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
                 recycledForm = inicioSesionForm(initial={'documento': documento})
-                return render(request, "home.html", {'form': recycledForm,
+                return render(request, HTMLHOME, {'form': recycledForm,
                                                      'error': ERROR_6})
             
             logedUser = authenticate(request, username=documento, password=password)
@@ -107,7 +115,7 @@ def Home(request):
             #Verificar que el usuario exista y su contraseña sea correcta
             if logedUser is None:
                 recycledForm = inicioSesionForm(initial={'documento': documento})
-                return render(request, "home.html", {'form': recycledForm,
+                return render(request, HTMLHOME, {'form': recycledForm,
                                                     'error':ERROR_4})
             else:
                 login(request, logedUser)
@@ -125,12 +133,12 @@ def Home(request):
                     return redirect(reverse('registro'))
                 else:
                     logout(request)
-                    return render(request, "home.html", {'form': newForm,
+                    return render(request, HTMLHOME, {'form': newForm,
                                                          'error': ERROR_5})
         else:
-            return render(request, "home.html",{'form':newForm,
+            return render(request, HTMLHOME,{'form':newForm,
                                                 'error': ERROR_2})
-    return render(request, "home.html", {'form': newForm})
+    return render(request, HTMLHOME, {'form': newForm})
 
 def Registro(request):
     newForm = registroUsuariosForm()
@@ -138,7 +146,7 @@ def Registro(request):
         form = registroUsuariosForm(request.POST)
         #Verificar que el documento no se haya registrado antes.
         if form.has_error("username", code="unique"):
-            return render(request, "registro.html", {
+            return render(request, HTMLREGISTRO, {
                     "form": form,
                     "evento": ERROR_1,
                     "exito": False,
@@ -154,7 +162,7 @@ def Registro(request):
                 password = form.cleaned_data['password']
                 
                 if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
-                    return render(request, "registro.html", {
+                    return render(request, HTMLREGISTRO, {
                       "form": form,
                       "evento": ERROR_6,
                       "exito": False  
@@ -166,7 +174,7 @@ def Registro(request):
                 user.email = form.cleaned_data['email']
                 user.save()
                 
-                return render(request, "registro.html", {
+                return render(request, HTMLREGISTRO, {
                     "form": newForm,
                     "evento": EXITO_1,
                     "exito": True,
@@ -174,19 +182,19 @@ def Registro(request):
                     "password": f"Contraseña: {form.cleaned_data['password']}"
                 })
             except Exception as e:
-                return render(request, "registro.html", {
+                return render(request, HTMLREGISTRO, {
                     "form": form,
                     "evento": ERROR_3,
                     "exito": False,
                 })
         else:
-            return render(request, "registro.html", {
+            return render(request, HTMLREGISTRO, {
                     "form": form,
                     "evento": ERROR_2,
                     "exito": False,
                 })
     #GET
-    return render(request, "registro.html", {'form': newForm })
+    return render(request, HTMLREGISTRO, {'form': newForm })
 
 
 
