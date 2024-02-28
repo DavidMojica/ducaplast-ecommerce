@@ -1,5 +1,5 @@
-const accountForm = document.getElementById('accountForm');
-const passForm = document.getElementById('passForm');
+const accountForm = document.getElementById('formAccount');
+const passForm = document.getElementById('formPass');
 
 const nombre = document.getElementById('nombre');
 const apellidos = document.getElementById('apellidos');
@@ -32,13 +32,12 @@ const changeBadgeColor = (type, badge) => {
 
 accountForm.addEventListener('submit', function(e){
     e.preventDefault();
-
     validationResult = accountValidations();
-    if (validationResult === "0") {
-        accountForm.submit();
-
+    if (validationResult !== '0') {
+        account_event.innerText = validationResult;
+       return;
     }
-    else account_event.innerText = validationResult;
+    else accountForm.submit();
 });
 
 function accountValidations() {
@@ -51,12 +50,12 @@ function accountValidations() {
 
 passForm.addEventListener('submit', function(e){
     e.preventDefault();
-
     validationResult = passValidations();
-    if(validationResult === "0") {
-        passForm.submit();
+    if(validationResult !== '0') {
+        pass_event.innerText = validationResult;
+        return;
     }
-    else pass_event.innerText = validationResult;
+    else passForm.submit();
 })
 
 function passValidations() {
@@ -65,7 +64,7 @@ function passValidations() {
     if (password1.value.length < passwordMinLegth) return "Confirmar contraseña es demasiado corta";
     if (password.value !== password1.value) return "Las contraseñas no coinciden";
 
-    return "0";
+    return '0';
 }
 
 //------------DOM BADGE INTERACTION----------//
@@ -96,22 +95,29 @@ oldPassword.addEventListener('input',(e)=>{
 
 password.addEventListener('input',(e)=>{
     const spanBadge = e.target.parentElement.querySelector('.badge');
+    badgeChild = password.parentElement.querySelector('.badge');
     if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)){
         changeBadgeColor(0, spanBadge);
         badgeChild = password1.parentElement.querySelector('.badge');
         changeBadgeColor(0,badgeChild);
     }
-    else changeBadgeColor(1, spanBadge);
+    else{
+        changeBadgeColor(1, spanBadge);
+        changeBadgeColor(1,badgeChild);
+    }
 });
 
 password1.addEventListener('input',(e)=>{
     const spanBadge = e.target.parentElement.querySelector('.badge');
+    badgeChild = password.parentElement.querySelector('.badge');
     if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)){
         changeBadgeColor(0, spanBadge);
-        badgeChild = password.parentElement.querySelector('.badge');
         changeBadgeColor(0,badgeChild);
     }
-    else changeBadgeColor(1, spanBadge);
+    else {
+        changeBadgeColor(1, spanBadge);
+        changeBadgeColor(1,badgeChild);
+    }
 });
 
 //--------Init DOM badge-------//
