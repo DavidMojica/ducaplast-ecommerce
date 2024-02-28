@@ -5,7 +5,7 @@
 <script src="{% static 'javascript/editar_cuenta.js' %}" defer></script>
 <main class="d-flex justify-content-center align-items-center">
     <section class="card p-4">
-        <form action="" method="POST" id="accountForm" class="card p-4">
+        <form action="" method="POST" id="formAccount" class="card p-4">
             {% csrf_token %}
             <h2 class="text-primary text-bold text-center">Editar perfil</h2>
             <ul class="list-group">
@@ -28,10 +28,11 @@
                     <input type="text" name="email" id="email" class="form-control" placeholder="Ingrese su email" value="{{user.email}}">
                 </li>
             </ul>
-            <button type="submit" name="acc_data" class="btn btn-secondary mt-3">Guardar cambios</button>
+            <input type="hidden" name="acc_data">
+            <input type="submit" value="Guardar cambios" class="btn btn-secondary mt-3">
             <span class="badge bg-danger mt-2" id="account_event">{{account_data_event}}</span>
         </form>
-        <form action="" method="POST" id="passForm" class="card p-4 bg-danger">
+        <form action="" method="POST" id="formPass" class="card p-4 bg-danger">
             {% csrf_token %}
             <h2 class="text-center text-white">Zona de cuidado</h2>
             <span class="badge bg-danger">Cambiar contraseña<br>
@@ -56,7 +57,8 @@
                     <input type="password" name="password1" class="form-control" id="password1" placeholder="Confirme contraseña nueva">
                 </li>
             </ul>    
-            <input type="submit" value="Guardar contraseña" name="pass_data" class="btn btn-warning mt-3">
+            <input type="hidden" name="pass_data">
+            <input type="submit" value="Guardar contraseña" name="" class="btn btn-warning mt-3">
             <span class="badge bg-warning mt-2" id="pass_event">{{password_change_event}}</span>
         </form>
     </section>

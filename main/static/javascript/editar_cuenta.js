@@ -1,5 +1,5 @@
-const accountForm = document.getElementById('accountForm"');
-const passForm = document.getElementById('passForm');
+const accountForm = document.getElementById('formAccount');
+const passForm = document.getElementById('formPass');
 
 const nombre = document.getElementById('nombre');
 const apellidos = document.getElementById('apellidos');
@@ -13,20 +13,31 @@ const pass_event = document.getElementById('pass_event');
 
 //Variables
 let validationResult = undefined;
+let badgeChild = undefined;
 const nombreMinLength = 2;
 const apellidosMinLength = 3;
 const passwordMinLegth = 8;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-accountForm.addEventListener('submit', (e)=>{
-    e.preventDefault();
-
-    validationResult = accountValidations();
-    if (validationResult === "0") {
-        accountForm.submit();
-
+//---------------Functions--------------//
+const changeBadgeColor = (type, badge) => {
+    if (type == 0) {
+        badge.classList.remove('bg-danger');
+        badge.classList.add('bg-success');
+    } else if(type == 1) {
+        badge.classList.remove('bg-success');
+        badge.classList.add('bg-danger');
     }
-    else account_event.innerText = validationResult;
+}
+
+accountForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    validationResult = accountValidations();
+    if (validationResult !== '0') {
+        account_event.innerText = validationResult;
+       return;
+    }
+    else accountForm.submit();
 });
 
 function accountValidations() {
@@ -37,14 +48,14 @@ function accountValidations() {
 }
 
 
-passForm.addEventListener('submit', (e)=>{
+passForm.addEventListener('submit', function(e){
     e.preventDefault();
-
     validationResult = passValidations();
-    if(validationResult === "0") {
-        passForm.submit();
+    if(validationResult !== '0') {
+        pass_event.innerText = validationResult;
+        return;
     }
-    else pass_event.innerText = validationResult;
+    else passForm.submit();
 })
 
 function passValidations() {
@@ -53,5 +64,70 @@ function passValidations() {
     if (password1.value.length < passwordMinLegth) return "Confirmar contraseña es demasiado corta";
     if (password.value !== password1.value) return "Las contraseñas no coinciden";
 
-    return "0";
+    return '0';
 }
+
+//------------DOM BADGE INTERACTION----------//
+
+nombre.addEventListener('input',(e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= nombreMinLength) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
+});
+
+apellidos.addEventListener('input',(e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= apellidosMinLength) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
+});
+
+email.addEventListener('input', (e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if(emailRegex.test(email.value)) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
+});
+
+oldPassword.addEventListener('input',(e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= passwordMinLegth) changeBadgeColor(0, spanBadge);
+    else changeBadgeColor(1, spanBadge);
+});
+
+password.addEventListener('input',(e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    badgeChild = password.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)){
+        changeBadgeColor(0, spanBadge);
+        badgeChild = password1.parentElement.querySelector('.badge');
+        changeBadgeColor(0,badgeChild);
+    }
+    else{
+        changeBadgeColor(1, spanBadge);
+        changeBadgeColor(1,badgeChild);
+    }
+});
+
+password1.addEventListener('input',(e)=>{
+    const spanBadge = e.target.parentElement.querySelector('.badge');
+    badgeChild = password.parentElement.querySelector('.badge');
+    if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)){
+        changeBadgeColor(0, spanBadge);
+        changeBadgeColor(0,badgeChild);
+    }
+    else {
+        changeBadgeColor(1, spanBadge);
+        changeBadgeColor(1,badgeChild);
+    }
+});
+
+//--------Init DOM badge-------//
+
+badgeChild = nombre.parentElement.querySelector('.badge');
+if (nombre.value.trim().length >= nombreMinLength) changeBadgeColor(0, badgeChild);
+
+
+badgeChild = apellidos.parentElement.querySelector('.badge');
+if (apellidos.value.trim().length >= apellidosMinLength) changeBadgeColor(0, badgeChild);
+
+badgeChild = email.parentElement.querySelector('.badge');
+if (emailRegex.test(email.value)) changeBadgeColor(0, badgeChild);
