@@ -13,6 +13,7 @@ const pass_event = document.getElementById('pass_event');
 
 //Variables
 let validationResult = undefined;
+let badgeChild = undefined;
 const nombreMinLength = 2;
 const apellidosMinLength = 3;
 const passwordMinLegth = 8;
@@ -26,6 +27,19 @@ const changeBadgeColor = (type, badge) => {
     } else if(type == 1) {
         badge.classList.remove('bg-success');
         badge.classList.add('bg-danger');
+    } else if (type == 2){
+        badge.classList.remove('bg-danger');
+        badge.classList.add('bg-warning');
+    } else if (type == 3) {
+        badge.classList.remove('bg-warning');
+        badge.classList.add('bg-success');
+    } else if (type == 4 ){
+        badge.classList.remove('bg-success');
+        badge.classList.add('bg-warning');
+    } else if (type == 5) {
+        badge.classList.remove('bg-warning');
+        badge.classList.add('bg-danger');
+
     }
 }
 
@@ -93,6 +107,8 @@ oldPassword.addEventListener('input',(e)=>{
     else changeBadgeColor(1, spanBadge);
 });
 
+
+
 password.addEventListener('input',(e)=>{
     const spanBadge = e.target.parentElement.querySelector('.badge');
     if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)) changeBadgeColor(0, spanBadge);
@@ -104,3 +120,14 @@ password1.addEventListener('input',(e)=>{
     if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)) changeBadgeColor(0, spanBadge);
     else changeBadgeColor(1, spanBadge);
 });
+
+//--------Init DOM badge-------//
+
+badgeChild = nombre.parentElement.querySelector('.badge');
+if (nombre.value.trim().length >= nombreMinLength) changeBadgeColor(0, badgeChild);
+
+badgeChild = apellidos.parentElement.querySelector('.badge');
+if (apellidos.value.trim().length >= apellidosMinLength) changeBadgeColor(0, badgeChild);
+
+badgeChild = email.parentElement.querySelector('.badge');
+if (emailRegex.test(email.value)) changeBadgeColor(0, badgeChild);
