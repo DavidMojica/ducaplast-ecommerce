@@ -27,19 +27,6 @@ const changeBadgeColor = (type, badge) => {
     } else if(type == 1) {
         badge.classList.remove('bg-success');
         badge.classList.add('bg-danger');
-    } else if (type == 2){
-        badge.classList.remove('bg-danger');
-        badge.classList.add('bg-warning');
-    } else if (type == 3) {
-        badge.classList.remove('bg-warning');
-        badge.classList.add('bg-success');
-    } else if (type == 4 ){
-        badge.classList.remove('bg-success');
-        badge.classList.add('bg-warning');
-    } else if (type == 5) {
-        badge.classList.remove('bg-warning');
-        badge.classList.add('bg-danger');
-
     }
 }
 
@@ -107,17 +94,23 @@ oldPassword.addEventListener('input',(e)=>{
     else changeBadgeColor(1, spanBadge);
 });
 
-
-
 password.addEventListener('input',(e)=>{
     const spanBadge = e.target.parentElement.querySelector('.badge');
-    if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)) changeBadgeColor(0, spanBadge);
+    if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)){
+        changeBadgeColor(0, spanBadge);
+        badgeChild = password1.parentElement.querySelector('.badge');
+        changeBadgeColor(0,badgeChild);
+    }
     else changeBadgeColor(1, spanBadge);
 });
 
 password1.addEventListener('input',(e)=>{
     const spanBadge = e.target.parentElement.querySelector('.badge');
-    if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)) changeBadgeColor(0, spanBadge);
+    if (e.target.value.trim().length >= passwordMinLegth && (password.value === password1.value)){
+        changeBadgeColor(0, spanBadge);
+        badgeChild = password.parentElement.querySelector('.badge');
+        changeBadgeColor(0,badgeChild);
+    }
     else changeBadgeColor(1, spanBadge);
 });
 
@@ -125,6 +118,7 @@ password1.addEventListener('input',(e)=>{
 
 badgeChild = nombre.parentElement.querySelector('.badge');
 if (nombre.value.trim().length >= nombreMinLength) changeBadgeColor(0, badgeChild);
+
 
 badgeChild = apellidos.parentElement.querySelector('.badge');
 if (apellidos.value.trim().length >= apellidosMinLength) changeBadgeColor(0, badgeChild);
