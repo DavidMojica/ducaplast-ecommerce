@@ -24,4 +24,5 @@ urlpatterns = [
     path('registro/', views.Registro, name="registro"),
     path('logout/', views.Logout, name='logout'),
     path('editar_cuenta/', views.EditarCuenta, name='editar_cuenta'),
+    path('catalogo/', views.Catalogo, name='catalogo'),
 ]
