@@ -2,28 +2,58 @@
 {% block content %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/mainHeigth.css' %}">
-<main class="d-flex justify-content-center">
-    <section class="d-flex justify-content-center container p-4">
-        <form action="" method="GET" class="text-center mt-5 card p-4">
-            <h2 class="text-primary text-bold">Buscar productos</h2>
-            <input type="text" name="find" id="find" placeholder="Nombre del producto" class="form-control">
-            <input type="submit" value="Buscar" class="btn btn-primary">
-        </form>
-        <form action="" method="GET" class="text-center mt-3 card p-4">
-            <h2 class="text-primary text-bold">Filtrar productos</h2>
-            <select name="ordenar" id="ordenar" form="form-select">
-                <option value="">Alfabeticamente (Ascendente)</option>
-                <option value="">Alfabeticamente (Descendente)</option>
-                <option value="">Precio/Unidad (Mayor a menor)</option>
-                <option value="">Precio/Unidad (Menor a mayor)</option>
-            </select>
-            <article class="form-group">
-                <label for="availables"><span class="badge bg-success">Mostrar solo disponibles</span></label>
-                <input type="checkbox" name="availables" id="availables">
+<link rel="stylesheet" href="{% static 'styles/catalogo.css' %}">
+<main>
+    <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
+        <form action="" method="GET" class="text-center">
+            <h2 class="text-primary font-weight-bold">Buscar productos</h2>
+            <article class="input-group mb-3">
+                <input type="text" name="find" id="find" placeholder="Nombre del producto" class="form-control">
+                <article class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </article>
             </article>
-            <input type="submit" value="Guardar cambios" class="btn btn-primary">
+        </form>
+        <form action="" method="GET" class="text-center mt-1">
+            <h2 class="text-primary font-weight-bold">Filtrar productos</h2>
+            <article class="my-2">
+                <label for="availables" class="form-check-label"><span class="badge bg-success">Mostrar solo disponibles</span></label>
+                <input type="checkbox" name="availables" id="availables" class="form-check-input">
+            </article>
+            <article class="input-group">
+                <select name="ordenar" id="ordenar" class="form-select">
+                    <option value="">Alfabeticamente (Ascendente)</option>
+                    <option value="">Alfabeticamente (Descendente)</option>
+                    <option value="">Precio/Unidad (Mayor a menor)</option>
+                    <option value="">Precio/Unidad (Menor a mayor)</option>
+                </select>
+                <article class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Aplicar</button>
+                </article>
+            </article>
+
         </form>
     </section>
-
+    <section class="bg-light album">
+        <section class="container">
+            <section class="row">
+                <article class="col-md-4">
+                    <article class="card mb-4 box-shadow"></article>
+                    <article class="">Thumbnail</article>
+                    <article class="card-body bg-white">
+                        <caption class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</caption>
+                        <article class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Version</button>
+                            </div>
+                            <small>9 mins</small>
+                        </article>
+                    </article>
+                </article>
+            </section>
+        </section>
+    </section>
 </main>
+
 {% endblock %}
