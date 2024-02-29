@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'styles/mainHeigth.css' %}">
 <link rel="stylesheet" href="{% static 'styles/catalogo.css' %}">
 <main>
     <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
@@ -34,22 +33,32 @@
 
         </form>
     </section>
-    <section class="bg-light album">
+    <section class="bg-primary album">
         <section class="container">
             <section class="row">
-                <article class="col-md-4">
-                    <article class="card mb-4 box-shadow"></article>
-                    <article class="">Thumbnail</article>
-                    <article class="card-body bg-white">
-                        <caption class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</caption>
-                        <article class="d-flex justify-content-between align-items-center">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary">Version</button>
-                            </div>
-                            <small>9 mins</small>
+                <article class="col-md-4  producto">
+                    <article class="card my-2 box-shadow">
+                        <article class="bg-dark p-1 text-center">
+                            <h3 class="text-white center-block">Nombre producto</h3>
+                        </article>
+                        <article class="card-body bg-success text-light">
+                            <caption class="card-text">Descripcion producto lorem</caption>
+                            <article class="d-flex justify-content-between align-items-start mt-2">
+                                <section class="">
+                                    <!-- {{producto.cantidad}} -->
+                                    <span class="badge bg-secondary">Cantidad:</span>
+                                    <input type="number" name="" id="" min="0" value="1">
+                                    <button class="btn btn-warning my-2">Agregar al carrito</button>
+                                </section>
+                                <small>
+                                    $5000 /Unidad <br>
+                                    Cod. 205 <br>
+                                    <span class="badge bg-primary">Cantidad disponible: 10</span>
+                                </small>
+                            </article>
                         </article>
                     </article>
+                    
                 </article>
             </section>
         </section>
