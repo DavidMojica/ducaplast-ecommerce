@@ -1,3 +1,4 @@
 venv/
 db.sqlite3
 main/_pycache__/
+extras/productosETL/productos1.xlsx

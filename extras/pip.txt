@@ -8,3 +8,4 @@ django-admin startproject ducaplast
 python manage.py startapp main
 pip install psycopg2
 pip install django-bootstrap-v5
+pip install pandas
