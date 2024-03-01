@@ -67,7 +67,7 @@ def unloginRequired(view_func):
 @login_required
 def Catalogo(request):
     PRODUCTOS_POR_PAGINA = 12
-    productos = Producto.objects.all()
+    productos = Producto.objects.order_by('id')
     if request.method == "POST":
         pass
     
