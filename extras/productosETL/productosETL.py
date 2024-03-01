@@ -13,7 +13,11 @@ v_database = "ducaplast"
 v_user       = "postgres"
 v_password = "12345"
 
-logs_proceso = []
+datos_vacios = []
+precios_0 = []
+datos_extranos = []
+acentos = []
+
 logRoute = "C:\\Users\\swan5\\Desktop\\universidad\\projects\\works\\Ducaplast\\extras\\productosETL\\log.txt"
 descripciones_vacias = 0
 referencias_vacias = 0
@@ -49,7 +53,7 @@ def eliminar_acentos(palabra, contador):
             palabra_nueva+=letra
     
     if ban:
-        logs_proceso.append(f"ACENTO ELIMINADO de {palabra} : {removidos}. Fila: {contador+1}")
+        acentos.append(f"ACENTO ELIMINADO de {palabra} : {removidos}. Fila: {contador+1}")
     return palabra_nueva
 #---------------------------------------------------------------------------------------------------------------
 #CONEXIÓN A BD
@@ -103,18 +107,18 @@ try:
             
             #Verificar espacios vacíos
             if descripcion == "":
-                logs_proceso.append(f"Descripcion vacía en la fila {contador+1}")
+                datos_vacios.append(f"Descripcion vacía en la fila {contador+1}")
                 descripciones_vacias += 1
             if referencia_fabrica == "":
-                logs_proceso.append(f"Referencia de fábrica vacía en la fila {contador+1}")
+                datos_vacios.append(f"Referencia de fábrica vacía en la fila {contador+1}")
                 referencias_vacias += 1
             if precio == "":
-                logs_proceso.append(f"Precio está vacío en la fila {contador+1}")
+                datos_vacios.append(f"Precio está vacío en la fila {contador+1}")
                 precios_vacios += 1
 
             #Verificar que el precio no sea 0
             if precio == 0 or precio == "0":
-                logs_proceso.append(f"PRECAUCION: El precio es 0 en fila {contador+1}")
+                precios_0.append(f"PRECAUCION: El precio es 0 en fila {contador+1}")
                 precios_en_0 += 1
 
             #Remover acentos
@@ -124,11 +128,11 @@ try:
             #Datos extraños.Nombres que son numeros
             descripcion, result = tryParse(descripcion, float)
             if result:
-                logs_proceso.append(f"CUIDADO: La descripción es un número, no una descripcion. Fila {contador+1}")
+                datos_extranos.append(f"CUIDADO: La descripción es un número, no una descripcion. Fila {contador+1}")
                 descripciones_extranas += 1
             referencia_fabrica, result = tryParse(referencia_fabrica, float)
             if result:
-                logs_proceso.append(f"CUIDADO: La referencia de fabrica es un numero. Fila {contador+1}")
+                datos_extranos.append(f"CUIDADO: La referencia de fabrica es un numero. Fila {contador+1}")
                 referencias_extranas += 1
                 
             
@@ -144,3 +148,25 @@ finally:
 with open(logRoute, "w") as File:
     File.write("")
     File.write(f"|-------------------ANALISIS RESULTANTE DE LA EXTRACCION DE DATOS--------------|\nDescripciones vacías: {descripciones_vacias}\nReferencias vacías: {referencias_vacias}\nPrecios vacíos: {precios_vacios}\nPrecios en 0: {precios_en_0}\nDescripciones extrañas: {descripciones_extranas}\nReferencias extrañas: {referencias_extranas}\nAcentos removidos: {acentos_removidos}")
+    File.write("---------DATOS VACIOS-------")
+    for vacio in datos_vacios:
+        File.write(vacio +"\n")
+    
+    File.write("---------PRECIOS EN 0-------")
+    for precio in precios_0:
+        File.write(precio +"\n")
+        
+    File.write("---------DATOS EXTRAÑOS-------")
+    for dato in datos_extranos:
+        File.write(dato +"\n")
+
+    File.write("---------Acentos retirados-------")
+    for acento in acentos:
+        File.write(acento +"\n")
+    File.write("Fin del reporte")
+    
+tiempo_final = time.time()
+tiempo_total_transcurrido = tiempo_final - tiempo_inicial
+tiempo_dos_decimales = round(tiempo_total_transcurrido, 2)
+
+print(f"Fin del proceso ETL.\nTiempo de ejecucion: {tiempo_dos_decimales} segundos.")
