@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from django.core.paginator import Paginator, EmptyPage
 from .forms import registroUsuariosForm, inicioSesionForm
-from .models import Usuarios
+from .models import Usuarios, Producto
 
 import re
 
@@ -39,6 +40,7 @@ ERROR_9 = "Alguna(s) de las contraseñas no cumplen con la longitud minima."
 ERROR_10 = "Las contraseñas nuevas no coinciden"
 ERROR_11 = "Nombre o apellidos no cumplen con la longitud minima."
 ERROR_12 = "Formato de email no válido"
+
 #-----------Functions----------#
 def stripForm(form):
     for campo in form.fields:
@@ -64,10 +66,17 @@ def unloginRequired(view_func):
 
 @login_required
 def Catalogo(request):
+    PRODUCTOS_POR_PAGINA = 12
+    productos = Producto.objects.order_by('id')
     if request.method == "POST":
         pass
-    else:
-        return render(request, HTMLCATALOGO)
+    
+    paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
+    productos = paginator.page(request.GET.get('page', 1))
+    
+    return render(request, HTMLCATALOGO,{
+        'productos': productos
+    })
 
 @login_required
 def EditarCuenta(request):
