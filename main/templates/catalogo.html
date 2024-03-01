@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/catalogo.css' %}">
+<main>
+    <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
+        <form action="" method="GET" class="text-center">
+            <h2 class="text-primary font-weight-bold">Buscar productos</h2>
+            <article class="input-group mb-3">
+                <input type="text" name="find" id="find" placeholder="Nombre del producto" class="form-control">
+                <article class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </article>
+            </article>
+        </form>
+        <form action="" method="GET" class="text-center mt-1">
+            <h2 class="text-primary font-weight-bold">Filtrar productos</h2>
+            <article class="my-2">
+                <label for="availables" class="form-check-label"><span class="badge bg-success">Mostrar solo disponibles</span></label>
+                <input type="checkbox" name="availables" id="availables" class="form-check-input">
+            </article>
+            <article class="input-group">
+                <select name="ordenar" id="ordenar" class="form-select">
+                    <option value="">Alfabeticamente (Ascendente)</option>
+                    <option value="">Alfabeticamente (Descendente)</option>
+                    <option value="">Precio/Unidad (Mayor a menor)</option>
+                    <option value="">Precio/Unidad (Menor a mayor)</option>
+                </select>
+                <article class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Aplicar</button>
+                </article>
+            </article>
+
+        </form>
+    </section>
+    <section class="bg-primary album">
+        <section class="container">
+            <section class="row">
+                <article class="col-md-4  producto">
+                    <article class="card my-2 box-shadow">
+                        <article class="bg-dark p-1 text-center">
+                            <h3 class="text-white center-block">Descripcion</h3>
+                        </article>
+                        <article class="card-body bg-success text-light">
+                            <caption class="card-text">Referencia de fábrica</caption>
+                            <article class="d-flex justify-content-between align-items-start mt-2">
+                                <section class="">
+                                    <!-- {{producto.cantidad}} -->
+                                    <span class="badge bg-secondary">Cantidad:</span>
+                                    <input type="number" name="" id="" min="0" value="1">
+                                    <button class="btn btn-warning my-2">Agregar al carrito</button>
+                                </section>
+                                <small>
+                                    $5000 /Unidad <br>
+                                    Cod. 205 <br>
+                                    <span class="badge bg-primary">Cantidad disponible: 10</span>
+                                </small>
+                            </article>
+                        </article>
+                    </article>
+                    
+                </article>
+            </section>
+        </section>
+    </section>
+</main>
+
+{% endblock %}

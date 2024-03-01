@@ -21,6 +21,7 @@ adminIds = [0, 1]
 HTMLEDITARCUENTA = "editar_cuenta.html"
 HTMLHOME = "home.html"
 HTMLREGISTRO = "registro.html"
+HTMLCATALOGO = "catalogo.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -60,6 +61,13 @@ def unloginRequired(view_func):
         else:
             return view_func(request, *args, **kwargs)
     return wrapper
+
+@login_required
+def Catalogo(request):
+    if request.method == "POST":
+        pass
+    else:
+        return render(request, HTMLCATALOGO)
 
 @login_required
 def EditarCuenta(request):
