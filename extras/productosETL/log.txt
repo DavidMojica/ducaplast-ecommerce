@@ -1,0 +1,460 @@
+|-------------------ANALISIS RESULTANTE DE LA EXTRACCION DE DATOS--------------|
+Descripciones vacías: 315
+Precios en 0: 125
+Descripciones extrañas: 1
+Referencias extrañas: 1
+Acentos removidos: 7
+---------FILAS VACIAS-------
+Datos vacíos en fila 63
+Datos vacíos en fila 64
+Datos vacíos en fila 65
+Datos vacíos en fila 66
+Datos vacíos en fila 67
+Datos vacíos en fila 68
+Datos vacíos en fila 69
+Datos vacíos en fila 521
+Datos vacíos en fila 522
+Datos vacíos en fila 523
+Datos vacíos en fila 524
+Datos vacíos en fila 525
+Datos vacíos en fila 526
+Datos vacíos en fila 527
+Datos vacíos en fila 528
+Datos vacíos en fila 529
+Datos vacíos en fila 530
+Datos vacíos en fila 564
+Datos vacíos en fila 565
+Datos vacíos en fila 566
+Datos vacíos en fila 567
+Datos vacíos en fila 568
+Datos vacíos en fila 569
+Datos vacíos en fila 570
+Datos vacíos en fila 571
+Datos vacíos en fila 572
+Datos vacíos en fila 573
+Datos vacíos en fila 574
+Datos vacíos en fila 575
+Datos vacíos en fila 576
+Datos vacíos en fila 577
+Datos vacíos en fila 578
+Datos vacíos en fila 579
+Datos vacíos en fila 580
+Datos vacíos en fila 581
+Datos vacíos en fila 582
+Datos vacíos en fila 583
+Datos vacíos en fila 584
+Datos vacíos en fila 585
+Datos vacíos en fila 586
+Datos vacíos en fila 587
+Datos vacíos en fila 588
+Datos vacíos en fila 589
+Datos vacíos en fila 590
+Datos vacíos en fila 591
+Datos vacíos en fila 592
+Datos vacíos en fila 593
+Datos vacíos en fila 594
+Datos vacíos en fila 595
+Datos vacíos en fila 596
+Datos vacíos en fila 597
+Datos vacíos en fila 598
+Datos vacíos en fila 599
+Datos vacíos en fila 600
+Datos vacíos en fila 601
+Datos vacíos en fila 602
+Datos vacíos en fila 603
+Datos vacíos en fila 604
+Datos vacíos en fila 605
+Datos vacíos en fila 606
+Datos vacíos en fila 607
+Datos vacíos en fila 608
+Datos vacíos en fila 609
+Datos vacíos en fila 610
+Datos vacíos en fila 611
+Datos vacíos en fila 612
+Datos vacíos en fila 613
+Datos vacíos en fila 614
+Datos vacíos en fila 615
+Datos vacíos en fila 616
+Datos vacíos en fila 617
+Datos vacíos en fila 618
+Datos vacíos en fila 619
+Datos vacíos en fila 620
+Datos vacíos en fila 621
+Datos vacíos en fila 622
+Datos vacíos en fila 623
+Datos vacíos en fila 624
+Datos vacíos en fila 625
+Datos vacíos en fila 626
+Datos vacíos en fila 627
+Datos vacíos en fila 628
+Datos vacíos en fila 629
+Datos vacíos en fila 630
+Datos vacíos en fila 631
+Datos vacíos en fila 632
+Datos vacíos en fila 633
+Datos vacíos en fila 634
+Datos vacíos en fila 635
+Datos vacíos en fila 636
+Datos vacíos en fila 637
+Datos vacíos en fila 638
+Datos vacíos en fila 639
+Datos vacíos en fila 640
+Datos vacíos en fila 641
+Datos vacíos en fila 642
+Datos vacíos en fila 643
+Datos vacíos en fila 644
+Datos vacíos en fila 645
+Datos vacíos en fila 646
+Datos vacíos en fila 647
+Datos vacíos en fila 648
+Datos vacíos en fila 649
+Datos vacíos en fila 650
+Datos vacíos en fila 651
+Datos vacíos en fila 652
+Datos vacíos en fila 653
+Datos vacíos en fila 654
+Datos vacíos en fila 655
+Datos vacíos en fila 656
+Datos vacíos en fila 657
+Datos vacíos en fila 658
+Datos vacíos en fila 659
+Datos vacíos en fila 660
+Datos vacíos en fila 661
+Datos vacíos en fila 662
+Datos vacíos en fila 663
+Datos vacíos en fila 664
+Datos vacíos en fila 665
+Datos vacíos en fila 666
+Datos vacíos en fila 667
+Datos vacíos en fila 668
+Datos vacíos en fila 669
+Datos vacíos en fila 670
+Datos vacíos en fila 671
+Datos vacíos en fila 672
+Datos vacíos en fila 673
+Datos vacíos en fila 674
+Datos vacíos en fila 675
+Datos vacíos en fila 676
+Datos vacíos en fila 677
+Datos vacíos en fila 678
+Datos vacíos en fila 679
+Datos vacíos en fila 680
+Datos vacíos en fila 681
+Datos vacíos en fila 682
+Datos vacíos en fila 683
+Datos vacíos en fila 684
+Datos vacíos en fila 685
+Datos vacíos en fila 686
+Datos vacíos en fila 687
+Datos vacíos en fila 688
+Datos vacíos en fila 689
+Datos vacíos en fila 690
+Datos vacíos en fila 691
+Datos vacíos en fila 692
+Datos vacíos en fila 693
+Datos vacíos en fila 694
+Datos vacíos en fila 695
+Datos vacíos en fila 696
+Datos vacíos en fila 697
+Datos vacíos en fila 698
+Datos vacíos en fila 699
+Datos vacíos en fila 700
+Datos vacíos en fila 701
+Datos vacíos en fila 702
+Datos vacíos en fila 703
+Datos vacíos en fila 704
+Datos vacíos en fila 705
+Datos vacíos en fila 706
+Datos vacíos en fila 707
+Datos vacíos en fila 708
+Datos vacíos en fila 709
+Datos vacíos en fila 710
+Datos vacíos en fila 711
+Datos vacíos en fila 712
+Datos vacíos en fila 713
+Datos vacíos en fila 714
+Datos vacíos en fila 715
+Datos vacíos en fila 716
+Datos vacíos en fila 717
+Datos vacíos en fila 718
+Datos vacíos en fila 719
+Datos vacíos en fila 720
+Datos vacíos en fila 721
+Datos vacíos en fila 722
+Datos vacíos en fila 723
+Datos vacíos en fila 724
+Datos vacíos en fila 725
+Datos vacíos en fila 726
+Datos vacíos en fila 727
+Datos vacíos en fila 728
+Datos vacíos en fila 729
+Datos vacíos en fila 730
+Datos vacíos en fila 731
+Datos vacíos en fila 732
+Datos vacíos en fila 733
+Datos vacíos en fila 734
+Datos vacíos en fila 735
+Datos vacíos en fila 736
+Datos vacíos en fila 737
+Datos vacíos en fila 738
+Datos vacíos en fila 739
+Datos vacíos en fila 740
+Datos vacíos en fila 741
+Datos vacíos en fila 742
+Datos vacíos en fila 743
+Datos vacíos en fila 744
+Datos vacíos en fila 745
+Datos vacíos en fila 746
+Datos vacíos en fila 747
+Datos vacíos en fila 748
+Datos vacíos en fila 749
+Datos vacíos en fila 750
+Datos vacíos en fila 751
+Datos vacíos en fila 752
+Datos vacíos en fila 753
+Datos vacíos en fila 754
+Datos vacíos en fila 755
+Datos vacíos en fila 756
+Datos vacíos en fila 757
+Datos vacíos en fila 758
+Datos vacíos en fila 759
+Datos vacíos en fila 760
+Datos vacíos en fila 761
+Datos vacíos en fila 762
+Datos vacíos en fila 763
+Datos vacíos en fila 764
+Datos vacíos en fila 765
+Datos vacíos en fila 766
+Datos vacíos en fila 767
+Datos vacíos en fila 768
+Datos vacíos en fila 769
+Datos vacíos en fila 770
+Datos vacíos en fila 771
+Datos vacíos en fila 772
+Datos vacíos en fila 773
+Datos vacíos en fila 774
+Datos vacíos en fila 775
+Datos vacíos en fila 776
+Datos vacíos en fila 777
+Datos vacíos en fila 778
+Datos vacíos en fila 779
+Datos vacíos en fila 780
+Datos vacíos en fila 781
+Datos vacíos en fila 782
+Datos vacíos en fila 783
+Datos vacíos en fila 784
+Datos vacíos en fila 785
+Datos vacíos en fila 786
+Datos vacíos en fila 787
+Datos vacíos en fila 788
+Datos vacíos en fila 789
+Datos vacíos en fila 790
+Datos vacíos en fila 791
+Datos vacíos en fila 792
+Datos vacíos en fila 793
+Datos vacíos en fila 794
+Datos vacíos en fila 795
+Datos vacíos en fila 796
+Datos vacíos en fila 797
+Datos vacíos en fila 798
+Datos vacíos en fila 799
+Datos vacíos en fila 800
+Datos vacíos en fila 801
+Datos vacíos en fila 802
+Datos vacíos en fila 803
+Datos vacíos en fila 804
+Datos vacíos en fila 805
+Datos vacíos en fila 806
+Datos vacíos en fila 807
+Datos vacíos en fila 808
+Datos vacíos en fila 809
+Datos vacíos en fila 810
+Datos vacíos en fila 811
+Datos vacíos en fila 812
+Datos vacíos en fila 813
+Datos vacíos en fila 814
+Datos vacíos en fila 815
+Datos vacíos en fila 816
+Datos vacíos en fila 817
+Datos vacíos en fila 818
+Datos vacíos en fila 819
+Datos vacíos en fila 820
+Datos vacíos en fila 821
+Datos vacíos en fila 822
+Datos vacíos en fila 823
+Datos vacíos en fila 824
+Datos vacíos en fila 825
+Datos vacíos en fila 826
+Datos vacíos en fila 827
+Datos vacíos en fila 828
+Datos vacíos en fila 829
+Datos vacíos en fila 830
+Datos vacíos en fila 831
+Datos vacíos en fila 832
+Datos vacíos en fila 833
+Datos vacíos en fila 834
+Datos vacíos en fila 835
+Datos vacíos en fila 836
+Datos vacíos en fila 837
+Datos vacíos en fila 838
+Datos vacíos en fila 839
+Datos vacíos en fila 840
+Datos vacíos en fila 841
+Datos vacíos en fila 842
+Datos vacíos en fila 843
+Datos vacíos en fila 844
+Datos vacíos en fila 845
+Datos vacíos en fila 846
+Datos vacíos en fila 847
+Datos vacíos en fila 848
+Datos vacíos en fila 849
+Datos vacíos en fila 850
+Datos vacíos en fila 851
+Datos vacíos en fila 852
+Datos vacíos en fila 853
+Datos vacíos en fila 854
+Datos vacíos en fila 855
+Datos vacíos en fila 856
+Datos vacíos en fila 857
+Datos vacíos en fila 858
+Datos vacíos en fila 859
+Datos vacíos en fila 860
+Datos vacíos en fila 954
+---------PRECIOS EN 0-------
+PRECAUCION: El precio es 0 en fila 23
+PRECAUCION: El precio es 0 en fila 39
+PRECAUCION: El precio es 0 en fila 105
+PRECAUCION: El precio es 0 en fila 256
+PRECAUCION: El precio es 0 en fila 951
+PRECAUCION: El precio es 0 en fila 952
+PRECAUCION: El precio es 0 en fila 953
+PRECAUCION: El precio es 0 en fila 955
+PRECAUCION: El precio es 0 en fila 956
+PRECAUCION: El precio es 0 en fila 957
+PRECAUCION: El precio es 0 en fila 958
+PRECAUCION: El precio es 0 en fila 960
+PRECAUCION: El precio es 0 en fila 974
+PRECAUCION: El precio es 0 en fila 975
+PRECAUCION: El precio es 0 en fila 976
+PRECAUCION: El precio es 0 en fila 977
+PRECAUCION: El precio es 0 en fila 978
+PRECAUCION: El precio es 0 en fila 979
+PRECAUCION: El precio es 0 en fila 980
+PRECAUCION: El precio es 0 en fila 981
+PRECAUCION: El precio es 0 en fila 982
+PRECAUCION: El precio es 0 en fila 983
+PRECAUCION: El precio es 0 en fila 985
+PRECAUCION: El precio es 0 en fila 986
+PRECAUCION: El precio es 0 en fila 1013
+PRECAUCION: El precio es 0 en fila 1032
+PRECAUCION: El precio es 0 en fila 1037
+PRECAUCION: El precio es 0 en fila 1041
+PRECAUCION: El precio es 0 en fila 1042
+PRECAUCION: El precio es 0 en fila 1043
+PRECAUCION: El precio es 0 en fila 1044
+PRECAUCION: El precio es 0 en fila 1045
+PRECAUCION: El precio es 0 en fila 1047
+PRECAUCION: El precio es 0 en fila 1049
+PRECAUCION: El precio es 0 en fila 1051
+PRECAUCION: El precio es 0 en fila 1053
+PRECAUCION: El precio es 0 en fila 1064
+PRECAUCION: El precio es 0 en fila 1074
+PRECAUCION: El precio es 0 en fila 1075
+PRECAUCION: El precio es 0 en fila 1076
+PRECAUCION: El precio es 0 en fila 1084
+PRECAUCION: El precio es 0 en fila 1085
+PRECAUCION: El precio es 0 en fila 1129
+PRECAUCION: El precio es 0 en fila 1143
+PRECAUCION: El precio es 0 en fila 1177
+PRECAUCION: El precio es 0 en fila 1185
+PRECAUCION: El precio es 0 en fila 1209
+PRECAUCION: El precio es 0 en fila 1212
+PRECAUCION: El precio es 0 en fila 1219
+PRECAUCION: El precio es 0 en fila 1241
+PRECAUCION: El precio es 0 en fila 1242
+PRECAUCION: El precio es 0 en fila 1260
+PRECAUCION: El precio es 0 en fila 1273
+PRECAUCION: El precio es 0 en fila 1288
+PRECAUCION: El precio es 0 en fila 1292
+PRECAUCION: El precio es 0 en fila 1365
+PRECAUCION: El precio es 0 en fila 1399
+PRECAUCION: El precio es 0 en fila 1400
+PRECAUCION: El precio es 0 en fila 1401
+PRECAUCION: El precio es 0 en fila 1402
+PRECAUCION: El precio es 0 en fila 1403
+PRECAUCION: El precio es 0 en fila 1404
+PRECAUCION: El precio es 0 en fila 1405
+PRECAUCION: El precio es 0 en fila 1406
+PRECAUCION: El precio es 0 en fila 1407
+PRECAUCION: El precio es 0 en fila 1408
+PRECAUCION: El precio es 0 en fila 1527
+PRECAUCION: El precio es 0 en fila 1528
+PRECAUCION: El precio es 0 en fila 1529
+PRECAUCION: El precio es 0 en fila 1530
+PRECAUCION: El precio es 0 en fila 1531
+PRECAUCION: El precio es 0 en fila 1532
+PRECAUCION: El precio es 0 en fila 1533
+PRECAUCION: El precio es 0 en fila 1534
+PRECAUCION: El precio es 0 en fila 1535
+PRECAUCION: El precio es 0 en fila 1536
+PRECAUCION: El precio es 0 en fila 1537
+PRECAUCION: El precio es 0 en fila 1538
+PRECAUCION: El precio es 0 en fila 1539
+PRECAUCION: El precio es 0 en fila 1541
+PRECAUCION: El precio es 0 en fila 1542
+PRECAUCION: El precio es 0 en fila 1543
+PRECAUCION: El precio es 0 en fila 1544
+PRECAUCION: El precio es 0 en fila 1545
+PRECAUCION: El precio es 0 en fila 1546
+PRECAUCION: El precio es 0 en fila 1547
+PRECAUCION: El precio es 0 en fila 1548
+PRECAUCION: El precio es 0 en fila 1549
+PRECAUCION: El precio es 0 en fila 1550
+PRECAUCION: El precio es 0 en fila 1551
+PRECAUCION: El precio es 0 en fila 1552
+PRECAUCION: El precio es 0 en fila 1553
+PRECAUCION: El precio es 0 en fila 1554
+PRECAUCION: El precio es 0 en fila 1555
+PRECAUCION: El precio es 0 en fila 1556
+PRECAUCION: El precio es 0 en fila 1557
+PRECAUCION: El precio es 0 en fila 1560
+PRECAUCION: El precio es 0 en fila 1561
+PRECAUCION: El precio es 0 en fila 1564
+PRECAUCION: El precio es 0 en fila 1565
+PRECAUCION: El precio es 0 en fila 1566
+PRECAUCION: El precio es 0 en fila 1567
+PRECAUCION: El precio es 0 en fila 1568
+PRECAUCION: El precio es 0 en fila 1569
+PRECAUCION: El precio es 0 en fila 1570
+PRECAUCION: El precio es 0 en fila 1571
+PRECAUCION: El precio es 0 en fila 1572
+PRECAUCION: El precio es 0 en fila 1573
+PRECAUCION: El precio es 0 en fila 1574
+PRECAUCION: El precio es 0 en fila 1632
+PRECAUCION: El precio es 0 en fila 1633
+PRECAUCION: El precio es 0 en fila 1635
+PRECAUCION: El precio es 0 en fila 1636
+PRECAUCION: El precio es 0 en fila 1637
+PRECAUCION: El precio es 0 en fila 1638
+PRECAUCION: El precio es 0 en fila 1639
+PRECAUCION: El precio es 0 en fila 1640
+PRECAUCION: El precio es 0 en fila 1641
+PRECAUCION: El precio es 0 en fila 1642
+PRECAUCION: El precio es 0 en fila 1643
+PRECAUCION: El precio es 0 en fila 1644
+PRECAUCION: El precio es 0 en fila 1645
+PRECAUCION: El precio es 0 en fila 1646
+PRECAUCION: El precio es 0 en fila 1647
+PRECAUCION: El precio es 0 en fila 1791
+---------DATOS EXTRAÑOS-------
+CUIDADO: La descripción es un número, no una descripcion. Fila 1347
+CUIDADO: La referencia de fabrica es un numero. Fila 1347
+---------Acentos retirados-------
+ACENTO ELIMINADO de CINTA X300 MT EXACTOS CAFÉ : ['É']. Fila: 501
+ACENTO ELIMINADO de CINTA X300 MT EXACTOS CAFÉ : ['É']. Fila: 501
+ACENTO ELIMINADO de PORTACUBIERTO CAFÉ Y BEIS : ['É']. Fila: 563
+ACENTO ELIMINADO de PORTACUBIERTO CAFÉ Y BEIS : ['É']. Fila: 563
+ACENTO ELIMINADO de B IMP 5.5X16 REF CAFÉ EJECUTIVO MAMBO : ['É']. Fila: 1001
+ACENTO ELIMINADO de GRAPA X30 CAFÉ : ['É']. Fila: 1710
+ACENTO ELIMINADO de GRAPA X30 CAFÉ : ['É']. Fila: 1710
+Fin del reporte

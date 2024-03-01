@@ -16,12 +16,10 @@ v_password = "12345"
 datos_vacios = []
 precios_0 = []
 datos_extranos = []
-acentos = []
+acentos_rem = []
 
 logRoute = "C:\\Users\\swan5\\Desktop\\universidad\\projects\\works\\Ducaplast\\extras\\productosETL\\log.txt"
-descripciones_vacias = 0
-referencias_vacias = 0
-precios_vacios = 0
+data_vacia = 0
 
 precios_en_0 = 0
 
@@ -53,7 +51,9 @@ def eliminar_acentos(palabra, contador):
             palabra_nueva+=letra
     
     if ban:
-        acentos.append(f"ACENTO ELIMINADO de {palabra} : {removidos}. Fila: {contador+1}")
+        acentos_rem.append(f"ACENTO ELIMINADO de {palabra} : {removidos}. Fila: {contador+1}")
+        global acentos_removidos
+        acentos_removidos+=1
     return palabra_nueva
 #---------------------------------------------------------------------------------------------------------------
 #CONEXIÓN A BD
@@ -84,12 +84,14 @@ def cargarTablaProductos(connection, cursor, contador, descripcion, referencia_f
         cursor.execute(command, (descripcion, referencia_fabrica, precio, cantidad))
         connection.commit()
     except(Exception) as error:
-        print("Error cargando la tabla: ", error)
+        print(f"Error cargando la tabla: {error}, {contador}, {descripcion}, {referencia_fabrica}, {precio}")
 
 #---------------------------------------------------------------------------------------------------------------
 #Limpieza de tablas 
 #---------------------------------------------------------------------------------------------------------------
-command = '''TRUNCATE main_producto'''
+command = '''TRUNCATE main_producto CASCADE'''
+cursor.execute(command)
+command = '''ALTER SEQUENCE main_producto_id_seq RESTART WITH 1'''
 cursor.execute(command)
 
 #---------------------------------------------------------------------------------------------------------------
@@ -100,44 +102,42 @@ try:
     with io.open(archivo, encoding=('utf-8')) as File:
         reader = csv.reader(File, delimiter='|', quotechar=(','), quoting=csv.QUOTE_MINIMAL)
         contador = 0
+        registro = 0
         for row in reader:
             descripcion = row[0].strip()
             referencia_fabrica = row[1].strip()
             precio = row[2].strip()
+            if precio.endswith('.0'):
+                precio = precio[:-2]  # Eliminar los dos últimos caracteres
+
             
             #Verificar espacios vacíos
-            if descripcion == "":
-                datos_vacios.append(f"Descripcion vacía en la fila {contador+1}")
-                descripciones_vacias += 1
-            if referencia_fabrica == "":
-                datos_vacios.append(f"Referencia de fábrica vacía en la fila {contador+1}")
-                referencias_vacias += 1
-            if precio == "":
-                datos_vacios.append(f"Precio está vacío en la fila {contador+1}")
-                precios_vacios += 1
+            if descripcion == "" or referencia_fabrica == "" or precio == "":
+                datos_vacios.append(f"Datos vacíos en fila {registro+1}")
+                data_vacia += 1
+            else:
+                #Verificar que el precio no sea 0
+                if precio == 0 or precio == "0":
+                    precios_0.append(f"PRECAUCION: El precio es 0 en fila {registro+1}")
+                    precios_en_0 += 1
 
-            #Verificar que el precio no sea 0
-            if precio == 0 or precio == "0":
-                precios_0.append(f"PRECAUCION: El precio es 0 en fila {contador+1}")
-                precios_en_0 += 1
+                #Remover acentos
+                eliminar_acentos(descripcion, registro+1)
+                eliminar_acentos(referencia_fabrica, registro+1)
+                #Datos extraños.Nombres que son numeros
+                descripcion, result = tryParse(descripcion, float)
+                if result:
+                    datos_extranos.append(f"CUIDADO: La descripción es un número, no una descripcion. Fila {registro+1}")
+                    descripciones_extranas += 1
+                referencia_fabrica, result = tryParse(referencia_fabrica, float)
+                if result:
+                    datos_extranos.append(f"CUIDADO: La referencia de fabrica es un numero. Fila {registro+1}")
+                    referencias_extranas += 1
+                    
+                cargarTablaProductos(connection, cursor, contador, descripcion, referencia_fabrica, precio)
+                contador += 1
 
-            #Remover acentos
-            eliminar_acentos(descripcion, contador)
-            eliminar_acentos(referencia_fabrica, contador)
-            
-            #Datos extraños.Nombres que son numeros
-            descripcion, result = tryParse(descripcion, float)
-            if result:
-                datos_extranos.append(f"CUIDADO: La descripción es un número, no una descripcion. Fila {contador+1}")
-                descripciones_extranas += 1
-            referencia_fabrica, result = tryParse(referencia_fabrica, float)
-            if result:
-                datos_extranos.append(f"CUIDADO: La referencia de fabrica es un numero. Fila {contador+1}")
-                referencias_extranas += 1
-                
-            
-            contador += 1
-    
+            registro += 1
 except (Exception) as error:
     print(f"Error leyendo el archivo csv ------------> {error}")
 finally:
@@ -145,23 +145,23 @@ finally:
         connection.close()
         print(f"Conexion con la base de datos {v_database} cerrada.")
         
-with open(logRoute, "w") as File:
+with open(logRoute, "w", encoding='utf-8') as File:
     File.write("")
-    File.write(f"|-------------------ANALISIS RESULTANTE DE LA EXTRACCION DE DATOS--------------|\nDescripciones vacías: {descripciones_vacias}\nReferencias vacías: {referencias_vacias}\nPrecios vacíos: {precios_vacios}\nPrecios en 0: {precios_en_0}\nDescripciones extrañas: {descripciones_extranas}\nReferencias extrañas: {referencias_extranas}\nAcentos removidos: {acentos_removidos}")
-    File.write("---------DATOS VACIOS-------")
+    File.write(f"|-------------------ANALISIS RESULTANTE DE LA EXTRACCION DE DATOS--------------|\nDescripciones vacías: {data_vacia}\nPrecios en 0: {precios_en_0}\nDescripciones extrañas: {descripciones_extranas}\nReferencias extrañas: {referencias_extranas}\nAcentos removidos: {acentos_removidos}")
+    File.write("\n"+"---------FILAS VACIAS-------"+"\n")
     for vacio in datos_vacios:
         File.write(vacio +"\n")
     
-    File.write("---------PRECIOS EN 0-------")
+    File.write("---------PRECIOS EN 0-------"+"\n")
     for precio in precios_0:
         File.write(precio +"\n")
         
-    File.write("---------DATOS EXTRAÑOS-------")
+    File.write("---------DATOS EXTRAÑOS-------"+"\n")
     for dato in datos_extranos:
         File.write(dato +"\n")
 
-    File.write("---------Acentos retirados-------")
-    for acento in acentos:
+    File.write("---------Acentos retirados-------"+"\n")
+    for acento in acentos_rem:
         File.write(acento +"\n")
     File.write("Fin del reporte")
     
