@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from .forms import registroUsuariosForm, inicioSesionForm
-from .models import Usuarios
+from .models import Usuarios, Producto
 
 import re
 
@@ -64,10 +64,13 @@ def unloginRequired(view_func):
 
 @login_required
 def Catalogo(request):
+    productos = Producto.objects.all()
     if request.method == "POST":
         pass
     else:
-        return render(request, HTMLCATALOGO)
+        return render(request, HTMLCATALOGO,{
+            'productos': productos
+        })
 
 @login_required
 def EditarCuenta(request):

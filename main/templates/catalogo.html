@@ -33,33 +33,36 @@
 
         </form>
     </section>
-    <section class="bg-primary album">
+    <section class="bg-light bg-gradient">
         <section class="container">
             <section class="row">
-                <article class="col-md-4  producto">
+                <h1 class="text-center text-primary">Productos</h1>
+                {% for p in productos %}
+                <article class="col-md-4 producto">
                     <article class="card my-2 box-shadow">
                         <article class="bg-dark p-1 text-center">
-                            <h3 class="text-white center-block">Descripcion</h3>
+                            <h3 class="text-white center-block">{{p.descripcion}}</h3>
                         </article>
-                        <article class="card-body bg-success text-light">
-                            <caption class="card-text">Referencia de fábrica</caption>
+                        <article class="card-body bg-dark text-light">
+                            <h3 class="text-bold">Referencia de fábrica:</h3>
+                            <caption class="card-text">{{p.referencia_fabrica}}</caption>
                             <article class="d-flex justify-content-between align-items-start mt-2">
                                 <section class="">
-                                    <!-- {{producto.cantidad}} -->
-                                    <span class="badge bg-secondary">Cantidad:</span>
+                                    <span class="badge bg-secondary">Cantidad</span>
                                     <input type="number" name="" id="" min="0" value="1">
                                     <button class="btn btn-warning my-2">Agregar al carrito</button>
                                 </section>
                                 <small>
-                                    $5000 /Unidad <br>
-                                    Cod. 205 <br>
-                                    <span class="badge bg-primary">Cantidad disponible: 10</span>
+                                    ${{p.precio}} <br>
+                                    Cod. {{p.id}} <br>
+                                    <span class="badge {% if p.cantidad == 0 %} bg-danger {% elif p.cantidad >= 1 and p.cantidad <= 10 %} bg-warning {% elif p.cantidad < 10 %} bg-success {% else %} bg-secondary {% endif %}">Cantidad disponible: {{p.cantidad}}</span>
                                 </small>
                             </article>
                         </article>
                     </article>
                     
                 </article>
+                {% endfor %}
             </section>
         </section>
     </section>
