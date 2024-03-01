@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage
 from .forms import registroUsuariosForm, inicioSesionForm
-from .models import Usuarios, Producto
+from .models import Usuarios, Producto, Carrito
 
 import re
 
@@ -23,6 +23,7 @@ HTMLEDITARCUENTA = "editar_cuenta.html"
 HTMLHOME = "home.html"
 HTMLREGISTRO = "registro.html"
 HTMLCATALOGO = "catalogo.html"
+HTMLCARRITO = "carrito.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -77,6 +78,18 @@ def Catalogo(request):
     return render(request, HTMLCATALOGO,{
         'productos': productos
     })
+
+def AgregarAlCarrito(request, producto_id, cantidad):
+    producto = Producto.objects.get(id=producto_id)
+    item, creado = Carrito.objects.get_or_create(usuario=request.user,producto=producto)
+    if not creado:
+        item.cantidad = cantidad
+        item.save()
+    
+def Carrito(request):
+    items_carrito = Carrito.objects.filter(usuario=request.user)
+    return render(request, HTMLCARRITO, {'items': items_carrito})
+    
 
 @login_required
 def EditarCuenta(request):

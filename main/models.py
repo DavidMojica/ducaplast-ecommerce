@@ -75,6 +75,12 @@ class Producto(models.Model):
     def __str__(self):
          return self.nombre
      
+class Carrito(models.Model):
+    usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField(default=1)
+    creado_en = models.DateTimeField(auto_now_add=True)
+     
 class ProductosPedido(models.Model):
     id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     id_pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
