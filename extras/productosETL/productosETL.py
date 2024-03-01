@@ -20,16 +20,12 @@ acentos_rem = []
 
 logRoute = "C:\\Users\\swan5\\Desktop\\universidad\\projects\\works\\Ducaplast\\extras\\productosETL\\log.txt"
 data_vacia = 0
-
 precios_en_0 = 0
-
 descripciones_extranas = 0
 referencias_extranas = 0
-
 acentos_removidos = 0
 
 def tryParse(dato, tipo_dato):
-    #dato = dato.replace('"','') <----Eliminar '"' no es necesario ahora que construimos un programa para exportar
     try:
         return tipo_dato(dato), True
     except (ValueError, TypeError):
@@ -37,7 +33,7 @@ def tryParse(dato, tipo_dato):
 
 
 #Elimina las letra que contengan acentos
-def eliminar_acentos(palabra, contador):
+def eliminar_acentos(palabra, registro, contador):
     acentos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "Á": "A", "É": "E", "Í": "I", "Ó":"O", "Ú":"U"}
     palabra_nueva = ""
     ban = False
@@ -51,7 +47,7 @@ def eliminar_acentos(palabra, contador):
             palabra_nueva+=letra
     
     if ban:
-        acentos_rem.append(f"ACENTO ELIMINADO de {palabra} : {removidos}. Fila: {contador+1}")
+        acentos_rem.append(f"ACENTO ELIMINADO de {palabra} : {removidos}. Fila: {registro}(excel) - {contador} (base de datos)")
         global acentos_removidos
         acentos_removidos+=1
     return palabra_nueva
@@ -113,25 +109,25 @@ try:
             
             #Verificar espacios vacíos
             if descripcion == "" or referencia_fabrica == "" or precio == "":
-                datos_vacios.append(f"Datos vacíos en fila {registro+1}")
+                datos_vacios.append(f"Datos vacíos en fila {registro+1} (excel)")
                 data_vacia += 1
             else:
                 #Verificar que el precio no sea 0
                 if precio == 0 or precio == "0":
-                    precios_0.append(f"PRECAUCION: El precio es 0 en fila {registro+1}")
+                    precios_0.append(f"PRECAUCION: El precio es 0 en fila {registro+1} (excel) - {contador+1} (base de datos)")
                     precios_en_0 += 1
 
                 #Remover acentos
-                eliminar_acentos(descripcion, registro+1)
-                eliminar_acentos(referencia_fabrica, registro+1)
+                eliminar_acentos(descripcion, registro+1,contador+1)
+                eliminar_acentos(referencia_fabrica, registro+1,contador+1)
                 #Datos extraños.Nombres que son numeros
                 descripcion, result = tryParse(descripcion, float)
                 if result:
-                    datos_extranos.append(f"CUIDADO: La descripción es un número, no una descripcion. Fila {registro+1}")
+                    datos_extranos.append(f"CUIDADO: La descripción es un número, no una descripcion. Fila {registro+1} (excel) - {contador+1} (base de datos)")
                     descripciones_extranas += 1
                 referencia_fabrica, result = tryParse(referencia_fabrica, float)
                 if result:
-                    datos_extranos.append(f"CUIDADO: La referencia de fabrica es un numero. Fila {registro+1}")
+                    datos_extranos.append(f"CUIDADO: La referencia de fabrica es un numero. Fila {registro+1} (Excel) - {contador+1} (base de datos)")
                     referencias_extranas += 1
                     
                 cargarTablaProductos(connection, cursor, contador, descripcion, referencia_fabrica, precio)
@@ -147,12 +143,9 @@ finally:
         
 with open(logRoute, "w", encoding='utf-8') as File:
     File.write("")
-    File.write(f"|-------------------ANALISIS RESULTANTE DE LA EXTRACCION DE DATOS--------------|\nDescripciones vacías: {data_vacia}\nPrecios en 0: {precios_en_0}\nDescripciones extrañas: {descripciones_extranas}\nReferencias extrañas: {referencias_extranas}\nAcentos removidos: {acentos_removidos}")
-    File.write("\n"+"---------FILAS VACIAS-------"+"\n")
-    for vacio in datos_vacios:
-        File.write(vacio +"\n")
+    File.write(f"|-------------------ANALISIS RESULTANTE DE LA EXTRACCION DE DATOS--------------|\nProductos vacíos (Removidos): {data_vacia}\nPrecios en 0: {precios_en_0}\nDescripciones extrañas: {descripciones_extranas}\nReferencias extrañas: {referencias_extranas}\nAcentos removidos: {acentos_removidos}")
     
-    File.write("---------PRECIOS EN 0-------"+"\n")
+    File.write("\n"+"---------PRECIOS EN 0-------"+"\n")
     for precio in precios_0:
         File.write(precio +"\n")
         
@@ -164,6 +157,10 @@ with open(logRoute, "w", encoding='utf-8') as File:
     for acento in acentos_rem:
         File.write(acento +"\n")
     File.write("Fin del reporte")
+    
+    File.write("\n"+"---------FILAS VACIAS-------"+"\n")
+    for vacio in datos_vacios:
+        File.write(vacio +"\n")
     
 tiempo_final = time.time()
 tiempo_total_transcurrido = tiempo_final - tiempo_inicial
