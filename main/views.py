@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage
 from .forms import registroUsuariosForm, inicioSesionForm
-from .models import Usuarios, Producto, Carrito
+from .models import Usuarios, Producto
 
 import re
 
@@ -79,16 +80,28 @@ def Catalogo(request):
         'productos': productos
     })
 
-def AgregarAlCarrito(request, producto_id, cantidad):
-    producto = Producto.objects.get(id=producto_id)
-    item, creado = Carrito.objects.get_or_create(usuario=request.user,producto=producto)
-    if not creado:
-        item.cantidad = cantidad
-        item.save()
-    
-def Carrito(request):
-    items_carrito = Carrito.objects.filter(usuario=request.user)
-    return render(request, HTMLCARRITO, {'items': items_carrito})
+@login_required
+def AgregarAlCarro(request):
+    if request.method == "POST" and request.is_ajax():
+        producto_id = request.POST.get('producto_id')
+        cantidad = int(request.POST.get('cantidad', 1))
+        producto = Producto.objects.get(pk=producto_id)
+        
+        carrito = request.session.get('carrito', {})
+        
+        if producto_id in carrito:
+            carrito[producto_id]['cantidad'] += cantidad
+        else:
+            carrito[producto_id] = {
+                'descripcion': producto.descripcion,
+                'precio': producto.precio,
+                'cantidad': cantidad,
+            }
+        
+        request.session['carrito'] = carrito
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
     
 
 @login_required
