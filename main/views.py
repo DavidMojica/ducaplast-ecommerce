@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage
 from .forms import registroUsuariosForm, inicioSesionForm
 from .models import Usuarios, Producto
@@ -23,6 +24,7 @@ HTMLEDITARCUENTA = "editar_cuenta.html"
 HTMLHOME = "home.html"
 HTMLREGISTRO = "registro.html"
 HTMLCATALOGO = "catalogo.html"
+HTMLCARRITO = "cart.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -66,6 +68,7 @@ def unloginRequired(view_func):
 
 @login_required
 def Catalogo(request):
+    carrito = request.session.get('carrito', {})
     PRODUCTOS_POR_PAGINA = 12
     productos = Producto.objects.order_by('id')
     if request.method == "POST":
@@ -78,6 +81,35 @@ def Catalogo(request):
         'productos': productos
     })
 
+carrito = None
+@login_required
+def AddToCart(request):
+    global carrito
+    carrito = request.session.get('carrito', {})
+    producto_id = request.GET.get('producto_id')
+    cantidad = int(request.GET.get('cantidad', 1))
+    producto = Producto.objects.get(pk=producto_id)
+    print(f"${producto}")
+   
+    print(f"total producto {int(cantidad) * int(producto.precio)}")
+    if producto_id in carrito:
+        carrito[producto_id]['cantidad'] += cantidad
+    else:
+        carrito[producto_id] = {
+            'descripcion': producto.descripcion,
+            'precio': producto.precio,
+            'referencia_fabrica':producto.referencia_fabrica,
+            'cantidad': cantidad,
+            'total_producto': int(cantidad) * int(producto.precio)
+        }
+    
+    request.session['carrito'] = carrito
+    return JsonResponse({'success': True})
+    
+def Cart(request):
+    
+    return render(request, HTMLCARRITO, {'productos':carrito})
+    
 @login_required
 def EditarCuenta(request):
     user = get_object_or_404(Usuarios, pk=str(request.user.id))

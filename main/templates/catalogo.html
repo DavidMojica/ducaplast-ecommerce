@@ -2,6 +2,9 @@
 {% block content %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/catalogo.css' %}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="{% static 'javascript/cart.js' %}" defer></script>
+
 <main>
     <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
         <form action="" method="GET" class="text-center">
@@ -40,27 +43,29 @@
                 {% if productos %}
                 {% for p in productos %}
                 <article class="col-md-4 producto">
-                    <article class="card my-2 box-shadow">
-                        <article class="bg-dark p-1 text-center">
-                            <h3 class="text-white center-block">{{p.descripcion}}</h3>
-                        </article>
-                        <article class="card-body bg-dark text-light">
-                            <h3 class="text-bold">Referencia de fábrica:</h3>
-                            <caption class="card-text">{{p.referencia_fabrica}}</caption>
-                            <article class="d-flex justify-content-between align-items-start mt-2">
-                                <section class="">
-                                    <span class="badge bg-secondary">Cantidad</span>
-                                    <input type="number" name="" id="" min="0" value="1">
-                                    <button class="btn btn-warning my-2">Agregar al carrito</button>
-                                </section>
-                                <small>
-                                    ${{p.precio}} <br>
-                                    Cod. {{p.id}} <br>
-                                    <span class="badge {% if p.cantidad == 0 %} bg-danger {% elif p.cantidad >= 1 and p.cantidad <= 10 %} bg-warning {% elif p.cantidad > 10 %} bg-success {% else %} bg-secondary {% endif %}">Cantidad disponible: {{p.cantidad}}</span>
-                                </small>
+                    <form action="" method="POST">
+                        <article class="card my-2 box-shadow">
+                            <article class="bg-dark p-1 text-center">
+                                <h3 class="text-white center-block">{{p.descripcion}}</h3>
+                            </article>
+                            <article class="card-body bg-dark text-light">
+                                <h3 class="text-bold">Referencia de fábrica:</h3>
+                                <caption class="card-text">{{p.referencia_fabrica}}</caption>
+                                <article class="d-flex justify-content-between align-items-start mt-2">
+                                    <section class="">
+                                        <span class="badge bg-secondary">Cantidad</span>
+                                        <input type="number" name="" id="" min="0" value="1" class="cantidad">
+                                        <button class="btn btn-warning my-2 agregar-al-carrito" data-producto-id="{{ p.id }}" data-addtocart-url="{% url 'addtocart' %}">Agregar al carrito</button>
+                                    </section>
+                                    <small>
+                                        ${{p.precio}} <br>
+                                        Cod. {{p.id}} <br>
+                                        <span class="badge {% if p.cantidad == 0 %} bg-danger {% elif p.cantidad >= 1 and p.cantidad <= 10 %} bg-warning {% elif p.cantidad > 10 %} bg-success {% else %} bg-secondary {% endif %}">Cantidad disponible: {{p.cantidad}}</span>
+                                    </small>
+                                </article>
                             </article>
                         </article>
-                    </article>
+                    </form>
                 </article>
                 {% endfor %}
                 {% else %}
