@@ -81,27 +81,24 @@ def Catalogo(request):
     })
 
 @login_required
-def AgregarAlCarro(request):
-    if request.method == "POST" and request.is_ajax():
-        producto_id = request.POST.get('producto_id')
-        cantidad = int(request.POST.get('cantidad', 1))
-        producto = Producto.objects.get(pk=producto_id)
-        
-        carrito = request.session.get('carrito', {})
-        
-        if producto_id in carrito:
-            carrito[producto_id]['cantidad'] += cantidad
-        else:
-            carrito[producto_id] = {
-                'descripcion': producto.descripcion,
-                'precio': producto.precio,
-                'cantidad': cantidad,
-            }
-        
-        request.session['carrito'] = carrito
-        return JsonResponse({'success': True})
+def AddToCart(request):
+    producto_id = request.GET.get('producto_id')
+    cantidad = int(request.GET.get('cantidad', 1))
+    print(f"{producto_id}, {cantidad}")
+    producto = Producto.objects.get(pk=producto_id)
+    carrito = request.session.get('carrito', {})
+    
+    if producto_id in carrito:
+        carrito[producto_id]['cantidad'] += cantidad
     else:
-        return JsonResponse({'success': False})
+        carrito[producto_id] = {
+            'descripcion': producto.descripcion,
+            'precio': producto.precio,
+            'cantidad': cantidad,
+        }
+    
+    request.session['carrito'] = carrito
+    return JsonResponse({'success': True})
     
 
 @login_required

@@ -1,12 +1,14 @@
 $(document).ready(function() {
     $('.agregar-al-carrito').on('click', function(e) {
         e.preventDefault();
-        var producto_id = $(this).data('producto-id');
-        var cantidad = $(this).siblings('.cantidad').val();
+        let producto_id = $(this).data('producto-id');
+        let cantidad = $(this).siblings('.cantidad').val();
+        let url = $(this).data('addtocart-url');
         console.log(`p: ${producto_id} c: ${cantidad}`)
+        
         $.ajax({
-            type: 'POST',
-            url: '{% url "agregar_al_carrito" %}',
+            type: 'GET',
+            url: url,
             data: {
                 'producto_id': producto_id,
                 'cantidad': cantidad,
