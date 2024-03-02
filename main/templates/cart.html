@@ -7,86 +7,57 @@
 
 <main>
     <section class="h-100 gradient-custom">
-        <div class="container py-5">
-          <div class="row d-flex justify-content-center my-4">
-            <div class="col-md-8">
-              <div class="card mb-4 bg-gray text-light">
-                <div class="card-header py-3">
+        <article class="container py-5">
+          <article class="row d-flex justify-content-center my-4">
+            <section class="col-md-8">
+              <article class="card mb-4 bg-gray text-light">
+                <section class="card-header py-3">
                   <h5 class="mb-0">Cart - 2 items</h5>
-                </div>
-                <div class="card-body">
+                </section>
+                <section class="card-body">
                   <!-- Single item -->
-                  <div class="row ">
-                    <div class="col-lg-6 col-md-6 mb-4 mb-lg-0 ">
-                      <!-- Data -->
-                      <p><strong>Blue denim shirt</strong></p>
-                      <p>Color: blue</p>
-                      <p>Size: M</p>
-                      <button type="button" class="btn btn-primary btn-sm me-1 mb-2 " data-mdb-toggle="tooltip"
-                        title="Remove item">
-                        <i class="fa fa-trash"></i>
-                      </button>
-                      <span class="badge bg-danger">Restantes: 5</span>
-                      <!-- Data -->
-                    </div>
-      
-                    <div class="col-lg-6 col-md-6 mb-4 mb-lg-0">
-                      <!-- Quantity -->
-                      <div class="d-flex mb-4" style="max-width: 300px">
-                        <button class="btn btn-primary px-3 me-2"
-                          onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                          <i class="fa fa-minus"></i>
-                        </button>
-      
-                        <div class="form-outline text-center">
-                          <input id="form1" min="0" name="quantity" value="1" type="number" class="form-control" />
-                          <label class="form-label" for="form1">Quantity</label>
-                        </div>
-      
-                        <button class="btn btn-primary px-3 ms-2"
-                          onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                          <i class="fa fa-plus"></i>
-                        </button>
-                    </div>
-                    <p class="">
-                      <strong>$17.99</strong>
-                    </p>
-                      <!-- Quantity -->
-      
-                      <!-- Price -->
-                      <!-- Price -->
-                    </div>
-                  </div>
-                  <!-- Single item -->
-                  <hr class="my-4" />
+                    <article class="row ">
+                        <section class="col-lg-6 col-md-6 mb-4 mb-lg-0">
+                        <!-- Data -->
+                            <p><strong>Descripcion</strong></p>
+                            <p>Referencia de fabrica: Ref</p>
+                            <p><strong>Precio Unidad: $14.000</strong></p>
+
+                            <small>Cod. 25</small>
+                            <button type="button" class="btn btn-primary btn-sm me-1 mb-2 " data-mdb-toggle="tooltip" title="Eliminar item">
+                                <i class="fa fa-trash"></i>
+                            </button>
+
+                            
+                            <!-- Data -->
+                        </section>
+
+                        <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">
+                            <label class="form-label" for="form1"><strong>Cantidad</strong></label>
+                            <article class="d-flex mb-4">
+                                <button class="btn btn-primary px-3 me-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                <input id="form1" min="0" name="quantity" value="1" type="number" class="form-control" />
+
+            
+                                <button class="btn btn-primary px-3 ms-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </article>
+                            <p class="">
+                                <strong>Total artículo: $120.500</strong>
+                            </p>
+                            <span class="badge bg-danger mt-0">Unidades restantes: 5</span>
+                        </section>
+                    </article>
+                <!-- Single item -->
+                <hr class="my-4" />
       
       
-                </div>
-              </div>
-              <div class="card mb-4">
-                <div class="card-body">
-                  <p><strong>Expected shipping delivery</strong></p>
-                  <p class="mb-0">12.10.2020 - 14.10.2020</p>
-                </div>
-              </div>
-              <div class="card mb-4 mb-lg-0">
-                <div class="card-body">
-                  <p><strong>We accept</strong></p>
-                  <img class="me-2" width="45px"
-                    src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/visa.svg"
-                    alt="Visa" />
-                  <img class="me-2" width="45px"
-                    src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/amex.svg"
-                    alt="American Express" />
-                  <img class="me-2" width="45px"
-                    src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/mastercard.svg"
-                    alt="Mastercard" />
-                  <img class="me-2" width="45px"
-                    src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce/includes/gateways/paypal/assets/images/paypal.webp"
-                    alt="PayPal acceptance mark" />
-                </div>
-              </div>
-            </div>
+                </section>
+              </article>
+            </section>
             <div class="col-md-4">
               <div class="card mb-4">
                 <div class="card-header py-3">
@@ -121,8 +92,8 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </article>
+        </article>
       </section>
 
     <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5" style="background-color: #eee; border-radius: .5rem .5rem 0 0;">
