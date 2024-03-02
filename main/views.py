@@ -80,12 +80,14 @@ def Catalogo(request):
         'productos': productos
     })
 
+carrito = None
 @login_required
 def AddToCart(request):
     producto_id = request.GET.get('producto_id')
     cantidad = int(request.GET.get('cantidad', 1))
     producto = Producto.objects.get(pk=producto_id)
     print(f"${producto}")
+    global carrito
     carrito = request.session.get('carrito', {})
     
     if producto_id in carrito:
@@ -101,7 +103,8 @@ def AddToCart(request):
     return JsonResponse({'success': True})
     
 def Cart(request):
-    return render(request, HTMLCARRITO, {'productos':request.session.get('carrito')})
+    print(carrito)
+    return render(request, HTMLCARRITO, {'productos':carrito})
     
 @login_required
 def EditarCuenta(request):
