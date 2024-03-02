@@ -68,6 +68,7 @@ def unloginRequired(view_func):
 
 @login_required
 def Catalogo(request):
+    carrito = request.session.get('carrito', {})
     PRODUCTOS_POR_PAGINA = 12
     productos = Producto.objects.order_by('id')
     if request.method == "POST":
@@ -83,27 +84,30 @@ def Catalogo(request):
 carrito = None
 @login_required
 def AddToCart(request):
+    global carrito
+    carrito = request.session.get('carrito', {})
     producto_id = request.GET.get('producto_id')
     cantidad = int(request.GET.get('cantidad', 1))
     producto = Producto.objects.get(pk=producto_id)
     print(f"${producto}")
-    global carrito
-    carrito = request.session.get('carrito', {})
-    
+   
+    print(f"total producto {int(cantidad) * int(producto.precio)}")
     if producto_id in carrito:
         carrito[producto_id]['cantidad'] += cantidad
     else:
         carrito[producto_id] = {
             'descripcion': producto.descripcion,
             'precio': producto.precio,
+            'referencia_fabrica':producto.referencia_fabrica,
             'cantidad': cantidad,
+            'total_producto': int(cantidad) * int(producto.precio)
         }
     
     request.session['carrito'] = carrito
     return JsonResponse({'success': True})
     
 def Cart(request):
-    print(carrito)
+    
     return render(request, HTMLCARRITO, {'productos':carrito})
     
 @login_required

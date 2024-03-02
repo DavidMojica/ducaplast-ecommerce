@@ -12,94 +12,91 @@
             <section class="col-md-8">
               <article class="card mb-4 bg-gray text-light">
                 <section class="card-header py-3">
-                  <h5 class="mb-0">Cart - 2 items</h5>
+                  <h5 class="mb-0">Carro - 1 item(s)</h5>
                 </section>
                 <section class="card-body">
-                  <!-- Single item -->
-                    <article class="row ">
-                        <section class="col-lg-6 col-md-6 mb-4 mb-lg-0">
-                        <!-- Data -->
-                            <p><strong>Descripcion</strong></p>
-                            <p>Referencia de fabrica: Ref</p>
-                            <p><strong>Precio Unidad: $14.000</strong></p>
-
-                            <small>Cod. 25</small>
-                            <button type="button" class="btn btn-primary btn-sm me-1 mb-2 " data-mdb-toggle="tooltip" title="Eliminar item">
-                                <i class="fa fa-trash"></i>
-                            </button>
-
-                            
+                    {% if productos %}
+                        {% for key, p in productos.items %}
+                        <!-- item -->
+                        <article class="row ">
+                            <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">
                             <!-- Data -->
-                        </section>
+                                <p><strong>{{p.descripcion}}</strong></p>
+                                <p>Referencia de fabrica: {{p.referencia_fabrica}}</p>
+                                <p><strong>Precio por unidad: ${{p.precio}}</strong></p>
 
-                        <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">
-                            <label class="form-label" for="form1"><strong>Cantidad</strong></label>
-                            <article class="d-flex mb-4">
-                                <button class="btn btn-primary px-3 me-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                                    <i class="fa fa-minus"></i>
+                                <button type="button" class="btn btn-primary btn-sm me-1 mb-2 " data-mdb-toggle="tooltip" title="Eliminar item">
+                                    <i class="fa fa-trash"></i>
                                 </button>
-                                <input id="form1" min="0" name="quantity" value="1" type="number" class="form-control" />
+                                <small>Cod. {{key}}</small>
 
-            
-                                <button class="btn btn-primary px-3 ms-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </article>
-                            <p class="">
-                                <strong>Total artículo: $120.500</strong>
-                            </p>
-                            <span class="badge bg-danger mt-0">Unidades restantes: 5</span>
-                        </section>
-                    </article>
-                <!-- Single item -->
-                <hr class="my-4" />
-      
-      
+                                <!-- Data -->
+                            </section>
+
+                            <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">
+                                <label class="form-label" for="form1"><strong>Cantidad</strong></label>
+                                <article class="d-flex mb-4">
+                                    <button class="btn btn-primary px-3 me-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                    <input id="form1" min="0" name="quantity" value="{{p.cantidad}}" type="number" class="form-control" />
+                                    <button class="btn btn-primary px-3 ms-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </article>
+                                <p class=""><strong>Total artículo: $ {{p.total_producto}}</strong></p>
+                                <span class="badge bg-danger mt-0">Unidades restantes: 5</span>
+                            </section>
+                        </article>
+                        <!-- enditem -->
+                        <hr class="my-4" />
+                        {% endfor %}
+                    {% else %}
+
+                    <section class="card-body">
+                        <h4>No tiene productos seleccionados.</h4>
+                    </section>
+                    {% endif %}
                 </section>
               </article>
             </section>
-            <div class="col-md-4">
-              <div class="card mb-4">
-                <div class="card-header py-3">
-                  <h5 class="mb-0">Summary</h5>
-                </div>
-                <div class="card-body">
+
+            <!-- Resumen -->
+            {% if productos %}
+            <section class="col-md-4">
+              <article class="card mb-4">
+                <section class="card-header py-3">
+                  <h5 class="mb-0">Resumen</h5>
+                </section>
+                <section class="card-body">
                   <ul class="list-group list-group-flush">
-                    <li
-                      class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
-                      Products
-                      <span>$53.98</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                      Productos
+                      <span>$100.000</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                      Shipping
-                      <span>Gratis</span>
+                      IVA (19%)
+                      <span>$19.000</span>
                     </li>
                     <li
                       class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
-                      <div>
-                        <strong>Total amount</strong>
+                      <section>
+                        <strong>Total</strong>
                         <strong>
-                          <p class="mb-0">(including VAT)</p>
+                          <p class="mb-0">(IVA incluído)</p>
                         </strong>
-                      </div>
-                      <span><strong>$53.98</strong></span>
+                      </section>
+                      <span><strong>$119.000</strong></span>
                     </li>
                   </ul>
-      
-                  <button type="button" class="btn btn-primary btn-lg btn-block">
-                    Go to checkout
-                  </button>
-                </div>
-              </div>
-            </div>
+                  <button type="button" class="btn btn-primary btn-lg btn-block">Confirmar venta</button>
+                </section>
+              </article>
+            </section>
+            {% endif %}
           </article>
         </article>
       </section>
-
-    <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5" style="background-color: #eee; border-radius: .5rem .5rem 0 0;">
-        {% for key, p in productos.items %}
-        <h1>{{p.descripcion}}</h1>
-        {% endfor %}
-    </section>
+    
 </main>
 {% endblock %}
