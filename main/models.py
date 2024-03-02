@@ -73,7 +73,7 @@ class Producto(models.Model):
     cantidad = models.IntegerField(default=0)
     
     def __str__(self):
-         return self.nombre
+         return self.descripcion
      
 class ProductosPedido(models.Model):
     id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE)

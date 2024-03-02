@@ -3,7 +3,9 @@
 {% load static %}
 <main>
     <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
-        
+        {% for p in productos %}
+        <h1>{{p}}</h1>
+        {% endfor %}
     </section>
 </main>
 {% endblock %}

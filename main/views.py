@@ -24,7 +24,7 @@ HTMLEDITARCUENTA = "editar_cuenta.html"
 HTMLHOME = "home.html"
 HTMLREGISTRO = "registro.html"
 HTMLCATALOGO = "catalogo.html"
-HTMLCARRITO = "carrito.html"
+HTMLCARRITO = "cart.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -84,8 +84,8 @@ def Catalogo(request):
 def AddToCart(request):
     producto_id = request.GET.get('producto_id')
     cantidad = int(request.GET.get('cantidad', 1))
-    print(f"{producto_id}, {cantidad}")
     producto = Producto.objects.get(pk=producto_id)
+    print(f"${producto}")
     carrito = request.session.get('carrito', {})
     
     if producto_id in carrito:
@@ -100,7 +100,9 @@ def AddToCart(request):
     request.session['carrito'] = carrito
     return JsonResponse({'success': True})
     
-
+def Cart(request):
+    return render(request, HTMLCARRITO, {'productos':request.session.get('carrito')})
+    
 @login_required
 def EditarCuenta(request):
     user = get_object_or_404(Usuarios, pk=str(request.user.id))
