@@ -90,50 +90,69 @@ def Catalogo(request):
         'productos': productos
     })
 
-carrito = None
 @login_required
 def CartHandler(request):
+    carrito = request.session.get('carrito', {})
     if request.method == "POST":
+        event = ""
         action = request.POST.get('action')
-        print(action)
+        producto_id = request.POST.get('producto_id')
+        
+        #Añadir
         if action == "1":
-            carrito = request.session.get('carrito', {})
-            producto_id = request.POST.get('producto_id')
-            producto = Producto.objects.get(pk=producto_id)
-            cantidad = int(request.POST.get('cantidad', 1)) 
-            total_producto = int(cantidad) * int(producto.precio)
-            
-            if producto_id in carrito:
-                carrito[producto_id]['cantidad'] = cantidad
-                carrito[producto_id]['total_producto'] = total_producto
-                
-            else:
+            try:
+                producto = Producto.objects.get(pk=producto_id)
+                cantidad = int(request.POST.get('cantidad', 1)) 
+                total_producto = int(cantidad) * int(producto.precio)
+                print(total_producto)
                 carrito[producto_id] = {
                     'descripcion': producto.descripcion,
                     'precio': producto.precio,
-                    'referencia_fabrica':producto.referencia_fabrica,
+                    'referencia_fabrica': producto.referencia_fabrica,
                     'cantidad': cantidad,
                     'total_producto': total_producto,
                 }
-                
+                event = "Producto añadido"
+                request.session['carrito'] = carrito
+                return JsonResponse({'success': True, 'event': event,})
+            except Producto.DoesNotExist:
+                event = "El producto no existe"
+              
+        #Borrar  
+        elif action == "2":
+            if producto_id in carrito:
+                del carrito[producto_id]
+                event = "Producto borrado"
+                carrito_vacio = len(carrito) == 0  
+            total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
+            iva_actualizado = total_productos_actualizado * 0.19
+            total_actualizado = total_productos_actualizado + iva_actualizado
             request.session['carrito'] = carrito
-            return JsonResponse({'success': True})
-    return JsonResponse({'success':False})
+            
+            return JsonResponse({'success': True, 'event': event, 'total_productos': total_actualizado,
+                                'iva': iva_actualizado, 'total_actualizado': total_actualizado, 'carrito_vacio': carrito_vacio})
 
-
-def Cart(request):
-    #Valor total de los productos
-    carrito = request.session.get('carrito', {})
+    else:
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+            
+def getCartPrice(carrito):
     total_productos = 0
-    iva = 0
-    
     if carrito:
         for key, producto in carrito.items():
             total_productos += int(producto['precio']) * int(producto['cantidad'])
             producto['precio_str'] = numberWithPoints(producto['precio'])
             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
+        return  total_productos
     
-    iva = round(total_productos * 0.19)
+@login_required
+def Cart(request):
+    #Valor total de los productos
+    carrito = request.session.get('carrito', {})
+    total_productos = 0
+    iva = 0
+    if carrito:
+        total_productos = getCartPrice(carrito)
+        iva = round(total_productos * 0.19)
     return render(request, HTMLCARRITO, {'productos':carrito,
                                          'total_productos': numberWithPoints(total_productos),
                                          'iva': numberWithPoints(iva),

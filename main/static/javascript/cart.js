@@ -19,9 +19,20 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(data) {
                 if (data.success) {
-                    alert('Producto agregado al carrito');
+                    if (action == "1"){
+                        //Toast añadido
+                        console.log("Producto añadido");
+                    } else if (action == "2"){
+                        if(data.carrito_vacio) window.location.href = '/cart/';
+                        else{
+                            $('#p-' + producto_id).remove();
+                            $('#total_productos').text(`$${data.total_productos}`);
+                            $('#iva').text(`$${data.iva}`);
+                            $('#total_venta').text(`$${data.total_actualizado}`);
+                        }
+                    }
                 } else {
-                    alert('Error al agregar el producto al carrito');
+                    alert('Error en el carrito');
                 }
             },
             error: function() {
