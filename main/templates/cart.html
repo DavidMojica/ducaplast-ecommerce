@@ -14,7 +14,7 @@
             <section class="col-md-8">
               <article class="card mb-4 bg-gray text-light">
                 <section class="card-header py-3">
-                  <h5 class="mb-0">Carro - 1 item(s)</h5>
+                  <h5 class="mb-0" id="productos_cantidad">Carro - {{cantidad_productos}} item(s)</h5>
                 </section>
                 <section class="card-body">
                     {% if productos %}
@@ -100,6 +100,5 @@
           </article>
         </article>
       </section>
-    
 </main>
 {% endblock %}

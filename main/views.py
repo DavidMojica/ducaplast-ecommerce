@@ -130,7 +130,8 @@ def CartHandler(request):
             request.session['carrito'] = carrito
             
             return JsonResponse({'success': True, 'event': event, 'total_productos': total_actualizado,
-                                'iva': iva_actualizado, 'total_actualizado': total_actualizado, 'carrito_vacio': carrito_vacio})
+                                'iva': iva_actualizado, 'total_actualizado': total_actualizado, 'carrito_vacio': carrito_vacio,
+                                'productos': len(request.session['carrito'])})
 
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
@@ -156,7 +157,8 @@ def Cart(request):
     return render(request, HTMLCARRITO, {'productos':carrito,
                                          'total_productos': numberWithPoints(total_productos),
                                          'iva': numberWithPoints(iva),
-                                         'total_venta':numberWithPoints(total_productos+iva)})
+                                         'total_venta':numberWithPoints(total_productos+iva),
+                                         'cantidad_productos': len(request.session['carrito'])})
     
 @login_required
 def EditarCuenta(request):
