@@ -3,8 +3,7 @@ $(document).ready(function() {
         e.preventDefault();
         let producto_id = $(this).data('producto-id');
         let cantidad = $(this).siblings('.cantidad').val();
-        let url = $(this).data('addtocart-url');
-        console.log(`p: ${producto_id} c: ${cantidad}`)
+        let url = $(this).data('carthandler-url');
         
         $.ajax({
             type: 'GET',

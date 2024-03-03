@@ -25,7 +25,7 @@ urlpatterns = [
     path('logout/', views.Logout, name='logout'),
     path('editar_cuenta/', views.EditarCuenta, name='editar_cuenta'),
     path('catalogo/', views.Catalogo, name='catalogo'),
-    path('addtocart/', views.AddToCart, name="addtocart"),
+    path('carthandler/', views.CartHandler, name="carthandler"),
     path('cart/', views.Cart, name='cart')
     
 ]

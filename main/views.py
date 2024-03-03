@@ -92,15 +92,13 @@ def Catalogo(request):
 
 carrito = None
 @login_required
-def AddToCart(request):
+def CartHandler(request):
     global carrito
-    
     carrito = request.session.get('carrito', {})
     producto_id = request.GET.get('producto_id')
-    cantidad = int(request.GET.get('cantidad', 1))
     producto = Producto.objects.get(pk=producto_id)
+    cantidad = int(request.GET.get('cantidad', 1)) 
     total_producto = int(cantidad) * int(producto.precio)
-    
     
     if producto_id in carrito:
         carrito[producto_id]['cantidad'] = cantidad
@@ -115,7 +113,6 @@ def AddToCart(request):
             'total_producto': total_producto,
         }
         
-    
     request.session['carrito'] = carrito
     return JsonResponse({'success': True})
     
@@ -123,15 +120,19 @@ def Cart(request):
     #Valor total de los productos
     carrito = request.session.get('carrito', {})
     total_productos = 0
-    print(carrito)
+    iva = 0
+    
     if carrito:
         for key, producto in carrito.items():
             total_productos += int(producto['precio']) * int(producto['cantidad'])
-            
+            producto['precio_str'] = numberWithPoints(producto['precio'])
+            producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
     
-    total_productos = numberWithPoints(total_productos)
+    iva = round(total_productos * 0.19)
     return render(request, HTMLCARRITO, {'productos':carrito,
-                                         'total_productos': total_productos})
+                                         'total_productos': numberWithPoints(total_productos),
+                                         'iva': numberWithPoints(iva),
+                                         'total_venta':numberWithPoints(total_productos+iva)})
     
 @login_required
 def EditarCuenta(request):
