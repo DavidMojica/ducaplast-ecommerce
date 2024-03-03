@@ -1,25 +1,39 @@
 $(document).ready(function() {
-    $('.agregar-al-carrito').on('click', function(e) {
+    $('.cart-handler').on('click', function(e) {
         e.preventDefault();
         let producto_id = $(this).data('producto-id');
         let cantidad = $(this).siblings('.cantidad').val();
-        let url = $(this).data('addtocart-url');
-        console.log(`p: ${producto_id} c: ${cantidad}`)
-        
+        let url = $(this).data('carthandler-url');
+        let action = $(this).data('action');
+        let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+
         $.ajax({
-            type: 'GET',
+            type: 'POST',
             url: url,
             data: {
+                'action': action,
                 'producto_id': producto_id,
                 'cantidad': cantidad,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                'csrfmiddlewaretoken': csfrtoken
             },
             dataType: 'json',
             success: function(data) {
                 if (data.success) {
-                    alert('Producto agregado al carrito');
+                    if (action == "1"){
+                        //Toast añadido
+                        console.log("Producto añadido");
+                    } else if (action == "2"){
+                        if(data.carrito_vacio) window.location.href = '/cart/';
+                        else{
+                            $('#p-' + producto_id).remove();
+                            $('#total_productos').text(`$${data.total_productos}`);
+                            $('#iva').text(`$${data.iva}`);
+                            $('#total_venta').text(`$${data.total_actualizado}`);
+                            $('#productos_cantidad').text(`Carro - ${data.productos_cantidad} item(s)`)
+                        }
+                    }
                 } else {
-                    alert('Error al agregar el producto al carrito');
+                    alert('Error en el carrito');
                 }
             },
             error: function() {
