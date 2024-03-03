@@ -15,6 +15,8 @@ APELLIDOSLENGTHMIN = 3
 DOCLENGTHMIN = 6 #Minimo de carácteres para el documento
 PASSLENGTHMIN = 8 #Minimo de carácteres para la contraseña
 
+carrito = None
+
 EMAILREGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 NUMBERWITHPOINTSREGEX = r'\B(?=(\d{3})+(?!\d))'
 #Arrays - listas
@@ -66,7 +68,7 @@ def isValidEmail(email):
 def numberWithPoints(numero):
     return re.sub(NUMBERWITHPOINTSREGEX, '.', str(numero))
 
-# Decorador que valida que el usuario no esté logueado para hacer algo.
+#Decorador que valida que el usuario no esté logueado para hacer algo.
 def unloginRequired(view_func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -75,67 +77,8 @@ def unloginRequired(view_func):
             return view_func(request, *args, **kwargs)
     return wrapper
 
+#Obtener el precio de los articulos del carro y actualizar sus respectivos valores con puntos decimales.
 @login_required
-def Catalogo(request):
-    carrito = request.session.get('carrito', {})
-    PRODUCTOS_POR_PAGINA = 12
-    productos = Producto.objects.order_by('id')
-    if request.method == "POST":
-        pass
-    
-    paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
-    productos = paginator.page(request.GET.get('page', 1))
-    
-    return render(request, HTMLCATALOGO,{
-        'productos': productos
-    })
-
-@login_required
-def CartHandler(request):
-    carrito = request.session.get('carrito', {})
-    if request.method == "POST":
-        event = ""
-        action = request.POST.get('action')
-        producto_id = request.POST.get('producto_id')
-        
-        #Añadir
-        if action == "1":
-            try:
-                producto = Producto.objects.get(pk=producto_id)
-                cantidad = int(request.POST.get('cantidad', 1)) 
-                total_producto = int(cantidad) * int(producto.precio)
-                print(total_producto)
-                carrito[producto_id] = {
-                    'descripcion': producto.descripcion,
-                    'precio': producto.precio,
-                    'referencia_fabrica': producto.referencia_fabrica,
-                    'cantidad': cantidad,
-                    'total_producto': total_producto,
-                }
-                event = "Producto añadido"
-                request.session['carrito'] = carrito
-                return JsonResponse({'success': True, 'event': event,})
-            except Producto.DoesNotExist:
-                event = "El producto no existe"
-              
-        #Borrar  
-        elif action == "2":
-            if producto_id in carrito:
-                del carrito[producto_id]
-                event = "Producto borrado"
-                carrito_vacio = len(carrito) == 0  
-            total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-            iva_actualizado = total_productos_actualizado * 0.19
-            total_actualizado = total_productos_actualizado + iva_actualizado
-            request.session['carrito'] = carrito
-            
-            return JsonResponse({'success': True, 'event': event, 'total_productos': total_actualizado,
-                                'iva': iva_actualizado, 'total_actualizado': total_actualizado, 'carrito_vacio': carrito_vacio,
-                                'productos': len(request.session['carrito'])})
-
-    else:
-        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
-            
 def getCartPrice(carrito):
     total_productos = 0
     if carrito:
@@ -143,73 +86,9 @@ def getCartPrice(carrito):
             total_productos += int(producto['precio']) * int(producto['cantidad'])
             producto['precio_str'] = numberWithPoints(producto['precio'])
             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
-        return  total_productos
+        return total_productos
     
-@login_required
-def Cart(request):
-    #Valor total de los productos
-    carrito = request.session.get('carrito', {})
-    total_productos = 0
-    iva = 0
-    if carrito:
-        total_productos = getCartPrice(carrito)
-        iva = round(total_productos * 0.19)
-    return render(request, HTMLCARRITO, {'productos':carrito,
-                                         'total_productos': numberWithPoints(total_productos),
-                                         'iva': numberWithPoints(iva),
-                                         'total_venta':numberWithPoints(total_productos+iva),
-                                         'cantidad_productos': len(request.session['carrito'])})
-    
-@login_required
-def EditarCuenta(request):
-    user = get_object_or_404(Usuarios, pk=str(request.user.id))
-    if request.method == "POST":
-        print(request.POST)
-        print("nombre" in request.POST)
-        print("pass_data" in request.POST)
-        if "acc_data" in request.POST:
-            nombre = request.POST.get("nombre", "").strip()
-            apellidos = request.POST.get("apellidos", "").strip()
-            email = request.POST.get("email", "").strip()
-            print(f"nombre {nombre}")
-            if isEmpty([nombre, apellidos, email]):
-                return render(request, HTMLEDITARCUENTA,{"account_data_event": ERROR_7})
-            
-            if len(nombre) < NOMBRELENGTHMIN or len(apellidos) < APELLIDOSLENGTHMIN:
-                return render(request, HTMLEDITARCUENTA, {"account_data_event": ERROR_11})
-            
-            if not isValidEmail(email):
-                return render(request, HTMLEDITARCUENTA, {"account_data_event":ERROR_12})
-       
-            user.first_name = nombre
-            user.last_name = apellidos
-            user.email = email
-            user.save()
-            
-            return render(request, HTMLEDITARCUENTA, {"account_data_event": EXITO_2})
-            
-        elif "pass_data" in request.POST:
-            
-            oldPassword = request.POST.get('oldPassword')
-            newPassword = request.POST.get('password')
-            newPassword1 = request.POST.get('password1')
-            
-            if user.check_password(oldPassword):
-                if len(newPassword) >= PASSLENGTHMIN or len(newPassword1) >= PASSLENGTHMIN:
-                    if newPassword == newPassword1:
-                        user.set_password(newPassword)
-                        user.save()
-                        return redirect(reverse('home'))
-                    else:
-                        return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_10 })
-                else:
-                    return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_9 })
-            else:
-                return render(request, HTMLEDITARCUENTA, { "password_change_event": ERROR_8 })
-    
-    
-    return render(request, HTMLEDITARCUENTA)
-
+#-------------Views-----------#
 @unloginRequired
 def Home(request):
     newForm = inicioSesionForm()
@@ -256,6 +135,11 @@ def Home(request):
             return render(request, HTMLHOME,{'form':newForm,
                                                 'error': ERROR_2})
     return render(request, HTMLHOME, {'form': newForm})
+
+@login_required
+def Logout(request):
+    logout(request)
+    return redirect(reverse('home'))
 
 @login_required
 def Registro(request):
@@ -315,6 +199,130 @@ def Registro(request):
     return render(request, HTMLREGISTRO, {'form': newForm })
 
 @login_required
-def Logout(request):
-    logout(request)
-    return redirect(reverse('home'))
+def EditarCuenta(request):
+    user = get_object_or_404(Usuarios, pk=str(request.user.id))
+    if request.method == "POST":
+        print(request.POST)
+        print("nombre" in request.POST)
+        print("pass_data" in request.POST)
+        if "acc_data" in request.POST:
+            nombre = request.POST.get("nombre", "").strip()
+            apellidos = request.POST.get("apellidos", "").strip()
+            email = request.POST.get("email", "").strip()
+            print(f"nombre {nombre}")
+            if isEmpty([nombre, apellidos, email]):
+                return render(request, HTMLEDITARCUENTA,{"account_data_event": ERROR_7})
+            
+            if len(nombre) < NOMBRELENGTHMIN or len(apellidos) < APELLIDOSLENGTHMIN:
+                return render(request, HTMLEDITARCUENTA, {"account_data_event": ERROR_11})
+            
+            if not isValidEmail(email):
+                return render(request, HTMLEDITARCUENTA, {"account_data_event":ERROR_12})
+       
+            user.first_name = nombre
+            user.last_name = apellidos
+            user.email = email
+            user.save()
+            
+            return render(request, HTMLEDITARCUENTA, {"account_data_event": EXITO_2})
+            
+        elif "pass_data" in request.POST:
+            
+            oldPassword = request.POST.get('oldPassword')
+            newPassword = request.POST.get('password')
+            newPassword1 = request.POST.get('password1')
+            
+            if user.check_password(oldPassword):
+                if len(newPassword) >= PASSLENGTHMIN or len(newPassword1) >= PASSLENGTHMIN:
+                    if newPassword == newPassword1:
+                        user.set_password(newPassword)
+                        user.save()
+                        return redirect(reverse('home'))
+                    else:
+                        return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_10 })
+                else:
+                    return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_9 })
+            else:
+                return render(request, HTMLEDITARCUENTA, { "password_change_event": ERROR_8 })
+    
+    
+    return render(request, HTMLEDITARCUENTA)
+
+@login_required
+def CartHandler(request):
+    carrito = request.session.get('carrito', {})
+    if request.method == "POST":
+        event = ""
+        action = request.POST.get('action')
+        producto_id = request.POST.get('producto_id')
+        
+        #Añadir
+        if action == "1":
+            try:
+                producto = Producto.objects.get(pk=producto_id)
+                cantidad = int(request.POST.get('cantidad', 1)) 
+                total_producto = int(cantidad) * int(producto.precio)
+                print(total_producto)
+                carrito[producto_id] = {
+                    'descripcion': producto.descripcion,
+                    'precio': producto.precio,
+                    'referencia_fabrica': producto.referencia_fabrica,
+                    'cantidad': cantidad,
+                    'total_producto': total_producto,
+                }
+                event = "Producto añadido"
+                request.session['carrito'] = carrito
+                return JsonResponse({'success': True, 'event': event,})
+            except Producto.DoesNotExist:
+                event = "El producto no existe"
+              
+        #Borrar  
+        elif action == "2":
+            if producto_id in carrito:
+                del carrito[producto_id]
+                event = "Producto borrado"
+                carrito_vacio = len(carrito) == 0  
+            total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
+            iva_actualizado = total_productos_actualizado * 0.19
+            total_actualizado = total_productos_actualizado + iva_actualizado
+            request.session['carrito'] = carrito
+            
+            return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
+                                'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
+                                'productos_cantidad': len(request.session['carrito'])})
+
+    else:
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+ 
+@login_required
+def Catalogo(request):
+    PRODUCTOS_POR_PAGINA = 12
+    productos = Producto.objects.order_by('id')
+    if request.method == "POST":
+        pass
+    
+    paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
+    productos = paginator.page(request.GET.get('page', 1))
+    
+    return render(request, HTMLCATALOGO,{
+        'productos': productos,
+        'carrito': request.session.get('carrito', {}),
+    })
+           
+@login_required
+def Cart(request):
+    #Valor total de los productos
+    carrito = request.session.get('carrito', {})
+    total_productos = 0
+    iva = 0
+    if carrito:
+        total_productos = getCartPrice(carrito)
+        iva = int(round(total_productos * 0.19))
+    return render(request, HTMLCARRITO, {'productos':carrito,
+                                         'total_productos': numberWithPoints(total_productos),
+                                         'iva': numberWithPoints(iva),
+                                         'total_venta':numberWithPoints(total_productos+iva),
+                                         'cantidad_productos': len(carrito)})
+    
+
+

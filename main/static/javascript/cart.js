@@ -29,7 +29,7 @@ $(document).ready(function() {
                             $('#total_productos').text(`$${data.total_productos}`);
                             $('#iva').text(`$${data.iva}`);
                             $('#total_venta').text(`$${data.total_actualizado}`);
-                            $('#productos_cantidad').text(`Carro - ${data.productos} item(s)`)
+                            $('#productos_cantidad').text(`Carro - ${data.productos_cantidad} item(s)`)
                         }
                     }
                 } else {
