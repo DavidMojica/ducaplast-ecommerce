@@ -55,7 +55,10 @@
                                     <section class="">
                                         <span class="badge bg-secondary">Cantidad</span>
                                         <input type="number" name="" id="" min="0" value="1" class="cantidad">
-                                        <button class="btn btn-warning my-2 agregar-al-carrito" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}">Agregar al carrito</button>
+                                        <form action="">
+                                            {% csrf_token %}
+                                            <button class="btn btn-warning my-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="1">Agregar al carrito</button>
+                                        </form>
                                     </section>
                                     <small>
                                         ${{p.precio}} <br>

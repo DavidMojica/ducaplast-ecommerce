@@ -4,6 +4,8 @@
 <!-- fa fa -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="{% static 'styles/cart.css' %}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="{% static 'javascript/cart.js' %}" defer></script>
 
 <main>
     <section class="h-100 gradient-custom">
@@ -24,13 +26,14 @@
                                 <p><strong>{{p.descripcion}}</strong></p>
                                 <p>Referencia de fabrica: {{p.referencia_fabrica}}</p>
                                 <p><strong>Precio por unidad: ${{p.precio_str}}</strong></p>
-
-                                <button type="button" class="btn btn-primary btn-sm me-1 mb-2 " data-mdb-toggle="tooltip" title="Eliminar item">
-                                    <i class="fa fa-trash"></i>
-                                </button>
                                 <small>Cod. {{key}}</small>
 
-                                <!-- Data -->
+                                <form action="">
+                                  {% csrf_token %}
+                                  <button type="button" class="btn btn-primary btn-sm me-1 mb-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item">
+                                      <i class="fa fa-trash"></i>
+                                  </button>
+                              </form>
                             </section>
 
                             <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">

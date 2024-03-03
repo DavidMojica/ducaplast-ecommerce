@@ -93,29 +93,34 @@ def Catalogo(request):
 carrito = None
 @login_required
 def CartHandler(request):
-    global carrito
-    carrito = request.session.get('carrito', {})
-    producto_id = request.GET.get('producto_id')
-    producto = Producto.objects.get(pk=producto_id)
-    cantidad = int(request.GET.get('cantidad', 1)) 
-    total_producto = int(cantidad) * int(producto.precio)
-    
-    if producto_id in carrito:
-        carrito[producto_id]['cantidad'] = cantidad
-        carrito[producto_id]['total_producto'] = total_producto
-        
-    else:
-        carrito[producto_id] = {
-            'descripcion': producto.descripcion,
-            'precio': producto.precio,
-            'referencia_fabrica':producto.referencia_fabrica,
-            'cantidad': cantidad,
-            'total_producto': total_producto,
-        }
-        
-    request.session['carrito'] = carrito
-    return JsonResponse({'success': True})
-    
+    if request.method == "POST":
+        action = request.POST.get('action')
+        print(action)
+        if action == "1":
+            carrito = request.session.get('carrito', {})
+            producto_id = request.POST.get('producto_id')
+            producto = Producto.objects.get(pk=producto_id)
+            cantidad = int(request.POST.get('cantidad', 1)) 
+            total_producto = int(cantidad) * int(producto.precio)
+            
+            if producto_id in carrito:
+                carrito[producto_id]['cantidad'] = cantidad
+                carrito[producto_id]['total_producto'] = total_producto
+                
+            else:
+                carrito[producto_id] = {
+                    'descripcion': producto.descripcion,
+                    'precio': producto.precio,
+                    'referencia_fabrica':producto.referencia_fabrica,
+                    'cantidad': cantidad,
+                    'total_producto': total_producto,
+                }
+                
+            request.session['carrito'] = carrito
+            return JsonResponse({'success': True})
+    return JsonResponse({'success':False})
+
+
 def Cart(request):
     #Valor total de los productos
     carrito = request.session.get('carrito', {})
