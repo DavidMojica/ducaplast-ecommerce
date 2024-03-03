@@ -16,6 +16,7 @@ DOCLENGTHMIN = 6 #Minimo de carácteres para el documento
 PASSLENGTHMIN = 8 #Minimo de carácteres para la contraseña
 
 EMAILREGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+NUMBERWITHPOINTSREGEX = r'\B(?=(\d{3})+(?!\d))'
 #Arrays - listas
 adminIds = [0, 1]
 
@@ -44,20 +45,28 @@ ERROR_11 = "Nombre o apellidos no cumplen con la longitud minima."
 ERROR_12 = "Formato de email no válido"
 
 #-----------Functions----------#
+#Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
     for campo in form.fields:
         if isinstance(form.cleaned_data[campo], str):
             form.cleaned_data[campo] = form.cleaned_data[campo].strip()
     return form 
 
+#Verifica que una lista de strings no esté vacía
 def isEmpty(elements):
     return any(len(element.strip()) == 0 for element in elements)
 
+#Verifica la validez de un email
 def isValidEmail(email):
     if re.match(EMAILREGEX, email):
         return True
     return False
 
+#Agregar punto decimal a los números
+def numberWithPoints(numero):
+    return re.sub(NUMBERWITHPOINTSREGEX, '.', str(numero))
+
+# Decorador que valida que el usuario no esté logueado para hacer algo.
 def unloginRequired(view_func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -85,30 +94,44 @@ carrito = None
 @login_required
 def AddToCart(request):
     global carrito
+    
     carrito = request.session.get('carrito', {})
     producto_id = request.GET.get('producto_id')
     cantidad = int(request.GET.get('cantidad', 1))
     producto = Producto.objects.get(pk=producto_id)
-    print(f"${producto}")
-   
-    print(f"total producto {int(cantidad) * int(producto.precio)}")
+    total_producto = int(cantidad) * int(producto.precio)
+    
+    
     if producto_id in carrito:
-        carrito[producto_id]['cantidad'] += cantidad
+        carrito[producto_id]['cantidad'] = cantidad
+        carrito[producto_id]['total_producto'] = total_producto
+        
     else:
         carrito[producto_id] = {
             'descripcion': producto.descripcion,
             'precio': producto.precio,
             'referencia_fabrica':producto.referencia_fabrica,
             'cantidad': cantidad,
-            'total_producto': int(cantidad) * int(producto.precio)
+            'total_producto': total_producto,
         }
+        
     
     request.session['carrito'] = carrito
     return JsonResponse({'success': True})
     
 def Cart(request):
+    #Valor total de los productos
+    carrito = request.session.get('carrito', {})
+    total_productos = 0
+    print(carrito)
+    if carrito:
+        for key, producto in carrito.items():
+            total_productos += int(producto['precio']) * int(producto['cantidad'])
+            
     
-    return render(request, HTMLCARRITO, {'productos':carrito})
+    total_productos = numberWithPoints(total_productos)
+    return render(request, HTMLCARRITO, {'productos':carrito,
+                                         'total_productos': total_productos})
     
 @login_required
 def EditarCuenta(request):
