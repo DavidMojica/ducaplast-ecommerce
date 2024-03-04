@@ -6,7 +6,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import registroUsuariosForm, inicioSesionForm, filtrarProductos
+from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
 from .models import Usuarios, Producto
 
 import re
@@ -94,9 +94,9 @@ def getCartPrice(request):
 #-------------Views-----------#
 @unloginRequired
 def Home(request):
-    newForm = inicioSesionForm()
+    newForm = InicioSesionForm()
     if request.method == 'POST':
-        form = inicioSesionForm(request.POST)
+        form = InicioSesionForm(request.POST)
         if form.is_valid():
             form = stripForm(form)
             
@@ -105,7 +105,7 @@ def Home(request):
             
             #Verificar el minimo de carácteres para cada campo
             if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
-                recycledForm = inicioSesionForm(initial={'documento': documento})
+                recycledForm = InicioSesionForm(initial={'documento': documento})
                 return render(request, HTMLHOME, {'form': recycledForm,
                                                      'error': ERROR_6})
             
@@ -113,7 +113,7 @@ def Home(request):
             
             #Verificar que el usuario exista y su contraseña sea correcta
             if logedUser is None:
-                recycledForm = inicioSesionForm(initial={'documento': documento})
+                recycledForm = InicioSesionForm(initial={'documento': documento})
                 return render(request, HTMLHOME, {'form': recycledForm,
                                                     'error':ERROR_4})
             else:
@@ -145,9 +145,9 @@ def Logout(request):
 
 @login_required
 def Registro(request):
-    newForm = registroUsuariosForm()
+    newForm = RegistroUsuariosForm()
     if request.method == "POST":
-        form = registroUsuariosForm(request.POST)
+        form = RegistroUsuariosForm(request.POST)
         #Verificar que el documento no se haya registrado antes.
         if form.has_error("username", code="unique"):
             return render(request, HTMLREGISTRO, {
@@ -296,17 +296,13 @@ def CartHandler(request):
             carrito.clear()
             request.session['carrito'] = carrito
             return JsonResponse({'success': True})
-           
-                
-                
-            
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
  
 @login_required
 def Catalogo(request):
     productos = Producto.objects.order_by('id')
-    form = filtrarProductos(request.GET)
+    form = FiltrarProductos(request.GET)
     PRODUCTOS_POR_PAGINA = 18
     
     if form.is_valid():
@@ -359,6 +355,8 @@ def Catalogo(request):
 @login_required
 def Cart(request):
     #Valor total de los productos
+    
+    form = DetallesPedido()
     # if request.method == "POST":
     carrito = request.session.get('carrito', {})
     total_productos = 0
@@ -377,7 +375,8 @@ def Cart(request):
                                         'total_productos': numberWithPoints(total_productos),
                                         'iva': numberWithPoints(iva),
                                         'total_venta':numberWithPoints(total_productos+iva),
-                                        'cantidad_productos': len(carrito)})
+                                        'cantidad_productos': len(carrito),
+                                        'form': form})
     
 
 

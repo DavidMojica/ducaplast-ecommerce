@@ -72,6 +72,28 @@
 
             {% if productos %}
             <section class="col-md-4">
+                <!-- Detalles del pedido -->
+                <article class="card mb-4">
+                  <section class="card-header py-3">
+                    <h5 class="mb-0">Detalles del pedido</h5>
+                  </section>
+                  <section class="card-body detalles">
+                    <article class="input-group mb-2">
+                      <span class="badge bg-primary">{{form.cliente.label_tag}}</span>
+                      {{form.cliente}}
+                    </article>
+                    <article class="input-group mb-2">
+                      <span class="badge bg-primary">{{form.documento.label_tag}}</span>
+                      {{form.documento}}
+                    </article>
+                    <article class="input-group mb-2">
+                      <span class="badge bg-primary">{{form.direccion.label_tag}}</span>
+                      {{form.direccion}}
+                    </article>
+                    {{form.nota}}
+                  </section>
+                </article>
+
                 <!-- Resumen -->
                 <article class="card mb-4">
                   <section class="card-header py-3">
@@ -101,15 +123,8 @@
                     <button type="button" class="btn btn-primary btn-lg btn-block">Confirmar venta</button>
                   </section>
                 </article>
-                <!-- Detalles del pedido -->
-                <article class="card mb-4">
-                  <section class="card-header py-3">
-                    <h5 class="mb-0">Detalles del pedido</h5>
-                  </section>
-                  <section class="card-body">
-                    
-                  </section>
-                </article>
+                
+                
               </section>
             {% endif %}
           </article>

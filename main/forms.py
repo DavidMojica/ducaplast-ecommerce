@@ -3,7 +3,25 @@ import re
 from django import forms
 from .models import TipoUsuario, Usuarios
 
-class filtrarProductos(forms.Form):
+class DetallesPedido(forms.Form):
+    cliente = forms.CharField(
+        label="Nombre del cliente",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Pablo Perez', 'id': 'nombre'})
+    )
+    documento = forms.CharField(
+        label="Numero documento",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Documento del cliente', 'id': 'documento'})
+    )
+    direccion = forms.CharField(
+        label="Dirección de entrega",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Calle 66 #28sur - 13', 'id': 'documento'})
+    )
+    nota = forms.CharField(
+        label="Nota",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Escribe detalles del pedido, de la dirección de entrega o lo que necesites. (500 carácteres máximo).', 'maxlength': '500'})
+    )
+
+class FiltrarProductos(forms.Form):
     nombre = forms.CharField(
         label="Nombre del producto",
         required=False,
@@ -34,8 +52,7 @@ class filtrarProductos(forms.Form):
         initial='0',
     )
     
-
-class registroUsuariosForm(forms.ModelForm):
+class RegistroUsuariosForm(forms.ModelForm):
     first_name = forms.CharField(
         label="Nombre",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del empleado/administrador', 'id': 'nombre'})
@@ -78,7 +95,7 @@ class registroUsuariosForm(forms.ModelForm):
         model = Usuarios
         fields = ('first_name', 'last_name', 'username', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
     
-class inicioSesionForm(forms.Form):
+class InicioSesionForm(forms.Form):
     documento = forms.CharField(
         widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento', 'id':'documento'}),
         required=True
