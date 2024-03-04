@@ -34,9 +34,14 @@ $(document).ready(()=> {
                             $('#productos_cantidad').text(`Carro - ${data.productos_cantidad} item(s)`);
                             createToastNotify(1, "Producto removido", "Producto removido del carrito correctamente.");
                         }
-                    } 
+                    }
+                    else if (action == "3"){
+                        window.location.href = '/cart/';
+                    } else{
+                        createToastNotify(1, "Error", "Opción no válida.");
+                    }
                 } else {
-                    createToastNotify(1, "Error", "Opción no válida.");
+                    createToastNotify(1, "Error", "Hubo un error en la petición.");
                 }
             },
             error: () => {

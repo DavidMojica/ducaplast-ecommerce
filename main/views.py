@@ -1,11 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
-from django.core.paginator import Paginator, EmptyPage
-from .forms import registroUsuariosForm, inicioSesionForm
-from .models import Usuarios, Producto
+from django.db.models.functions import Cast
+from django.db.models import FloatField
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
+from .models import Usuarios, Producto, Clientes, Pedido, ProductosPedido
 
 import re
 
@@ -92,9 +94,9 @@ def getCartPrice(request):
 #-------------Views-----------#
 @unloginRequired
 def Home(request):
-    newForm = inicioSesionForm()
+    newForm = InicioSesionForm()
     if request.method == 'POST':
-        form = inicioSesionForm(request.POST)
+        form = InicioSesionForm(request.POST)
         if form.is_valid():
             form = stripForm(form)
             
@@ -103,7 +105,7 @@ def Home(request):
             
             #Verificar el minimo de carácteres para cada campo
             if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
-                recycledForm = inicioSesionForm(initial={'documento': documento})
+                recycledForm = InicioSesionForm(initial={'documento': documento})
                 return render(request, HTMLHOME, {'form': recycledForm,
                                                      'error': ERROR_6})
             
@@ -111,13 +113,12 @@ def Home(request):
             
             #Verificar que el usuario exista y su contraseña sea correcta
             if logedUser is None:
-                recycledForm = inicioSesionForm(initial={'documento': documento})
+                recycledForm = InicioSesionForm(initial={'documento': documento})
                 return render(request, HTMLHOME, {'form': recycledForm,
                                                     'error':ERROR_4})
             else:
                 login(request, logedUser)
                 userType = logedUser.tipo_usuario_id
-                print(f"-------------->usertype {userType}")
                 if userType == 0:
                     return redirect(reverse('registro'))
                 elif userType == 1:
@@ -144,9 +145,9 @@ def Logout(request):
 
 @login_required
 def Registro(request):
-    newForm = registroUsuariosForm()
+    newForm = RegistroUsuariosForm()
     if request.method == "POST":
-        form = registroUsuariosForm(request.POST)
+        form = RegistroUsuariosForm(request.POST)
         #Verificar que el documento no se haya registrado antes.
         if form.has_error("username", code="unique"):
             return render(request, HTMLREGISTRO, {
@@ -263,7 +264,6 @@ def CartHandler(request):
                 producto = Producto.objects.get(pk=producto_id)
                 cantidad = int(request.POST.get('cantidad', 1)) 
                 total_producto = int(cantidad) * int(producto.precio)
-                print(total_producto)
                 carrito[producto_id] = {
                     'descripcion': producto.descripcion,
                     'precio': producto.precio,
@@ -291,39 +291,104 @@ def CartHandler(request):
             return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
                                 'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
                                 'productos_cantidad': len(request.session['carrito'])})
-
+        #borrar todo el carrito
+        elif action == "3":
+            carrito.clear()
+            request.session['carrito'] = carrito
+            return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
  
 @login_required
 def Catalogo(request):
-    PRODUCTOS_POR_PAGINA = 12
     productos = Producto.objects.order_by('id')
-    if request.method == "POST":
-        pass
+    form = FiltrarProductos(request.GET)
+    PRODUCTOS_POR_PAGINA = 18
+    
+    if form.is_valid():
+        id_producto = form.cleaned_data.get('id')
+        nombre = form.cleaned_data.get('nombre')
+        ordenar = form.cleaned_data.get('ordenar')
+        disponibles = form.cleaned_data.get('disponibles')
+        
+        #--------------Extraer los datos-------------#
+        if ordenar:
+            if ordenar == '1':
+                productos = Producto.objects.order_by('-id')
+            elif ordenar == '2':
+                productos = Producto.objects.order_by('descripcion')
+            elif ordenar == '3':
+                productos = Producto.objects.order_by('-descripcion')
+            elif ordenar == '4':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
+            elif ordenar == '5':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
+            else: 
+                pass
+        #----------Filtrar los datos----------#
+        if id_producto:
+            productos = productos.filter(id=id_producto)
+           
+        if nombre:
+            productos = productos.filter(descripcion__icontains=nombre)
+        #Modulo disponibles 
+        if disponibles:
+            productos = productos.filter(cantidad__gt=0)
+        
     
     paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
-    productos = paginator.page(request.GET.get('page', 1))
+    page_number = request.GET.get('page')
+    
+    try:
+        productos_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        productos_paginados = paginator.page(1)
+    except EmptyPage:
+        productos_paginados = paginator.page(paginator.num_pages)
     
     return render(request, HTMLCATALOGO,{
-        'productos': productos,
+        'productos': productos_paginados,
         'carrito': request.session.get('carrito', {}),
+        'form': form
     })
            
 @login_required
 def Cart(request):
     #Valor total de los productos
+    
+    form = DetallesPedido(request.POST)
+    # if request.method == "POST":
     carrito = request.session.get('carrito', {})
     total_productos = 0
     iva = 0
     if carrito:
         total_productos = getCartPrice(request)
         iva = int(round(total_productos * 0.19))
+        
+    if "confirmar_venta" in request.POST:
+        if form.is_valid():
+            form = stripForm(form)
+            
+            cliente_nombre = form.cleaned_data['cliente']
+            cliente_documento = form.cleaned_data['documento']
+            pedido_direccion = form.cleaned_data['direccion']
+            pedido_nota = form.cleaned_data['nota']
+            
+            cliente, creado = Clientes.objects.get_or_create(documento=cliente_documento)
+            
+            if cliente_documento:  # Verificar si hay un documento de cliente proporcionado
+                cliente, creado = Clientes.objects.get_or_create(documento=cliente_documento)
+                cliente.nombre = cliente_nombre  # Actualizar el nombre del cliente si se proporciona
+                cliente.save()  # Guardar el cliente en la base de datos
+    
+    
+    
     return render(request, HTMLCARRITO, {'productos':carrito,
-                                         'total_productos': numberWithPoints(total_productos),
-                                         'iva': numberWithPoints(iva),
-                                         'total_venta':numberWithPoints(total_productos+iva),
-                                         'cantidad_productos': len(carrito)})
+                                        'total_productos': numberWithPoints(total_productos),
+                                        'iva': numberWithPoints(iva),
+                                        'total_venta':numberWithPoints(total_productos+iva),
+                                        'cantidad_productos': len(carrito),
+                                        'form': form})
     
 
 
