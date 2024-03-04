@@ -30,7 +30,7 @@ const changeBadgeColor = (type, badge) => {
     }
 }
 
-accountForm.addEventListener('submit', function(e){
+accountForm.addEventListener('submit', e =>{
     e.preventDefault();
     validationResult = accountValidations();
     if (validationResult !== '0') {
@@ -40,7 +40,7 @@ accountForm.addEventListener('submit', function(e){
     else accountForm.submit();
 });
 
-function accountValidations() {
+const accountValidations = () => {
     if (nombre.value.trim().length < nombreMinLength) return "Nombre demasiado corto.";
     if (apellidos.value.trim().length < apellidosMinLength) return "Apellidos demasiado cortos";
     if (!emailRegex.test(email.value.trim())) return "Ingrese un correo electrónico válido.";
@@ -48,7 +48,7 @@ function accountValidations() {
 }
 
 
-passForm.addEventListener('submit', function(e){
+passForm.addEventListener('submit', e =>{
     e.preventDefault();
     validationResult = passValidations();
     if(validationResult !== '0') {
@@ -58,7 +58,7 @@ passForm.addEventListener('submit', function(e){
     else passForm.submit();
 })
 
-function passValidations() {
+const passValidations = () => {
     if (oldPassword.value.length < passwordMinLegth) return "La contraseña antigua es demasiado corta";
     if (password.value.length < passwordMinLegth) return "La contraseña nueva es demasiado corta";
     if (password1.value.length < passwordMinLegth) return "Confirmar contraseña es demasiado corta";
