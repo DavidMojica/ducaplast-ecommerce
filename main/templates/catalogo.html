@@ -58,12 +58,17 @@
                                             {% csrf_token %}
                                             <span class="badge mb-2 {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %}">{% if p.id|stringformat:'s' in carrito %} Producto ya añadido {% else %} Cantidad {% endif %}</span>
                                             <input type="number" name="" id="" min="1" value="1" class="cantidad">
-                                            <button class="btn {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %} my-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="1">{% if p.id|stringformat:'s' in carrito %} Actualizar cantidad {% else %} Agregar al carrito {% endif %}</button>
+                                            <button class="add btn {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %} my-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="1">{% if p.id|stringformat:'s' in carrito %} Actualizar cantidad {% else %} Agregar al carrito {% endif %}</button>
                                             {% if p.id|stringformat:'s' in carrito %}
-                                            <button type="button" class="btn btn-primary btn-sm me-1 mb-2 cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
+                                                <button type="button" class="eliminate btn btn-primary btn-sm me-1 mb-2 cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item" style="display: inline;">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            {% else %}
+                                                <button type="button" class="eliminate btn btn-primary btn-sm me-1 mb-2 cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item" style="display: none;">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
                                             {% endif %}
+
                                         </form>
                                     </section>
                                     <small>

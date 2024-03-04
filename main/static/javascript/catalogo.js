@@ -1,18 +1,37 @@
-const buttons = document.querySelectorAll('.cart-handler[data-action="1"]');
+document.addEventListener('DOMContentLoaded', ()=> {
+    const addButtons = document.querySelectorAll('.add');
+    const eliminateButtons = document.querySelectorAll('.eliminate');
+    
+    addButtons.forEach((addButton)=> {
+        let deleteButton = addButton.parentElement.querySelector('.eliminate');
+        
+        addButton.addEventListener('click', ()=> {
+            const badge = addButton.parentElement.querySelector('.badge'); 
+            addButton.textContent = 'Actualizar cantidad';
+            badge.textContent = 'Producto ya añadido';
+            badge.classList.remove('bg-success');
+            badge.classList.add('bg-warning');
+            addButton.classList.remove('btn-success');
+            addButton.classList.add('btn-warning');
+            deleteButton = addButton.parentElement.querySelector('.eliminate');
+            if (deleteButton) {
+                deleteButton.style.display = 'inline-block';
+            }
+        });
 
-        buttons.forEach(function(button) {
-            const originalText = button.textContent.trim();
-
-            button.addEventListener('click', function() {
-                const badge = button.previousElementSibling;
-                const deleteButton = button.parentElement.querySelector('.cart-handler[data-action="2"]');
-
-                if (originalText === 'Agregar al carrito') {
-                    button.textContent = 'Actualizar cantidad';
-                    badge.textContent = 'Producto ya añadido';
-                    button.classList.remove('btn-success');
-                    button.classList.add('btn-warning');
-                    deleteButton.style.display = 'block';
-                }
+        eliminateButtons.forEach((eliminateButton)=> {
+            eliminateButton.addEventListener('click', (e)=> {
+                const addButton = eliminateButton.parentElement.querySelector('.cart-handler[data-action="1"]');
+                const badge = eliminateButton.parentElement.querySelector('.badge');
+                addButton.textContent = 'Agregar al carrito';
+                addButton.classList.remove('btn-warning');
+                addButton.classList.add('btn-success');
+                badge.classList.remove('bg-warning');
+                badge.classList.add('bg-success');
+                badge.textContent = 'Cantidad';
+                eliminateButton.style.display = 'none';
+                e.stopPropagation(); // Evitar que el evento se propague a los botones de agregar
             });
         });
+    });
+});
