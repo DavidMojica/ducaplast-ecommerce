@@ -15,8 +15,12 @@
           <article class="row d-flex justify-content-center my-4">
             <section class="col-md-8">
               <article class="card mb-4 bg-gray text-light">
-                <section class="card-header py-3">
+                <section class="card-header py-3 d-flex justify-content-between">
                   <h5 class="mb-0" id="productos_cantidad">Carro - {{cantidad_productos}} item(s)</h5>
+                  <form action="" method="POST">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-warning btn-sm cart-handler" data-producto-id="0" data-carthandler-url="{% url 'carthandler' %}" data-action="3" title="Limpiar completamente el carrito">Eliminar todo</button>
+                  </form>
                 </section>
                 <section class="card-body">
                     {% if productos %}

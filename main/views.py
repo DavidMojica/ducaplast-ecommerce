@@ -263,7 +263,6 @@ def CartHandler(request):
                 producto = Producto.objects.get(pk=producto_id)
                 cantidad = int(request.POST.get('cantidad', 1)) 
                 total_producto = int(cantidad) * int(producto.precio)
-                print(total_producto)
                 carrito[producto_id] = {
                     'descripcion': producto.descripcion,
                     'precio': producto.precio,
@@ -291,7 +290,15 @@ def CartHandler(request):
             return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
                                 'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
                                 'productos_cantidad': len(request.session['carrito'])})
-
+        #borrar todo el carrito
+        elif action == "3":
+            carrito.clear()
+            request.session['carrito'] = carrito
+            return JsonResponse({'success': True})
+           
+                
+                
+            
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
  
