@@ -33,8 +33,50 @@
     </section>
     <section class="bg-light bg-gradient">
         <section class="container">
+            <h1 class="text-center text-primary mt-4">Productos</h1>
+            <!-- Paginacion -->
+            <article class="pagination justify-content-center mt-2">
+                <ul class="pagination">
+                    {% if productos.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ productos.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
+                    </li>
+
+                    {% for i in productos.paginator.page_range %}
+                        {% if i >= productos.number|add:"-3" and i <= productos.number|add:"3" %}
+                            <li class="page-item {% if productos.number == i %}active{% endif %}">
+                                <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if productos.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ productos.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ productos.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </article>
+            <!-- Articulos -->
             <section class="row">
-                <h1 class="text-center text-primary">Productos</h1>
                 {% if productos %}
                 {% for p in productos %}
                 <article class="col-md-4 producto">
@@ -80,7 +122,6 @@
                 <p class="text-center fw-bold">No hay productos disponibles</p>
                 {% endif %}
             </section>
-
             <!-- Paginacion -->
             <article class="pagination justify-content-center mt-4">
                 <ul class="pagination">
@@ -122,8 +163,6 @@
                     {% endif %}
                 </ul>
             </article>
-
-
         </section>
     </section>
 </main>

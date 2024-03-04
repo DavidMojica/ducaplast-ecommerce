@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.db.models.functions import Cast
 from django.db.models import FloatField
@@ -312,6 +312,7 @@ def Catalogo(request):
     
     if form.is_valid():
         id_producto = form.cleaned_data.get('id')
+        nombre = form.cleaned_data.get('nombre')
         ordenar = form.cleaned_data.get('ordenar')
         disponibles = form.cleaned_data.get('disponibles')
         
@@ -319,30 +320,39 @@ def Catalogo(request):
         if ordenar:
             if ordenar == '1':
                 productos = Producto.objects.order_by('-id')
-            if ordenar == '2':
+            elif ordenar == '2':
                 productos = Producto.objects.order_by('descripcion')
-            if ordenar == '3':
+            elif ordenar == '3':
                 productos = Producto.objects.order_by('-descripcion')
-            if ordenar == '4':
+            elif ordenar == '4':
                 productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
-            if ordenar == '5':
+            elif ordenar == '5':
                 productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
-        
+            else: 
+                pass
         #----------Filtrar los datos----------#
         if id_producto:
             productos = productos.filter(id=id_producto)
            
-        
+        if nombre:
+            productos = productos.filter(descripcion__icontains=nombre)
         #Modulo disponibles 
         if disponibles:
             productos = productos.filter(cantidad__gt=0)
         
     
     paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
-    productos = paginator.page(request.GET.get('page', 1))
+    page_number = request.GET.get('page')
+    
+    try:
+        productos_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        productos_paginados = paginator.page(1)
+    except EmptyPage:
+        productos_paginados = paginator.page(paginator.num_pages)
     
     return render(request, HTMLCATALOGO,{
-        'productos': productos,
+        'productos': productos_paginados,
         'carrito': request.session.get('carrito', {}),
         'form': form
     })
