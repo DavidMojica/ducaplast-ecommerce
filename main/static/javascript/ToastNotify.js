@@ -1,4 +1,4 @@
-!(function () {
+!(() => {
   var e =
       "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css",
     t = "link";
@@ -54,7 +54,12 @@ const ToastRemove = (e) => {
     setTimeout(() => e.remove(), 500);
 };
 
-
+/**
+ * Pushes a toast notification.
+ * @param {Number} opc 0: success, 1: error, 2: info, 3: warning 
+ * @param {String} head Message title
+ * @param {String} msg  Message
+ */
 const createToastNotify =(opc,head,msg) =>{
   switch(opc){
       case 0:{
@@ -77,7 +82,7 @@ const createToastNotify =(opc,head,msg) =>{
           new ToastNotify('info', {
               head: head,
               msg: msg,
-              timer: 15000
+              timer: 3000
           });
           break;
       };
