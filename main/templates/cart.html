@@ -4,8 +4,10 @@
 <!-- fa fa -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="{% static 'styles/cart.css' %}">
+<link rel="stylesheet" href="{% static 'styles/ToastNotify.css' %}">
+<script src="{% static 'javascript/ToastNotify.js' %}" defer></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="{% static 'javascript/cart.js' %}" defer></script>
+<script src="{% static 'javascript/cart_handler.js' %}" defer></script>
 
 <main>
     <section class="h-100 gradient-custom">
@@ -42,7 +44,7 @@
                                     <button class="btn btn-primary px-3 me-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
                                         <i class="fa fa-minus"></i>
                                     </button>
-                                    <input id="form1" min="0" name="quantity" value="{{p.cantidad}}" type="number" class="form-control" />
+                                    <input id="form1" min="1" name="quantity" value="{{p.cantidad}}" type="number" class="form-control cantidad" />
                                     <button class="btn btn-primary px-3 ms-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
                                         <i class="fa fa-plus"></i>
                                     </button>
@@ -50,9 +52,9 @@
                                 <p class=""><strong>Total artículo: ${{p.total_producto_str}}</strong></p>
                                 <span class="badge bg-danger mt-0">Unidades restantes: 5</span>
                             </section>
+                            <hr class="my-4" />
                         </article>
                         <!-- enditem -->
-                        <hr class="my-4" />
                         {% endfor %}
                     {% else %}
 
