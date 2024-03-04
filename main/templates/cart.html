@@ -71,7 +71,7 @@
             </section>
 
             {% if productos %}
-            <section class="col-md-4">
+            <section class="col-md-4 second-details">
                 <!-- Detalles del pedido -->
                 <article class="card mb-4">
                   <section class="card-header py-3">
@@ -120,12 +120,16 @@
                         <span><strong id="total_venta">${{total_venta}}</strong></span>
                       </li>
                     </ul>
-                    <button type="button" class="btn btn-primary btn-lg btn-block">Confirmar venta</button>
+                    <form action="" method="POST">
+                      {% csrf_token %}
+                      <input type="hidden" name="confirmar_venta">
+                      <button type="submit" class="btn btn-primary btn-lg btn-block">Confirmar venta</button>
+                    </form>
                   </section>
                 </article>
                 
                 
-              </section>
+            </section>
             {% endif %}
           </article>
         </article>

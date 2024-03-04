@@ -7,7 +7,7 @@ from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
-from .models import Usuarios, Producto
+from .models import Usuarios, Producto, Clientes, Pedido, ProductosPedido
 
 import re
 
@@ -356,7 +356,7 @@ def Catalogo(request):
 def Cart(request):
     #Valor total de los productos
     
-    form = DetallesPedido()
+    form = DetallesPedido(request.POST)
     # if request.method == "POST":
     carrito = request.session.get('carrito', {})
     total_productos = 0
@@ -366,8 +366,20 @@ def Cart(request):
         iva = int(round(total_productos * 0.19))
         
     if "confirmar_venta" in request.POST:
-        pass
-        
+        if form.is_valid():
+            form = stripForm(form)
+            
+            cliente_nombre = form.cleaned_data['cliente']
+            cliente_documento = form.cleaned_data['documento']
+            pedido_direccion = form.cleaned_data['direccion']
+            pedido_nota = form.cleaned_data['nota']
+            
+            cliente, creado = Clientes.objects.get_or_create(documento=cliente_documento)
+            
+            if cliente_documento:  # Verificar si hay un documento de cliente proporcionado
+                cliente, creado = Clientes.objects.get_or_create(documento=cliente_documento)
+                cliente.nombre = cliente_nombre  # Actualizar el nombre del cliente si se proporciona
+                cliente.save()  # Guardar el cliente en la base de datos
     
     
     
