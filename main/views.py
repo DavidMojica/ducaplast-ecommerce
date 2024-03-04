@@ -119,7 +119,6 @@ def Home(request):
             else:
                 login(request, logedUser)
                 userType = logedUser.tipo_usuario_id
-                print(f"-------------->usertype {userType}")
                 if userType == 0:
                     return redirect(reverse('registro'))
                 elif userType == 1:
@@ -360,17 +359,25 @@ def Catalogo(request):
 @login_required
 def Cart(request):
     #Valor total de los productos
+    # if request.method == "POST":
     carrito = request.session.get('carrito', {})
     total_productos = 0
     iva = 0
     if carrito:
         total_productos = getCartPrice(request)
         iva = int(round(total_productos * 0.19))
+        
+    if "confirmar_venta" in request.POST:
+        pass
+        
+    
+    
+    
     return render(request, HTMLCARRITO, {'productos':carrito,
-                                         'total_productos': numberWithPoints(total_productos),
-                                         'iva': numberWithPoints(iva),
-                                         'total_venta':numberWithPoints(total_productos+iva),
-                                         'cantidad_productos': len(carrito)})
+                                        'total_productos': numberWithPoints(total_productos),
+                                        'iva': numberWithPoints(iva),
+                                        'total_venta':numberWithPoints(total_productos+iva),
+                                        'cantidad_productos': len(carrito)})
     
 
 
