@@ -34,7 +34,7 @@ accountForm.addEventListener('submit', e =>{
     e.preventDefault();
     validationResult = accountValidations();
     if (validationResult !== '0') {
-        account_event.innerText = validationResult;
+        createToastNotify(1,"Error en editar perfil.", validationResult);
        return;
     }
     else accountForm.submit();
@@ -52,14 +52,14 @@ passForm.addEventListener('submit', e =>{
     e.preventDefault();
     validationResult = passValidations();
     if(validationResult !== '0') {
-        pass_event.innerText = validationResult;
+        createToastNotify(1, "Error en zona de cuidado.", validationResult);
         return;
     }
     else passForm.submit();
 })
 
 const passValidations = () => {
-    if (oldPassword.value.length < passwordMinLegth) return "La contraseña antigua es demasiado corta";
+    if (oldPassword.value.length < passwordMinLegth) return "La contraseña anterior es demasiado corta";
     if (password.value.length < passwordMinLegth) return "La contraseña nueva es demasiado corta";
     if (password1.value.length < passwordMinLegth) return "Confirmar contraseña es demasiado corta";
     if (password.value !== password1.value) return "Las contraseñas no coinciden";

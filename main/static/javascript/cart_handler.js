@@ -3,8 +3,10 @@ const regexNumeros = input => {
 }
 
 $(document).ready(()=> {
-    $('.cart-handler').on('click', e => {
+    $('.cart-handler').on('click', function(e) {
         e.preventDefault();
+        let producto_id = $(this).data('producto-id');
+        let url = $(this).data('carthandler-url');
         let action = $(this).data('action');
         let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
         $.ajax({
@@ -13,7 +15,6 @@ $(document).ready(()=> {
             data: {
                 'action': action,
                 'producto_id': producto_id,
-                'cantidad': cantidad,
                 'csrfmiddlewaretoken': csfrtoken
             },
             dataType: 'json',

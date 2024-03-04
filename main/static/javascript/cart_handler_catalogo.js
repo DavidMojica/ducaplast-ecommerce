@@ -3,7 +3,7 @@ const regexNumeros = input => {
 }
 
 $(document).ready(()=> {
-    $('.cart-handler').on('click', e => {
+    $('.cart-handler').on('click', function(e) {
         e.preventDefault();
         let producto_id = $(this).data('producto-id');
         let cantidad = $(this).siblings('.cantidad').val();
@@ -26,11 +26,9 @@ $(document).ready(()=> {
                 dataType: 'json',
                 success: data => {
                     if (data.success) {
-                        if (action == "1") createToastNotify(0, "Producto añadido/actualizado.", "El producto fue añadido o actualizado correctamente.");
-                         else if (action == "2") createToastNotify(1, "Producto removido", "Producto removido del carrito correctamente.");
-                        
+                        if (action == "1")createToastNotify(0, "Producto añadido/actualizado.", "El producto fue añadido o actualizado correctamente.");
+                        else if (action == "2") createToastNotify(1, "Producto removido", "Producto removido del carrito correctamente.");
                     } else createToastNotify(1, "Error", "Opción no válida.");
-                
                 },
                 error: ()=> {
                     createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
