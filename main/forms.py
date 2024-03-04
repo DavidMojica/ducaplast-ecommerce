@@ -3,6 +3,38 @@ import re
 from django import forms
 from .models import TipoUsuario, Usuarios
 
+class filtrarProductos(forms.Form):
+    nombre = forms.CharField(
+        label="Nombre del producto",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    id = forms.IntegerField(
+        label="Codigo de producto",
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    disponibles = forms.BooleanField(
+        label="Sólo productos disponibles",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    OPCIONES = (('0', 'Código de producto (Ascendente)'),
+                ('1', 'Código de producto (Descendente)'),
+                ('2', 'Alfabéticamente (Ascendente)'),
+                ('3', 'Alfabéticamente (Descendente)'),
+                ('4', 'Precio (Mayor a menor)'),
+                ('5', 'Precio (Menor a mayor)'))
+    
+    ordenar = forms.ChoiceField(
+        label="Ordenar por:",
+        choices=OPCIONES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        initial='0',
+    )
+    
+
 class registroUsuariosForm(forms.ModelForm):
     first_name = forms.CharField(
         label="Nombre",

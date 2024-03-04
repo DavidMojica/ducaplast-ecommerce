@@ -10,33 +10,25 @@
 <script src="{% static 'javascript/cart_handler_catalogo.js' %}" defer></script>
 <main>
     <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
-        <form action="" method="GET" class="text-center">
-            <h2 class="text-primary font-weight-bold">Buscar productos</h2>
-            <article class="input-group mb-3">
-                <input type="text" name="find" id="find" placeholder="Nombre del producto" class="form-control">
-                <article class="input-group-append">
-                    <button type="submit" class="btn btn-primary">Buscar</button>
-                </article>
-            </article>
-        </form>
-        <form action="" method="GET" class="text-center mt-1">
+        <form action="" method="GET" class="text-center filter-form">
             <h2 class="text-primary font-weight-bold">Filtrar productos</h2>
-            <article class="my-2">
-                <label for="availables" class="form-check-label"><span class="badge bg-success">Mostrar solo disponibles</span></label>
-                <input type="checkbox" name="availables" id="availables" class="form-check-input">
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                {{form.nombre}}
             </article>
-            <article class="input-group">
-                <select name="ordenar" id="ordenar" class="form-select">
-                    <option value="">Alfabeticamente (Ascendente)</option>
-                    <option value="">Alfabeticamente (Descendente)</option>
-                    <option value="">Precio/Unidad (Mayor a menor)</option>
-                    <option value="">Precio/Unidad (Menor a mayor)</option>
-                </select>
-                <article class="input-group-append">
-                    <button type="submit" class="btn btn-primary">Aplicar</button>
-                </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                {{form.id}}
             </article>
-
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.ordenar.label_tag}}</span>
+                {{form.ordenar}}
+            </article>
+            <article class=" mb-3">
+                <span class="badge bg-info mr-2">{{form.disponibles.label_tag}}</span>
+                {{form.disponibles}}
+            </article>
+            <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-arrow-right"></i></button>
         </form>
     </section>
     <section class="bg-light bg-gradient">

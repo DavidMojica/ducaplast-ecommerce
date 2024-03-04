@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.http import JsonResponse
-from django.core.paginator import Paginator, EmptyPage
-from .forms import registroUsuariosForm, inicioSesionForm
+from django.core.paginator import Paginator
+from .forms import registroUsuariosForm, inicioSesionForm, filtrarProductos
 from .models import Usuarios, Producto
 
 import re
@@ -315,6 +315,7 @@ def Catalogo(request):
     return render(request, HTMLCATALOGO,{
         'productos': productos,
         'carrito': request.session.get('carrito', {}),
+        'form': filtrarProductos()
     })
            
 @login_required
