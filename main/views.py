@@ -1,9 +1,11 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
-from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.db.models.functions import Cast
+from django.db.models import FloatField
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .forms import registroUsuariosForm, inicioSesionForm, filtrarProductos
 from .models import Usuarios, Producto
 
@@ -304,10 +306,37 @@ def CartHandler(request):
  
 @login_required
 def Catalogo(request):
-    PRODUCTOS_POR_PAGINA = 12
     productos = Producto.objects.order_by('id')
-    if request.method == "POST":
-        pass
+    form = filtrarProductos(request.GET)
+    PRODUCTOS_POR_PAGINA = 18
+    
+    if form.is_valid():
+        id_producto = form.cleaned_data.get('id')
+        ordenar = form.cleaned_data.get('ordenar')
+        disponibles = form.cleaned_data.get('disponibles')
+        
+        #--------------Extraer los datos-------------#
+        if ordenar:
+            if ordenar == '1':
+                productos = Producto.objects.order_by('-id')
+            if ordenar == '2':
+                productos = Producto.objects.order_by('descripcion')
+            if ordenar == '3':
+                productos = Producto.objects.order_by('-descripcion')
+            if ordenar == '4':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
+            if ordenar == '5':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
+        
+        #----------Filtrar los datos----------#
+        if id_producto:
+            productos = productos.filter(id=id_producto)
+           
+        
+        #Modulo disponibles 
+        if disponibles:
+            productos = productos.filter(cantidad__gt=0)
+        
     
     paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
     productos = paginator.page(request.GET.get('page', 1))
@@ -315,7 +344,7 @@ def Catalogo(request):
     return render(request, HTMLCATALOGO,{
         'productos': productos,
         'carrito': request.session.get('carrito', {}),
-        'form': filtrarProductos()
+        'form': form
     })
            
 @login_required

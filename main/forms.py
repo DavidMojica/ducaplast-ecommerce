@@ -19,10 +19,10 @@ class filtrarProductos(forms.Form):
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
-    OPCIONES = (('0', 'Código de producto (Ascendente)'),
-                ('1', 'Código de producto (Descendente)'),
-                ('2', 'Alfabéticamente (Ascendente)'),
-                ('3', 'Alfabéticamente (Descendente)'),
+    OPCIONES = (('0', 'Código de producto (Menor a mayor)'),
+                ('1', 'Código de producto (Mayor a menor)'),
+                ('2', 'Alfabéticamente (A-Z)'),
+                ('3', 'Alfabéticamente (Z-A)'),
                 ('4', 'Precio (Mayor a menor)'),
                 ('5', 'Precio (Menor a mayor)'))
     
