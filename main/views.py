@@ -79,7 +79,8 @@ def unloginRequired(view_func):
 
 #Obtener el precio de los articulos del carro y actualizar sus respectivos valores con puntos decimales.
 @login_required
-def getCartPrice(carrito):
+def getCartPrice(request):
+    carrito = request.session.get('carrito', {})
     total_productos = 0
     if carrito:
         for key, producto in carrito.items():
@@ -316,7 +317,7 @@ def Cart(request):
     total_productos = 0
     iva = 0
     if carrito:
-        total_productos = getCartPrice(carrito)
+        total_productos = getCartPrice(request)
         iva = int(round(total_productos * 0.19))
     return render(request, HTMLCARRITO, {'productos':carrito,
                                          'total_productos': numberWithPoints(total_productos),

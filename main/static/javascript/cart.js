@@ -23,17 +23,20 @@ $(document).ready(function() {
                         //Toast añadido
                         console.log("Producto añadido");
                     } else if (action == "2"){
-                        if(window.location.href === '/cart/'){
-                            if(data.carrito_vacio) window.location.href === '/cart/';
-                            else{
-                                $('#p-' + producto_id).remove();
+                        if (window.location.href.includes('/cart/')) { //Página del carrito
+                            if (data.carrito_vacio) {
+                                window.location.href = '/cart/';
+                            } else {
+                                const productoElement = $('#p-' + producto_id);
+                                if (productoElement.length) {
+                                    productoElement.remove();
+                                }
                                 $('#total_productos').text(`$${data.total_productos}`);
                                 $('#iva').text(`$${data.iva}`);
                                 $('#total_venta').text(`$${data.total_actualizado}`);
-                                $('#productos_cantidad').text(`Carro - ${data.productos_cantidad} item(s)`)
+                                $('#productos_cantidad').text(`Carro - ${data.productos_cantidad} item(s)`);
                             }
                         }
-                        console.log(window.location.href)
                     }
                 } else {
                     alert('Error en el carrito');
