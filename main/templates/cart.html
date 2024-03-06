@@ -80,8 +80,8 @@
                   </section>
                   <section class="card-body detalles">
                     <article class="input-group mb-2">
-                      <span class="badge bg-primary">{{form.cliente.label_tag}}</span>
-                      {{form.cliente}}
+                      <span class="badge bg-primary">{{form.nombre.label_tag}}</span>
+                      {{form.nombre}}
                     </article>
                     {{form.nota}}
                     <hr>
@@ -92,16 +92,16 @@
                   <section class="card-body detalles">
                     <form action="" method="POST">
                       <article class="input-group mb-2">
-                        <span class="badge bg-primary">Nombre del cliente</span>
-                        <input type="text" name="nombre_cli" id="">
+                        <span class="badge bg-primary ">Nombre del cliente</span>
+                        <input type="text" class="form-control" name="nombre_cli" id="">
                       </article>
                       <article class="input-group mb-2">
-                        <span class="badge bg-primary">Documento del cliente</span>
-                        <input type="text" name="documento_cli" id="">
+                        <span class="badge bg-primary ">Documento del cliente</span>
+                        <input type="text" class="form-control" name="documento_cli" id="">
                       </article>
                       <article class="input-group mb-2">
-                        <span class="badge bg-primary">Dirección del cliente</span>
-                        <input type="text" name="direccion_cli" id="">
+                        <span class="badge bg-primary ">Dirección del cliente</span>
+                        <input type="text" class="form-control" name="direccion_cli" id="">
                       </article>
                       <input type="hidden" name="create_cli">
                       <button type="submit">Registrar cliente</button>
