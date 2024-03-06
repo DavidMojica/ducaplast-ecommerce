@@ -30,6 +30,7 @@ HTMLHOME = "home.html"
 HTMLREGISTRO = "registro.html"
 HTMLCATALOGO = "catalogo.html"
 HTMLCARRITO = "cart.html"
+HTMLORDERS = "orders.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -92,6 +93,11 @@ def getCartPrice(request):
         return total_productos
     
 #-------------Views-----------#
+
+@login_required
+def Orders(request):
+    return render(request, HTMLORDERS)
+
 @unloginRequired
 def Home(request):
     newForm = InicioSesionForm()
