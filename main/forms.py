@@ -1,17 +1,16 @@
 import re
 
 from django import forms
-from .models import TipoUsuario, Usuarios
+from .models import TipoUsuario, Usuarios, Clientes
 
 class DetallesPedido(forms.Form):
-    cliente = forms.CharField(
+    cliente = forms.ModelChoiceField(
         label="Nombre del cliente",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Pablo Perez', 'id': 'nombre'})
+        widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Pablo Perez', 'id': 'nombre'}),
+        queryset=Clientes.objects.all(),
+        empty_label= "Seleccione el cliente"
     )
-    documento = forms.CharField(
-        label="Numero documento",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Documento del cliente', 'id': 'documento'})
-    )
+
     direccion = forms.CharField(
         label="Dirección de entrega",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Calle 66 #28sur - 13', 'id': 'documento'})
