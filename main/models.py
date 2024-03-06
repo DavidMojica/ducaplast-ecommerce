@@ -21,6 +21,7 @@ class Clientes(models.Model):
     id = models.AutoField(primary_key=True)
     documento = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=100)
+    direccion = models.CharField(max_length=200)
     dinero_generado = models.BigIntegerField(default=0)
     
     def __str__(self):
