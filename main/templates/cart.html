@@ -34,7 +34,7 @@
                                 <p><strong>{{p.descripcion}}</strong></p>
                                 <p>Referencia de fabrica: {{p.referencia_fabrica}}</p>
                                 <p><strong>Precio por unidad: $<span>{{p.precio_str}}</span></strong></p>
-                                <small>Cod. {{key}}</small>
+                                <small >Cod. <span class="code">{{key}}</span></small>
 
                                 <form action="" >
                                   {% csrf_token %}
@@ -46,7 +46,7 @@
 
                             <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">
                                 <label class="form-label" for="form1"><strong>Cantidad</strong></label>
-                                <article class="d-flex mb-4">
+                                <section class="d-flex mb-4">
                                     <button class="btn btn-primary px-3 me-2 h-50 stepDown">
                                         <i class="fa fa-minus"></i>
                                     </button>
@@ -54,7 +54,7 @@
                                     <button class="btn btn-primary px-3 ms-2 h-50 stepUp">
                                         <i class="fa fa-plus"></i>
                                     </button>
-                                </article>
+                                </section>
                                 <p class=""><strong>Total artículo: $<span>{{p.total_producto_str}}</span> </strong></p>
                                 <span class="badge bg-danger mt-0">Unidades restantes: 5</span>
                             </section>
@@ -140,11 +140,29 @@
                         <strong>$<span id="total_venta">{{total_venta}}</span></strong>
                       </li>
                     </ul>
-                    <form action="" method="POST">
-                      {% csrf_token %}
-                      <input type="hidden" name="confirmar_venta">
-                      <button type="submit" class="btn btn-primary btn-lg btn-block">Confirmar venta</button>
-                    </form>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                      Launch demo modal
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            ...
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </section>
                 </article>
                 

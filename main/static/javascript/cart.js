@@ -8,50 +8,13 @@ const total_productos = document.getElementById('total_productos');
 const iva = document.getElementById('iva');
 let totalVenta = document.getElementById('total_venta');
 
+const form_venta = document.getElementById('form_venta');
+
 let totalProductos = 0;
+const Productos = {};
 
-//Mostrar detalles de cliente o crear cliente
-const showElement = element => {
-    element.classList.remove('d-none');
-    element.classList.add('d-block');
-}
-
-const hideElement = element => {
-    element.classList.remove('d-block');
-    element.classList.add('d-none');
-}
-
-openCreateClient.addEventListener('click', (e) => {
-    hideElement(selectClient);
-    showElement(createClient);
-});
-
-openSelectClient.addEventListener('click', (e) => {
-    showElement(selectClient);
-    hideElement(createClient);
-});
-
-//Actualizar el precio de cada producto
-document.querySelectorAll('.product_quantity').forEach(input => {
-    const priceElement = input.parentElement.nextElementSibling.querySelector('span');
-    const price = (parseFloat(priceElement.textContent.replace('$', '').replace('.', '')))/input.value;
-    totalProductos += price*input.value;
-    const stepDown = input.parentElement.querySelector('button:first-child');
-    const stepUp = input.parentElement.querySelector('button:last-child');
-
-    input.addEventListener('input', function() {
-        updateProductPrice(priceElement, price, parseInt(this.value));
-    });
-
-    stepDown.addEventListener('click', e =>{
-        input.stepDown();
-        updateProductPrice(priceElement, price, parseInt(input.value));
-    });
-    stepUp.addEventListener('click', e =>{
-        input.stepUp();
-        updateProductPrice(priceElement, price, parseInt(input.value));
-    });
-});
+var myModal = document.getElementById('myModal')
+var myInput = document.getElementById('myInput')
 
 const updateGlobalPrice = () => {
     totalProductos = 0;
@@ -66,13 +29,17 @@ const updateGlobalPrice = () => {
 
 }
 
-const updateProductPrice = (element, price, quantity) => {
+const updateProductPrice = (element, price, quantity, id) => {
     if (!isNaN(quantity) && quantity > 0){
         const object_price = price*quantity;
         element.textContent = addDecimal(object_price);
+        Productos[id] = quantity;
+        console.log(Productos);
         updateGlobalPrice();
     } else {
-        productPriceElement.textContent = "Cantidad no válida, el producto se borrará si se confirma la venta.";
+        element.textContent = "Cantidad no válida, el producto se borrará si se confirma la venta.";
+        delete Productos[id];
+        console.log(Productos);
     }
 }
 
@@ -81,3 +48,52 @@ const addDecimal = n => {
     p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     return p.join('.');
 }
+
+//Mostrar detalles de cliente o crear cliente
+const showElement = element => {
+    element.classList.remove('d-none');
+    element.classList.add('d-block');
+}
+
+const hideElement = element => {
+    element.classList.remove('d-block');
+    element.classList.add('d-none');
+}
+
+try{
+    openCreateClient.addEventListener('click', (e) => {
+        hideElement(selectClient);
+        showElement(createClient);
+    });
+    
+    openSelectClient.addEventListener('click', (e) => {
+        showElement(selectClient);
+        hideElement(createClient);
+    });
+} catch {}
+
+//Actualizar el precio de cada producto
+document.querySelectorAll('.product_quantity').forEach(input => {
+    const priceElement = input.parentElement.nextElementSibling.querySelector('span');
+    const price = (parseFloat(priceElement.textContent.replace('$', '').replace('.', '')))/input.value;
+    const id = input.closest('article').querySelector('.code').textContent;
+    totalProductos += price*input.value;
+    const stepDown = input.parentElement.querySelector('button:first-child');
+    const stepUp = input.parentElement.querySelector('button:last-child');
+    Productos[id] = parseInt(input.value);
+    console.log(Productos);
+
+    input.addEventListener('input', function() {
+        updateProductPrice(priceElement, price, parseInt(this.value), id);
+    });
+
+    stepDown.addEventListener('click', e =>{
+        input.stepDown();
+        updateProductPrice(priceElement, price, parseInt(input.value), id);
+    });
+    stepUp.addEventListener('click', e =>{
+        input.stepUp();
+        updateProductPrice(priceElement, price, parseInt(input.value), id);
+    });
+});
+

@@ -26,6 +26,7 @@ $(document).ready(()=> {
                         } else {
                             const productoElement = $('#p-' + producto_id);
                             if (productoElement.length) productoElement.remove();
+                            delete Productos[producto_id];
                             updateGlobalPrice();
                             createToastNotify(1, "Producto removido", "Producto removido del carrito correctamente.");
                         }

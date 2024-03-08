@@ -376,16 +376,10 @@ def Cart(request):
             form = stripForm(form)
             
             cliente_nombre = form.cleaned_data['cliente']
-            cliente_documento = form.cleaned_data['documento']
-            pedido_direccion = form.cleaned_data['direccion']
             pedido_nota = form.cleaned_data['nota']
+            productos = request.POST.get('productos')
+        
             
-            cliente, creado = Clientes.objects.get_or_create(documento=cliente_documento)
-            
-            if cliente_documento:  # Verificar si hay un documento de cliente proporcionado
-                cliente, creado = Clientes.objects.get_or_create(documento=cliente_documento)
-                cliente.nombre = cliente_nombre  # Actualizar el nombre del cliente si se proporciona
-                cliente.save()  # Guardar el cliente en la base de datos
     elif "crear_cliente" in request.POST:
         nombre = request.POST.get('nombre_cli').strip()
         direccion = request.POST.get('direccion_cli').strip()
