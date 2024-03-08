@@ -9,6 +9,7 @@
 <script src="{% static 'javascript/ToastNotify.js' %}" defer></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{% static 'javascript/cart_handler.js' %}" defer></script>
+<script src="{% static 'javascript/cart.js' %}" defer></script>
 
 <main>
     <section class="h-100 gradient-custom">
@@ -74,22 +75,23 @@
             {% if productos %}
             <section class="col-md-4 second-details">
                 <!-- Detalles del pedido -->
-                <article class="card mb-4 text-center">
+                <article class="card mb-4 text-center" >
                   <section class="card-header py-3">
                     <h5 class="mb-0">Detalles del cliente</h5>
                   </section>
-                  <section class="card-body detalles">
+
+                  <section class="card-body detalles" id="selectClient">
                     <article class="input-group mb-2">
-                      <span class="badge bg-primary">{{form.nombre.label_tag}}</span>
-                      {{form.nombre}}
+                      <span class="badge bg-primary">{{form.cliente.label_tag}}</span>
+                      {{form.cliente}}
                     </article>
                     {{form.nota}}
                     <hr>
                     <caption>¿No existe el cliente?</caption>
-                    <button class="btn btn-primary">Crear cliente</button>
+                    <button class="btn btn-primary" id="openCreateClient">Crear cliente</button>
                   </section>
 
-                  <section class="card-body detalles">
+                  <section class="card-body d-none toggleClient" id="createClient">
                     <form action="" method="POST">
                       <article class="input-group mb-2">
                         <span class="badge bg-primary ">Nombre del cliente</span>
@@ -104,13 +106,12 @@
                         <input type="text" class="form-control" name="direccion_cli" id="">
                       </article>
                       <input type="hidden" name="create_cli">
-                      <button type="submit">Registrar cliente</button>
-
+                      <button type="submit" class="btn btn-primary">Registrar cliente</button>
                     </form>
                     
                     <hr>
                     <caption>¿Ya existe el cliente?</caption>
-                    <button class="btn btn-primary">Seleccionar cliente</button>
+                    <button class="btn btn-primary" id="openSelectClient">Seleccionar cliente</button>
                   </section>
 
 
