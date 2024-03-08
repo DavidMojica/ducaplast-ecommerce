@@ -372,15 +372,13 @@ def Cart(request):
         iva = int(round(total_productos * 0.19))
         
     if "confirmar_venta" in request.POST:
-        if form.is_valid():
-            form = stripForm(form)
-            
-            cliente = form.cleaned_data['cliente']
-            pedido_nota = form.cleaned_data['nota']
-            productos = request.POST.get('productos')
-            print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
-        
-            
+        print("llego")
+        cliente = request.POST.get('cliente')
+        pedido_nota = request.POST.get('nota')
+        productos = request.POST.get('productos')
+        print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
+        return JsonResponse({'success': True})
+    
     elif "crear_cliente" in request.POST:
         nombre = request.POST.get('nombre_cli').strip()
         direccion = request.POST.get('direccion_cli').strip()

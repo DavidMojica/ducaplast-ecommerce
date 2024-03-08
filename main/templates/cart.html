@@ -158,10 +158,10 @@
                           </section>
                           <section class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                            <form action="" method="POST" id="confirmar_venta">
+                            <form action="{% url 'cart' %}" method="POST" id="confirmar_venta">
                               {% csrf_token %}
                               <input type="hidden" name="confirmar_venta">
-                              <button type="submit" class="btn btn-primary" data-cart-url="{% url 'carthandler' %}">Confirmar venta</button>
+                              <button type="submit" class="btn btn-primary">Confirmar venta</button>
                             </form>
                           </section>
                         </article>

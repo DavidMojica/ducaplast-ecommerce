@@ -103,23 +103,33 @@ $(document).ready(()=>{
     $('#confirmar_venta').on('submit', function(e){
         e.preventDefault();
         let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
-        let url = $(this).data('cart-url');
+        let url = $(this).attr('action');
+        console.log(csfrtoken)
+        console.log(Productos)
+        console.log(url)
+
+        console.log(cliente.value.trim());
+        console.log(nota.value.trim());
         $.ajax({
             type: 'POST',
             url: url,
             data:{
-                'productos': Productos,
+                'productos': JSON.stringify(Productos),
                 'cliente':cliente.value.trim(),
                 'nota':nota.value.trim(),
+                'confirmar_venta': true,
                 'csrfmiddlewaretoken': csfrtoken
             },
             dataType: 'json',
             success: data =>{
                 if (data.success){
-
+                    alert("hola")
                 } else createToastNotify(1, "Error", "Opción no válida.");
             },
-            error: ()=> {
+            error: (jqxhr,log,log2)=> {
+                console.log(jqxhr)
+                console.log(log);
+                console.log(log2);
                 createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
             }
         });
