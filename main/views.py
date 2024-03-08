@@ -375,9 +375,10 @@ def Cart(request):
         if form.is_valid():
             form = stripForm(form)
             
-            cliente_nombre = form.cleaned_data['cliente']
+            cliente = form.cleaned_data['cliente']
             pedido_nota = form.cleaned_data['nota']
             productos = request.POST.get('productos')
+            print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
         
             
     elif "crear_cliente" in request.POST:

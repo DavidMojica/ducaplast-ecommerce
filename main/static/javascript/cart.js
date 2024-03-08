@@ -12,6 +12,8 @@ const form_venta = document.getElementById('form_venta');
 
 let totalProductos = 0;
 const Productos = {};
+const nota = document.getElementById('nota');
+const cliente = document.getElementById('cliente');
 
 var myModal = document.getElementById('myModal')
 var myInput = document.getElementById('myInput')
@@ -97,3 +99,29 @@ document.querySelectorAll('.product_quantity').forEach(input => {
     });
 });
 
+$(document).ready(()=>{
+    $('#confirmar_venta').on('submit', function(e){
+        e.preventDefault();
+        let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+        let url = $(this).data('cart-url');
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data:{
+                'productos': Productos,
+                'cliente':cliente.value.trim(),
+                'nota':nota.value.trim(),
+                'csrfmiddlewaretoken': csfrtoken
+            },
+            dataType: 'json',
+            success: data =>{
+                if (data.success){
+
+                } else createToastNotify(1, "Error", "Opción no válida.");
+            },
+            error: ()=> {
+                createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
+            }
+        });
+    });
+});
