@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
     const addButtons = document.querySelectorAll('.add');
     const eliminateButtons = document.querySelectorAll('.eliminate');
     
-    addButtons.forEach((addButton)=> {
+    addButtons.forEach( addButton => {
         let deleteButton = addButton.parentElement.querySelector('.eliminate');
         
         addButton.addEventListener('click', ()=> {

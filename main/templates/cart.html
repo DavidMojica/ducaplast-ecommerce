@@ -47,15 +47,15 @@
                             <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">
                                 <label class="form-label" for="form1"><strong>Cantidad</strong></label>
                                 <article class="d-flex mb-4">
-                                    <button class="btn btn-primary px-3 me-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                    <button class="btn btn-primary px-3 me-2 h-50 stepDown">
                                         <i class="fa fa-minus"></i>
                                     </button>
-                                    <input id="form1" min="1" name="quantity" value="{{p.cantidad}}" type="number" class="form-control cantidad" />
-                                    <button class="btn btn-primary px-3 ms-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                    <input min="1" name="quantity" value="{{p.cantidad}}" type="number" class="form-control product_quantity" />
+                                    <button class="btn btn-primary px-3 ms-2 h-50 stepUp">
                                         <i class="fa fa-plus"></i>
                                     </button>
                                 </article>
-                                <p class=""><strong>Total artículo: ${{p.total_producto_str}}</strong></p>
+                                <p class=""><strong>Total artículo: $<span>{{p.total_producto_str}}</span> </strong></p>
                                 <span class="badge bg-danger mt-0">Unidades restantes: 5</span>
                             </section>
                             <hr class="my-4" />
