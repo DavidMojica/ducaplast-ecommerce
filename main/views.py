@@ -386,8 +386,13 @@ def Cart(request):
                 cliente, creado = Clientes.objects.get_or_create(documento=cliente_documento)
                 cliente.nombre = cliente_nombre  # Actualizar el nombre del cliente si se proporciona
                 cliente.save()  # Guardar el cliente en la base de datos
-    
-    
+    elif "crear_cliente" in request.POST:
+        nombre = request.POST.get('nombre_cli').strip()
+        direccion = request.POST.get('direccion_cli').strip()
+        nuevo_cliente = Clientes(nombre=nombre, direccion=direccion)
+        nuevo_cliente.save()
+
+        
     
     return render(request, HTMLCARRITO, {'productos':carrito,
                                         'total_productos': numberWithPoints(total_productos),

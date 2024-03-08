@@ -93,19 +93,16 @@
 
                   <section class="card-body d-none toggleClient" id="createClient">
                     <form action="" method="POST">
+                      {% csrf_token %}
                       <article class="input-group mb-2">
                         <span class="badge bg-primary ">Nombre del cliente</span>
-                        <input type="text" class="form-control" name="nombre_cli" id="">
-                      </article>
-                      <article class="input-group mb-2">
-                        <span class="badge bg-primary ">Documento del cliente</span>
-                        <input type="text" class="form-control" name="documento_cli" id="">
+                        <input type="text" class="form-control" name="nombre_cli" id="" placeholder="Pedro Gomez (ejemplo)">
                       </article>
                       <article class="input-group mb-2">
                         <span class="badge bg-primary ">Dirección del cliente</span>
-                        <input type="text" class="form-control" name="direccion_cli" id="">
+                        <input type="text" class="form-control" name="direccion_cli" id="" placeholder="Calle 56a #23-12">
                       </article>
-                      <input type="hidden" name="create_cli">
+                      <input type="hidden" name="crear_cliente">
                       <button type="submit" class="btn btn-primary">Registrar cliente</button>
                     </form>
                     
