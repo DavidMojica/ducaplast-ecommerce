@@ -25,13 +25,9 @@ $(document).ready(()=> {
                             window.location.href = '/cart/';
                         } else {
                             const productoElement = $('#p-' + producto_id);
-                            if (productoElement.length) {
-                                productoElement.remove();
-                            }
-                            $('#total_productos').text(`$${data.total_productos}`);
-                            $('#iva').text(`$${data.iva}`);
-                            $('#total_venta').text(`$${data.total_actualizado}`);
-                            $('#productos_cantidad').text(`Carro - ${data.productos_cantidad} item(s)`);
+                            if (productoElement.length) productoElement.remove();
+                            delete Productos[producto_id];
+                            updateGlobalPrice();
                             createToastNotify(1, "Producto removido", "Producto removido del carrito correctamente.");
                         }
                     }

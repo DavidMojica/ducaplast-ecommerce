@@ -9,6 +9,7 @@
 <script src="{% static 'javascript/ToastNotify.js' %}" defer></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{% static 'javascript/cart_handler.js' %}" defer></script>
+<script src="{% static 'javascript/cart.js' %}" defer></script>
 
 <main>
     <section class="h-100 gradient-custom">
@@ -32,8 +33,8 @@
                             <!-- Data -->
                                 <p><strong>{{p.descripcion}}</strong></p>
                                 <p>Referencia de fabrica: {{p.referencia_fabrica}}</p>
-                                <p><strong>Precio por unidad: ${{p.precio_str}}</strong></p>
-                                <small>Cod. {{key}}</small>
+                                <p><strong>Precio por unidad: $<span>{{p.precio_str}}</span></strong></p>
+                                <small >Cod. <span class="code">{{key}}</span></small>
 
                                 <form action="" >
                                   {% csrf_token %}
@@ -45,16 +46,16 @@
 
                             <section class="col-lg-6 col-md-6 mb-4 mb-lg-0 text-center">
                                 <label class="form-label" for="form1"><strong>Cantidad</strong></label>
-                                <article class="d-flex mb-4">
-                                    <button class="btn btn-primary px-3 me-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                <section class="d-flex mb-4">
+                                    <button class="btn btn-primary px-3 me-2 h-50 stepDown">
                                         <i class="fa fa-minus"></i>
                                     </button>
-                                    <input id="form1" min="1" name="quantity" value="{{p.cantidad}}" type="number" class="form-control cantidad" />
-                                    <button class="btn btn-primary px-3 ms-2 h-50" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                    <input min="1" name="quantity" value="{{p.cantidad}}" type="number" class="form-control product_quantity" />
+                                    <button class="btn btn-primary px-3 ms-2 h-50 stepUp">
                                         <i class="fa fa-plus"></i>
                                     </button>
-                                </article>
-                                <p class=""><strong>Total artículo: ${{p.total_producto_str}}</strong></p>
+                                </section>
+                                <p class=""><strong>Total artículo: $<span>{{p.total_producto_str}}</span> </strong></p>
                                 <span class="badge bg-danger mt-0">Unidades restantes: 5</span>
                             </section>
                             <hr class="my-4" />
@@ -74,41 +75,60 @@
             {% if productos %}
             <section class="col-md-4 second-details">
                 <!-- Detalles del pedido -->
-                <article class="card mb-4">
+                <article class="card mb-4 text-center" >
                   <section class="card-header py-3">
-                    <h5 class="mb-0">Detalles del pedido</h5>
+                    <h5 class="mb-0">Detalles del cliente</h5>
                   </section>
-                  <section class="card-body detalles">
+
+                  <section class="card-body detalles" id="selectClient">
                     <article class="input-group mb-2">
                       <span class="badge bg-primary">{{form.cliente.label_tag}}</span>
                       {{form.cliente}}
                     </article>
-                    <article class="input-group mb-2">
-                      <span class="badge bg-primary">{{form.documento.label_tag}}</span>
-                      {{form.documento}}
-                    </article>
-                    <article class="input-group mb-2">
-                      <span class="badge bg-primary">{{form.direccion.label_tag}}</span>
-                      {{form.direccion}}
-                    </article>
                     {{form.nota}}
+                    <hr>
+                    <caption>¿No existe el cliente?</caption>
+                    <button class="btn btn-primary" id="openCreateClient">Crear cliente</button>
                   </section>
+
+                  <section class="card-body d-none toggleClient" id="createClient">
+                    <form action="" method="POST">
+                      {% csrf_token %}
+                      <article class="input-group mb-2">
+                        <span class="badge bg-primary ">Nombre del cliente</span>
+                        <input type="text" class="form-control" name="nombre_cli" id="" placeholder="Pedro Gomez (ejemplo)">
+                      </article>
+                      <article class="input-group mb-2">
+                        <span class="badge bg-primary ">Dirección del cliente</span>
+                        <input type="text" class="form-control" name="direccion_cli" id="" placeholder="Calle 56a #23-12">
+                      </article>
+                      <input type="hidden" name="crear_cliente">
+                      <button type="submit" class="btn btn-primary">Registrar cliente</button>
+                    </form>
+                    
+                    <hr>
+                    <caption>¿Ya existe el cliente?</caption>
+                    <button class="btn btn-primary" id="openSelectClient">Seleccionar cliente</button>
+                  </section>
+
+
                 </article>
 
                 <!-- Resumen -->
                 <article class="card mb-4">
                   <section class="card-header py-3">
-                    <h5 class="mb-0">Resumen</h5>
+                    <h5 class="mb-0">Resumen de venta</h5>
                   </section>
                   <section class="card-body">
                     <ul class="list-group list-group-flush">
                       <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
                         Productos
-                        <span id="total_productos">${{total_productos}}</span>
+                        <span>$<span id="total_productos">{{total_productos}}</span></span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                         IVA (19%)
-                        <span id="iva">${{iva}}</span>
+                        <span>$<span id="iva">{{iva}}</span>
+                        </span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
                         <section>
@@ -117,18 +137,39 @@
                             <p class="mb-0">(IVA incluído)</p>
                           </strong>
                         </section>
-                        <span><strong id="total_venta">${{total_venta}}</strong></span>
+                        <strong>$<span id="total_venta">{{total_venta}}</span></strong>
                       </li>
                     </ul>
-                    <form action="" method="POST">
-                      {% csrf_token %}
-                      <input type="hidden" name="confirmar_venta">
-                      <button type="submit" class="btn btn-primary btn-lg btn-block">Confirmar venta</button>
-                    </form>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                      Vender!
+                    </button>
+
+                    <!-- Modal -->
+                    <section class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <article class="modal-dialog modal-dialog-centered">
+                        <article class="modal-content">
+                          <section class="modal-header">
+                            <h5 class="modal-title">Confirmar venta</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </section>
+                          <section class="modal-body">
+                            <p>¿Está seguro de completar esta venta? Esta acción es irreversible</p>
+                          </section>
+                          <section class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                            <form action="{% url 'cart' %}" method="POST" id="confirmar_venta">
+                              {% csrf_token %}
+                              <input type="hidden" name="confirmar_venta">
+                              <button type="submit" class="btn btn-primary">Confirmar venta</button>
+                            </form>
+                          </section>
+                        </article>
+                      </article>
+                    </section>
+                    
                   </section>
                 </article>
-                
-                
             </section>
             {% endif %}
           </article>
