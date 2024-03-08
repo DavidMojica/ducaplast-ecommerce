@@ -65,7 +65,7 @@ const updateGlobalPrice = () => {
     totalVenta.textContent = addDecimal(totalProductos + totalProductos*0.19);
 
 }
-console.log(totalProductos);
+
 const updateProductPrice = (element, price, quantity) => {
     if (!isNaN(quantity) && quantity > 0){
         const object_price = price*quantity;
