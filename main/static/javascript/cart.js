@@ -123,10 +123,12 @@ $(document).ready(()=>{
             dataType: 'json',
             success: data =>{
                 if (data.success){
-                    alert("hola")
-                } else createToastNotify(1, "Error", "Opción no válida.");
+                    createToastNotify(0, 'Sale Done!', data.msg);
+
+                    
+                } else createToastNotify(1, "Error", data.msg);
             },
-            error: (jqxhr,log,log2)=> {
+            error: (jqxhr, log,log2)=> {
                 console.log(jqxhr)
                 console.log(log);
                 console.log(log2);

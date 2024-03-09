@@ -361,7 +361,6 @@ def Catalogo(request):
 @login_required
 def Cart(request):
     #Valor total de los productos
-    
     form = DetallesPedido(request.POST)
     # if request.method == "POST":
     carrito = request.session.get('carrito', {})
@@ -372,19 +371,44 @@ def Cart(request):
         iva = int(round(total_productos * 0.19))
         
     if "confirmar_venta" in request.POST:
-        print("llego")
         cliente = request.POST.get('cliente')
         pedido_nota = request.POST.get('nota')
         productos = request.POST.get('productos')
-        print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
-        return JsonResponse({'success': True})
+        
+        if cliente and productos:
+            print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
+            return JsonResponse({'success': True, 'msg': 'Venta completada'})
+        else:
+            return JsonResponse({'success': False, 'msg':'Faltan parámetros obligatorios'})
     
     elif "crear_cliente" in request.POST:
         nombre = request.POST.get('nombre_cli').strip()
         direccion = request.POST.get('direccion_cli').strip()
-        nuevo_cliente = Clientes(nombre=nombre, direccion=direccion)
-        nuevo_cliente.save()
-
+        
+        if nombre and direccion:
+            nuevo_cliente = Clientes(nombre=nombre, direccion=direccion)
+            nuevo_cliente.save()
+            return render(request, HTMLCARRITO,{
+                'productos':carrito,
+                'total_productos': numberWithPoints(total_productos),
+                'iva': numberWithPoints(iva),
+                'total_venta':numberWithPoints(total_productos+iva),
+                'cantidad_productos': len(carrito),
+                'form': form,
+                'event': 'Cliente creado correctamente',
+                'success':True,
+            })
+        else:
+            return render(request, HTMLCARRITO,{
+                'productos':carrito,
+                'total_productos': numberWithPoints(total_productos),
+                'iva': numberWithPoints(iva),
+                'total_venta':numberWithPoints(total_productos+iva),
+                'cantidad_productos': len(carrito),
+                'form': form,
+                'event': 'Nombre o dirección inválida.',
+                'success':False
+            })
         
     
     return render(request, HTMLCARRITO, {'productos':carrito,

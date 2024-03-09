@@ -26,7 +26,7 @@ $(document).ready(()=> {
                 dataType: 'json',
                 success: data => {
                     if (data.success) {
-                        if (action == "1")createToastNotify(0, "Producto añadido/actualizado.", "El producto fue añadido o actualizado correctamente.");
+                        if (action == "1") createToastNotify(0, "Producto añadido/actualizado.", "El producto fue añadido o actualizado correctamente.");
                         else if (action == "2") createToastNotify(1, "Producto removido", "Producto removido del carrito correctamente.");
                     } else createToastNotify(1, "Error", "Opción no válida.");
                 },
