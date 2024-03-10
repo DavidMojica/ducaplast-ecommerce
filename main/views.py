@@ -375,11 +375,13 @@ def Cart(request):
         pedido_nota = request.POST.get('nota')
         productos = request.POST.get('productos')
         
-        if cliente and productos:
+        if not cliente:
+            return JsonResponse({'success': False, 'msg':'Por favor escoja un cliente.'})
+        elif not productos:
+            return JsonResponse({'success': False, 'msg':'No hay productos en el pedido.'})
+        else:
             print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
             return JsonResponse({'success': True, 'msg': 'Venta completada'})
-        else:
-            return JsonResponse({'success': False, 'msg':'Faltan parámetros obligatorios'})
     
     elif "crear_cliente" in request.POST:
         nombre = request.POST.get('nombre_cli').strip()
@@ -418,5 +420,3 @@ def Cart(request):
                                         'cantidad_productos': len(carrito),
                                         'form': form})
     
-
-

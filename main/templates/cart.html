@@ -92,27 +92,24 @@
                   </section>
 
                   <section class="card-body d-none toggleClient" id="createClient">
-                    <form action="" method="POST">
+                    <form action="" method="POST" id="form_registrar_cliente">
                       {% csrf_token %}
                       <article class="input-group mb-2">
-                        <span class="badge bg-primary ">Nombre del cliente</span>
-                        <input type="text" class="form-control" name="nombre_cli" id="" placeholder="Pedro Gomez (ejemplo)">
+                        <span class="badge bg-primary">Nombre del cliente</span>
+                        <input type="text" class="form-control" name="nombre_cli" id="reg_cliente_nombre" placeholder="Pedro Gomez (ejemplo)">
                       </article>
                       <article class="input-group mb-2">
                         <span class="badge bg-primary ">Dirección del cliente</span>
-                        <input type="text" class="form-control" name="direccion_cli" id="" placeholder="Calle 56a #23-12">
+                        <input type="text" class="form-control" name="direccion_cli" id="reg_cliente_direccion" placeholder="Calle 56a #23-12">
                       </article>
                       <input type="hidden" name="crear_cliente">
+                      <span id="reg_cliente_event" class="badge {% if success %} bg-success {% else %} bg-danger {% endif %} mb-2">{{event}}</span> <br>
                       <button type="submit" class="btn btn-primary">Registrar cliente</button>
-                      <span class="badge {% if success %} bg-success {% else %} bg-danger {% endif %}">{{event}}</span>
                     </form>
-                    
                     <hr>
                     <caption>¿Ya existe el cliente?</caption>
                     <button class="btn btn-primary" id="openSelectClient">Seleccionar cliente</button>
                   </section>
-
-
                 </article>
 
                 <!-- Resumen -->
@@ -142,7 +139,7 @@
                       </li>
                     </ul>
                     <!-- Button trigger modal -->
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" id="vender">
                       Vender!
                     </button>
 
@@ -159,7 +156,7 @@
                           </section>
                           <section class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                            <form action="{% url 'cart' %}" method="POST" id="confirmar_venta">
+                            <form action="" method="POST" id="confirmar_venta">
                               {% csrf_token %}
                               <input type="hidden" name="confirmar_venta">
                               <button type="submit" class="btn btn-primary">Confirmar venta</button>
