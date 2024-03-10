@@ -357,22 +357,7 @@ def Catalogo(request):
         'carrito': request.session.get('carrito', {}),
         'form': form
     })
-       
-def seleccionar_productos(productos_dict):
-    ids_productos = productos_dict.keys()
-    productos_seleccionados = Producto.objects.filter(pk__in=ids_productos)
-    
-    ids_productos_existen = set(producto.id for producto in productos_seleccionados)
-    ids_productos_deseados = set(int(id_producto) for id_producto in ids_productos)
-    ids_productos_no_existen = ids_productos_deseados - ids_productos_existen
-    
-    if ids_productos_no_existen:
-        productos_no_existen = ids_productos_no_existen
-        return productos_seleccionados, productos_no_existen
-    else:
-        return productos_seleccionados, None
-   
-       
+        
            
 @login_required
 def Cart(request):
@@ -405,45 +390,54 @@ def Cart(request):
         try:
             productos_dict = json.loads(productos_dict)
         except json.JSONDecodeError:
-            # Manejar el error si la cadena no es JSON válida
-            return JsonResponse({'success': False, 'msg': "La cadena no es un JSON válido"})
+            return JsonResponse({'success': False, 'msg': "JSON no válido"})
         
         if not cliente:
             return JsonResponse({'success': False, 'msg': "Por favor escoja un cliente."})
         elif not productos_dict:
             return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
         else:
-            productos_seleccionados, productos_no_existen = seleccionar_productos(productos_dict)
+            cliente = get_object_or_404(Clientes, pk=cliente)   
+            estado = get_object_or_404(Estados, pk=0)
+            #Actualizar carrito mientras se comrpueba la existencia de los productos solicitados
+            for producto_id, cantidad in productos_dict.items():
+                if producto_id in carrito:
+                    producto_real = get_object_or_404(Producto, pk=producto_id)
+                    carrito[producto_id] = {
+                        'precio': producto_real.precio,
+                        'cantidad_existencias': producto_real.cantidad,
+                        'cantidad': cantidad,
+                        'total_producto': int(cantidad) * int(producto_real.precio)
+                    }
+                else: 
+                    return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
+
+            #Construir pedido
+            nuevo_pedido = Pedido(
+                vendedor=request.user,
+                cliente=cliente,
+                estado=estado,
+                direccion=cliente.direccion,
+                valor=getCartPrice(request) + getCartPrice(request)*0.19,
+                nota=pedido_nota
+            )
+            nuevo_pedido.actualizar_dinero_generado_cliente()
+            nuevo_pedido.save()
             
-            if productos_no_existen:
-                return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
-            else:
-                cliente = get_object_or_404(Clientes, pk=cliente)   
-                estado = get_object_or_404(Estados, pk=0)
-                nuevo_pedido = Pedido(
-                    vendedor=request.user,
-                    cliente=cliente,
-                    estado=estado,
-                    direccion=cliente.direccion,
-                    valor=getCartPrice(request) + getCartPrice(request)*0.19,
-                    nota=pedido_nota
+            #Añadir productos al pedido
+            for producto_id, cantidad in productos_dict.items():
+                verificar_producto = get_object_or_404(Producto, pk=producto_id)
+                producto_pedido = ProductosPedido(
+                    producto = verificar_producto,
+                    pedido = nuevo_pedido,
+                    cantidad=cantidad
                 )
-                nuevo_pedido.actualizar_dinero_generado_cliente()
-                nuevo_pedido.save()
-                
-                for producto_id, cantidad in productos_dict.items():
-                    verificar_producto = get_object_or_404(Producto, pk=producto_id)
-                    producto_pedido = ProductosPedido(
-                        producto = verificar_producto,
-                        pedido = nuevo_pedido,
-                        cantidad=cantidad
-                    )
-                    producto_pedido.save()
-                    
-                
-                
-                print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos_dict}")
-                return JsonResponse({'success': True, 'msg': 'Venta completada'})
+                producto_pedido.save()
+            
+            #Limpiar carrito despues de una operacion exitosa
+            carrito.clear()
+            request.session['carrito'] = carrito
+            return JsonResponse({'success': True, 'msg': 'Venta completada'})
     
     elif "crear_cliente" in request.POST:
         nombre = request.POST.get('nombre_cli').strip()
@@ -456,7 +450,6 @@ def Cart(request):
         else:
             data['event'] = "Nombre o direccion inválida"
             return render(request, HTMLCARRITO, data)
-        
     
     return render(request, HTMLCARRITO, data)
     
