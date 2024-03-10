@@ -96,7 +96,26 @@ def getCartPrice(request):
 
 @login_required
 def Orders(request):
-    return render(request, HTMLORDERS)
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    PEDIDOS_POR_PAGINA = 10
+    pedidos = None
+    print(user.tipo_usuario)
+    #Vendedor
+    if user.tipo_usuario == "Vendedor":
+        pedidos = Pedido.objects.filter(vendedor_id=user).order_by('-id')
+        
+    print(pedidos)
+    paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        pedidos_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        pedidos_paginados = paginator.page(1)
+    except EmptyPage:
+        pedidos_paginados = paginator.page(paginator.num_pages)
+    
+    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados})
 
 @unloginRequired
 def Home(request):
