@@ -357,6 +357,28 @@ def Catalogo(request):
         'carrito': request.session.get('carrito', {}),
         'form': form
     })
+       
+def seleccionar_productos(productos_dict):
+    # Obtener las claves (ID de productos) del diccionario
+    ids_productos = productos_dict.keys()
+    
+    # Filtrar los productos por las claves
+    productos_seleccionados = Producto.objects.filter(id__in=ids_productos)
+    
+    # Verificar si todos los IDs de productos existen en la base de datos
+    ids_productos_existen = set(producto.id for producto in productos_seleccionados)
+    ids_productos_deseados = set(int(id_producto) for id_producto in ids_productos)
+    ids_productos_no_existen = ids_productos_deseados - ids_productos_existen
+    
+    if ids_productos_no_existen:
+        # Si hay IDs de productos que no existen, devolverlos
+        productos_no_existen = ids_productos_no_existen
+        return productos_seleccionados, productos_no_existen
+    else:
+        # Si todos los IDs de productos existen, devolver solo los productos seleccionados
+        return productos_seleccionados, None
+   
+       
            
 @login_required
 def Cart(request):
@@ -366,21 +388,49 @@ def Cart(request):
     carrito = request.session.get('carrito', {})
     total_productos = 0
     iva = 0
+    
     if carrito:
         total_productos = getCartPrice(request)
         iva = int(round(total_productos * 0.19))
-        
+    
+    data = {
+            'productos':carrito,
+            'total_productos': numberWithPoints(total_productos),
+            'iva': numberWithPoints(iva),
+            'total_venta':numberWithPoints(total_productos+iva),
+            'cantidad_productos': len(carrito),
+            'form': form,
+            'event': '',
+            'success':False,
+            }
+    
     if "confirmar_venta" in request.POST:
         cliente = request.POST.get('cliente')
         pedido_nota = request.POST.get('nota')
-        productos = request.POST.get('productos')
+        productos_dict = request.POST.get('productos')
         
+        print(cliente)
+        print(productos_dict)
         if not cliente:
-            return JsonResponse({'success': False, 'msg':'Por favor escoja un cliente.'})
-        elif not productos:
-            return JsonResponse({'success': False, 'msg':'No hay productos en el pedido.'})
+            data['event_venta'] = "Por favor escoja un cliente."
+            return render(request, HTMLCARRITO, data)
+        elif not productos_dict:
+            data['event_venta'] = "No hay productos en el pedido."
+            return render(request, HTMLCARRITO, data)
         else:
-            print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
+            productos_seleccionados, productos_no_existen = seleccionar_productos(productos_dict)
+            
+            if productos_no_existen:
+                data['event_venta'] = "Hay productos que no existen"
+                return render(request,HTMLCARRITO,data)
+            else:
+                print(carrito)
+                print(productos_seleccionados)
+            
+            cliente = get_object_or_404(Clientes, pk=cliente)
+            
+            
+            print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos_dict}")
             return JsonResponse({'success': True, 'msg': 'Venta completada'})
     
     elif "crear_cliente" in request.POST:
@@ -390,33 +440,11 @@ def Cart(request):
         if nombre and direccion:
             nuevo_cliente = Clientes(nombre=nombre, direccion=direccion)
             nuevo_cliente.save()
-            return render(request, HTMLCARRITO,{
-                'productos':carrito,
-                'total_productos': numberWithPoints(total_productos),
-                'iva': numberWithPoints(iva),
-                'total_venta':numberWithPoints(total_productos+iva),
-                'cantidad_productos': len(carrito),
-                'form': form,
-                'event': 'Cliente creado correctamente',
-                'success':True,
-            })
+            return render(request, HTMLCARRITO, data)
         else:
-            return render(request, HTMLCARRITO,{
-                'productos':carrito,
-                'total_productos': numberWithPoints(total_productos),
-                'iva': numberWithPoints(iva),
-                'total_venta':numberWithPoints(total_productos+iva),
-                'cantidad_productos': len(carrito),
-                'form': form,
-                'event': 'Nombre o dirección inválida.',
-                'success':False
-            })
+            data['event'] = "Nombre o direccion inválida"
+            return render(request, HTMLCARRITO, data)
         
     
-    return render(request, HTMLCARRITO, {'productos':carrito,
-                                        'total_productos': numberWithPoints(total_productos),
-                                        'iva': numberWithPoints(iva),
-                                        'total_venta':numberWithPoints(total_productos+iva),
-                                        'cantidad_productos': len(carrito),
-                                        'form': form})
+    return render(request, HTMLCARRITO, data)
     

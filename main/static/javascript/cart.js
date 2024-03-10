@@ -14,33 +14,32 @@ const confirmar_venta = document.getElementById('confirmar_venta');
 const vender = document.getElementById('vender');
 
 let totalProductos = 0;
-const Productos = {};
 const nota = document.getElementById('nota');
+const Productos = {};
 const cliente = document.getElementById('cliente');
 
-vender.addEventListener('click', e=>{
-    val_venta()
-    // if (val_venta) confirmar_venta.submit();
-});
-
 confirmar_venta.addEventListener('submit', e=>{
+    val_venta();
     e.preventDefault();
-    // if (val_venta) confirmar_venta.submit();
-
+    if (val_venta){
+        confirmar_venta.appendChild(cliente);
+        confirmar_venta.appendChild(Productos);
+        confirmar_venta.submit();
+    }
 });
 
 const val_venta = () =>{
     console.log(cliente.value)
     console.log(Productos);
-    if (cliente.value === "" || isNaN(cliente.value)){
-        createToastNotify(0, "Error al vender", "Seleccione un cliente");
+    if (cliente.value.trim() === "" || isNaN(cliente.value)){
+        createToastNotify(1, "Error al vender", "Seleccione un cliente");
         return false;
     }
     else if (Productos.length <= 0){
-        createToastNotify(0, "Error al vender", "Seleccione products");
+        createToastNotify(1, "Error al vender", "Seleccione products");
         return false;
     }
-    // return true;
+    return true;
 }
 
 form_registrar_cliente.addEventListener('submit', e =>{
