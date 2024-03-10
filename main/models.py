@@ -48,10 +48,6 @@ class Pedido(models.Model):
     valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
     
-    def calcular_valor_pedido(self):
-        productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
-        return sum([Producto.id_Producto.precio * Producto.cantidad for producto in productos_pedido]) #Valor del pedido
-    
     def descontar_cantidad_producto(self):
         productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
         for producto_pedido in productos_pedido:
@@ -76,6 +72,6 @@ class Producto(models.Model):
          return self.descripcion
      
 class ProductosPedido(models.Model):
-    id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    id_pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)    

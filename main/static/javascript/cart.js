@@ -18,6 +18,20 @@ const cliente = document.getElementById('cliente');
 var myModal = document.getElementById('myModal')
 var myInput = document.getElementById('myInput')
 
+form_registrar_cliente.addEventListener('submit', e =>{
+    e.preventDefault();
+    const val = val_cliente_registro();
+    if (val !== "0") createToastNotify(0, "Error al registrar", val);
+    else form_registrar_cliente.submit();
+    
+});
+
+const val_cliente_registro = () =>{
+    if (reg_cliente_nombre.textContent.trim().length < 4 || reg_cliente_direccion.textContent.trim().length < 4) return "Nombre o dirección demasiado corta.";
+    return "0";
+}
+
+
 const updateGlobalPrice = () => {
     totalProductos = 0;
     document.querySelectorAll('.product_quantity').forEach(input => {
@@ -99,41 +113,50 @@ document.querySelectorAll('.product_quantity').forEach(input => {
     });
 });
 
-$(document).ready(()=>{
-    $('#confirmar_venta').on('submit', function(e){
-        e.preventDefault();
-        let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
-        let url = $(this).attr('action');
-        console.log(csfrtoken)
-        console.log(Productos)
-        console.log(url)
-
-        console.log(cliente.value.trim());
-        console.log(nota.value.trim());
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data:{
-                'productos': JSON.stringify(Productos),
-                'cliente':cliente.value.trim(),
-                'nota':nota.value.trim(),
-                'confirmar_venta': true,
-                'csrfmiddlewaretoken': csfrtoken
-            },
-            dataType: 'json',
-            success: data =>{
-                if (data.success){
-                    createToastNotify(0, 'Sale Done!', data.msg);
-
-                    
-                } else createToastNotify(1, "Error", data.msg);
-            },
-            error: (jqxhr, log,log2)=> {
-                console.log(jqxhr)
-                console.log(log);
-                console.log(log2);
-                createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
-            }
+confirmar_venta.addEventListener('submit', e=>{
+    e.preventDefault();
+    if (val_venta()){
+        $(document).ready(()=>{
+            let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+            let url = $(this).attr('action');
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data:{
+                    'productos': JSON.stringify(Productos),
+                    'cliente':cliente.value.trim(),
+                    'nota':nota.value.trim(),
+                    'confirmar_venta': true,
+                    'csrfmiddlewaretoken': csfrtoken
+                },
+                dataType: 'json',
+                success: data =>{
+                    if (data.success){
+                        window.location.href = '/orders/';
+                    } else createToastNotify(1, "Error", data.msg);
+                },
+                error: (jqxhr, log,log2)=> {
+                    console.log(jqxhr)
+                    console.log(log);
+                    console.log(log2);
+                    createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
+                }
+            });
         });
-    });
+    }
 });
+
+const val_venta = () =>{
+    console.log(cliente.value)
+    console.log(Productos);
+    if (cliente.value.trim() === "" || isNaN(cliente.value)){
+        createToastNotify(1, "Error al vender", "Seleccione un cliente");
+        return false;
+    }
+    else if (Productos.length <= 0){
+        createToastNotify(1, "Error al vender", "Seleccione products");
+        return false;
+    }
+    return true;
+}
+

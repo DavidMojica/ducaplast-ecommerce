@@ -1,15 +1,16 @@
+from datetime import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
-from .models import Usuarios, Producto, Clientes, Pedido, ProductosPedido
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido
 
-import re
+import re, json
 
 # Variables
 NOMBRELENGTHMIN = 2
@@ -96,7 +97,55 @@ def getCartPrice(request):
 
 @login_required
 def Orders(request):
-    return render(request, HTMLORDERS)
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    PEDIDOS_POR_PAGINA = 10
+    pedidos = None
+    print(type(user.id))
+    #Vendedor
+    if user.tipo_usuario_id == 2:
+        pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
+        
+    for pedido in pedidos:
+    # Obtener la fecha del pedido
+        fecha_pedido = pedido.fecha
+
+        # Obtener la fecha y hora actual
+        fecha_actual = timezone.now()
+
+        # Calcular la diferencia de tiempo entre la fecha actual y la fecha del pedido
+        diferencia_tiempo = fecha_actual - fecha_pedido
+
+        # Obtener el número total de minutos transcurridos
+        minutos_transcurridos = diferencia_tiempo.total_seconds() // 60
+
+        # Mostrar el tiempo transcurrido según corresponda
+        if minutos_transcurridos < 60:
+            # Si han pasado menos de 60 minutos, mostrar los minutos transcurridos
+            tiempo_transcurrido = "Han pasado aproximadamente {} minutos".format(minutos_transcurridos)
+        elif minutos_transcurridos < 1440:
+            # Si han pasado menos de 1440 minutos (24 horas), mostrar las horas transcurridas
+            horas_transcurridas = minutos_transcurridos // 60
+            tiempo_transcurrido = "Han pasado aproximadamente {} horas".format(horas_transcurridas)
+        else:
+            # Si han pasado más de 1440 minutos (24 horas), mostrar los días transcurridos
+            dias_transcurridos = minutos_transcurridos // 1440
+            tiempo_transcurrido = "Han pasado aproximadamente {} días".format(dias_transcurridos)
+
+        # Imprimir el tiempo transcurrido para el pedido actual
+        print("Para el pedido {}:".format(pedido.id))
+        print(tiempo_transcurrido)
+        
+    paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        pedidos_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        pedidos_paginados = paginator.page(1)
+    except EmptyPage:
+        pedidos_paginados = paginator.page(paginator.num_pages)
+    
+    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados})
 
 @unloginRequired
 def Home(request):
@@ -357,6 +406,7 @@ def Catalogo(request):
         'carrito': request.session.get('carrito', {}),
         'form': form
     })
+        
            
 @login_required
 def Cart(request):
@@ -366,20 +416,77 @@ def Cart(request):
     carrito = request.session.get('carrito', {})
     total_productos = 0
     iva = 0
+    
     if carrito:
         total_productos = getCartPrice(request)
         iva = int(round(total_productos * 0.19))
-        
+    
+    data = {
+            'productos':carrito,
+            'total_productos': numberWithPoints(total_productos),
+            'iva': numberWithPoints(iva),
+            'total_venta':numberWithPoints(total_productos+iva),
+            'cantidad_productos': len(carrito),
+            'form': form,
+            'event': '',
+            'success':False,
+            }
+    
     if "confirmar_venta" in request.POST:
         cliente = request.POST.get('cliente')
         pedido_nota = request.POST.get('nota')
-        productos = request.POST.get('productos')
+        productos_dict = request.POST.get('productos')
+        try:
+            productos_dict = json.loads(productos_dict)
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'msg': "JSON no válido"})
         
-        if cliente and productos:
-            print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos}")
-            return JsonResponse({'success': True, 'msg': 'Venta completada'})
+        if not cliente:
+            return JsonResponse({'success': False, 'msg': "Por favor escoja un cliente."})
+        elif not productos_dict:
+            return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
         else:
-            return JsonResponse({'success': False, 'msg':'Faltan parámetros obligatorios'})
+            cliente = get_object_or_404(Clientes, pk=cliente)   
+            estado = get_object_or_404(Estados, pk=0)
+            #Actualizar carrito mientras se comrpueba la existencia de los productos solicitados
+            for producto_id, cantidad in productos_dict.items():
+                if producto_id in carrito:
+                    producto_real = get_object_or_404(Producto, pk=producto_id)
+                    carrito[producto_id] = {
+                        'precio': producto_real.precio,
+                        'cantidad_existencias': producto_real.cantidad,
+                        'cantidad': cantidad,
+                        'total_producto': int(cantidad) * int(producto_real.precio)
+                    }
+                else: 
+                    return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
+
+            #Construir pedido
+            nuevo_pedido = Pedido(
+                vendedor=request.user,
+                cliente=cliente,
+                estado=estado,
+                direccion=cliente.direccion,
+                valor=getCartPrice(request) + getCartPrice(request)*0.19,
+                nota=pedido_nota
+            )
+            nuevo_pedido.actualizar_dinero_generado_cliente()
+            nuevo_pedido.save()
+            
+            #Añadir productos al pedido
+            for producto_id, cantidad in productos_dict.items():
+                verificar_producto = get_object_or_404(Producto, pk=producto_id)
+                producto_pedido = ProductosPedido(
+                    producto = verificar_producto,
+                    pedido = nuevo_pedido,
+                    cantidad=cantidad
+                )
+                producto_pedido.save()
+            
+            #Limpiar carrito despues de una operacion exitosa
+            carrito.clear()
+            request.session['carrito'] = carrito
+            return JsonResponse({'success': True, 'msg': 'Venta completada'})
     
     elif "crear_cliente" in request.POST:
         nombre = request.POST.get('nombre_cli').strip()
@@ -388,35 +495,10 @@ def Cart(request):
         if nombre and direccion:
             nuevo_cliente = Clientes(nombre=nombre, direccion=direccion)
             nuevo_cliente.save()
-            return render(request, HTMLCARRITO,{
-                'productos':carrito,
-                'total_productos': numberWithPoints(total_productos),
-                'iva': numberWithPoints(iva),
-                'total_venta':numberWithPoints(total_productos+iva),
-                'cantidad_productos': len(carrito),
-                'form': form,
-                'event': 'Cliente creado correctamente',
-                'success':True,
-            })
+            return render(request, HTMLCARRITO, data)
         else:
-            return render(request, HTMLCARRITO,{
-                'productos':carrito,
-                'total_productos': numberWithPoints(total_productos),
-                'iva': numberWithPoints(iva),
-                'total_venta':numberWithPoints(total_productos+iva),
-                'cantidad_productos': len(carrito),
-                'form': form,
-                'event': 'Nombre o dirección inválida.',
-                'success':False
-            })
-        
+            data['event'] = "Nombre o direccion inválida"
+            return render(request, HTMLCARRITO, data)
     
-    return render(request, HTMLCARRITO, {'productos':carrito,
-                                        'total_productos': numberWithPoints(total_productos),
-                                        'iva': numberWithPoints(iva),
-                                        'total_venta':numberWithPoints(total_productos+iva),
-                                        'cantidad_productos': len(carrito),
-                                        'form': form})
+    return render(request, HTMLCARRITO, data)
     
-
-

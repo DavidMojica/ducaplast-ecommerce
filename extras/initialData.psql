@@ -5,3 +5,10 @@ insert into main_tipousuario (id, description) values(2, 'Vendedor');
 insert into main_tipousuario (id, description) values(3, 'Despachador');
 insert into main_tipousuario (id, description) values(4, 'Repartidor');
 --select * from main_tipousuario
+
+insert into main_estados (id, description) values(0, 'Recibido');
+insert into main_estados (id, description) values(1, 'En despacho');
+insert into main_estados (id, description) values(2, 'En reparto');
+insert into main_estados (id, description) values(3, 'Entregado');
+insert into main_estados (id, description) values(4, 'Pagado');
+--select * from main_estados
