@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
@@ -9,7 +9,7 @@ from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
 from .models import Usuarios, Producto, Clientes, Pedido, ProductosPedido
 
-import re
+import re, json
 
 # Variables
 NOMBRELENGTHMIN = 2
@@ -359,23 +359,18 @@ def Catalogo(request):
     })
        
 def seleccionar_productos(productos_dict):
-    # Obtener las claves (ID de productos) del diccionario
+    print(productos_dict)
     ids_productos = productos_dict.keys()
-    
-    # Filtrar los productos por las claves
     productos_seleccionados = Producto.objects.filter(id__in=ids_productos)
     
-    # Verificar si todos los IDs de productos existen en la base de datos
     ids_productos_existen = set(producto.id for producto in productos_seleccionados)
     ids_productos_deseados = set(int(id_producto) for id_producto in ids_productos)
     ids_productos_no_existen = ids_productos_deseados - ids_productos_existen
     
     if ids_productos_no_existen:
-        # Si hay IDs de productos que no existen, devolverlos
         productos_no_existen = ids_productos_no_existen
         return productos_seleccionados, productos_no_existen
     else:
-        # Si todos los IDs de productos existen, devolver solo los productos seleccionados
         return productos_seleccionados, None
    
        
@@ -408,30 +403,42 @@ def Cart(request):
         cliente = request.POST.get('cliente')
         pedido_nota = request.POST.get('nota')
         productos_dict = request.POST.get('productos')
+        try:
+            productos_dict = json.loads(productos_dict)
+        except json.JSONDecodeError:
+            # Manejar el error si la cadena no es JSON válida
+            return JsonResponse({'success': False, 'msg': "La cadena no es un JSON válido"})
         
-        print(cliente)
-        print(productos_dict)
         if not cliente:
-            data['event_venta'] = "Por favor escoja un cliente."
-            return render(request, HTMLCARRITO, data)
+            return JsonResponse({'success': False, 'msg': "Por favor escoja un cliente."})
         elif not productos_dict:
-            data['event_venta'] = "No hay productos en el pedido."
-            return render(request, HTMLCARRITO, data)
+            return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
         else:
             productos_seleccionados, productos_no_existen = seleccionar_productos(productos_dict)
             
             if productos_no_existen:
-                data['event_venta'] = "Hay productos que no existen"
-                return render(request,HTMLCARRITO,data)
+                return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
             else:
-                print(carrito)
-                print(productos_seleccionados)
-            
-            cliente = get_object_or_404(Clientes, pk=cliente)
-            
-            
-            print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos_dict}")
-            return JsonResponse({'success': True, 'msg': 'Venta completada'})
+                cliente = get_object_or_404(Clientes, pk=cliente)
+                for producto_id, cantidad in productos_seleccionados.items():
+                    if producto_id in carrito:
+                        carrito[producto_id] += cantidad
+                    else:
+                        carrito[producto_id] = cantidad
+
+                
+                nuevo_pedido = Pedido(
+                    vendedor=request.user,
+                    cliente=cliente,
+                    estado=0,
+                    direccion=cliente.direccion,
+                    valor=getCartPrice(),
+                    nota=pedido_nota
+                )
+
+                
+                print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos_dict}")
+                return JsonResponse({'success': True, 'msg': 'Venta completada'})
     
     elif "crear_cliente" in request.POST:
         nombre = request.POST.get('nombre_cli').strip()

@@ -1,46 +1,22 @@
 const selectClient = document.getElementById('selectClient');
 const createClient = document.getElementById('createClient');
+
 const openCreateClient = document.getElementById('openCreateClient');
 const openSelectClient = document.getElementById('openSelectClient');
+
 const total_productos = document.getElementById('total_productos');
 const iva = document.getElementById('iva');
 let totalVenta = document.getElementById('total_venta');
+
 const form_venta = document.getElementById('form_venta');
-const form_registrar_cliente =  document.getElementById('form_registrar_cliente');
-const reg_cliente_direccion = document.getElementById('reg_cliente_direccion');
-const reg_cliente_nombre = document.getElementById('reg_cliente_nombre');
-const reg_cliente_event = document.getElementById('reg_cliente_event');
-const confirmar_venta = document.getElementById('confirmar_venta');
-const vender = document.getElementById('vender');
 
 let totalProductos = 0;
-const nota = document.getElementById('nota');
 const Productos = {};
+const nota = document.getElementById('nota');
 const cliente = document.getElementById('cliente');
 
-confirmar_venta.addEventListener('submit', e=>{
-    val_venta();
-    e.preventDefault();
-    if (val_venta){
-        confirmar_venta.appendChild(cliente);
-        confirmar_venta.appendChild(Productos);
-        confirmar_venta.submit();
-    }
-});
-
-const val_venta = () =>{
-    console.log(cliente.value)
-    console.log(Productos);
-    if (cliente.value.trim() === "" || isNaN(cliente.value)){
-        createToastNotify(1, "Error al vender", "Seleccione un cliente");
-        return false;
-    }
-    else if (Productos.length <= 0){
-        createToastNotify(1, "Error al vender", "Seleccione products");
-        return false;
-    }
-    return true;
-}
+var myModal = document.getElementById('myModal')
+var myInput = document.getElementById('myInput')
 
 form_registrar_cliente.addEventListener('submit', e =>{
     e.preventDefault();
@@ -54,6 +30,7 @@ const val_cliente_registro = () =>{
     if (reg_cliente_nombre.textContent.trim().length < 4 || reg_cliente_direccion.textContent.trim().length < 4) return "Nombre o dirección demasiado corta.";
     return "0";
 }
+
 
 const updateGlobalPrice = () => {
     totalProductos = 0;
@@ -135,4 +112,51 @@ document.querySelectorAll('.product_quantity').forEach(input => {
         updateProductPrice(priceElement, price, parseInt(input.value), id);
     });
 });
+
+confirmar_venta.addEventListener('submit', e=>{
+    e.preventDefault();
+    if (val_venta()){
+        $(document).ready(()=>{
+            let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+            let url = $(this).attr('action');
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data:{
+                    'productos': JSON.stringify(Productos),
+                    'cliente':cliente.value.trim(),
+                    'nota':nota.value.trim(),
+                    'confirmar_venta': true,
+                    'csrfmiddlewaretoken': csfrtoken
+                },
+                dataType: 'json',
+                success: data =>{
+                    if (data.success){
+                        createToastNotify(0, 'Sale Done!', data.msg);
+                    } else createToastNotify(1, "Error", data.msg);
+                },
+                error: (jqxhr, log,log2)=> {
+                    console.log(jqxhr)
+                    console.log(log);
+                    console.log(log2);
+                    createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
+                }
+            });
+        });
+    }
+});
+
+const val_venta = () =>{
+    console.log(cliente.value)
+    console.log(Productos);
+    if (cliente.value.trim() === "" || isNaN(cliente.value)){
+        createToastNotify(1, "Error al vender", "Seleccione un cliente");
+        return false;
+    }
+    else if (Productos.length <= 0){
+        createToastNotify(1, "Error al vender", "Seleccione products");
+        return false;
+    }
+    return true;
+}
 
