@@ -132,7 +132,7 @@ confirmar_venta.addEventListener('submit', e=>{
                 dataType: 'json',
                 success: data =>{
                     if (data.success){
-                        createToastNotify(0, 'Sale Done!', data.msg);
+                        window.location.href = '/orders/';
                     } else createToastNotify(1, "Error", data.msg);
                 },
                 error: (jqxhr, log,log2)=> {

@@ -7,7 +7,7 @@ from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
-from .models import Usuarios, Producto, Clientes, Pedido, ProductosPedido
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido
 
 import re, json
 
@@ -359,9 +359,8 @@ def Catalogo(request):
     })
        
 def seleccionar_productos(productos_dict):
-    print(productos_dict)
     ids_productos = productos_dict.keys()
-    productos_seleccionados = Producto.objects.filter(id__in=ids_productos)
+    productos_seleccionados = Producto.objects.filter(pk__in=ids_productos)
     
     ids_productos_existen = set(producto.id for producto in productos_seleccionados)
     ids_productos_deseados = set(int(id_producto) for id_producto in ids_productos)
@@ -419,23 +418,29 @@ def Cart(request):
             if productos_no_existen:
                 return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
             else:
-                cliente = get_object_or_404(Clientes, pk=cliente)
-                for producto_id, cantidad in productos_seleccionados.items():
-                    if producto_id in carrito:
-                        carrito[producto_id] += cantidad
-                    else:
-                        carrito[producto_id] = cantidad
-
-                
+                cliente = get_object_or_404(Clientes, pk=cliente)   
+                estado = get_object_or_404(Estados, pk=0)
                 nuevo_pedido = Pedido(
                     vendedor=request.user,
                     cliente=cliente,
-                    estado=0,
+                    estado=estado,
                     direccion=cliente.direccion,
-                    valor=getCartPrice(),
+                    valor=getCartPrice(request) + getCartPrice(request)*0.19,
                     nota=pedido_nota
                 )
-
+                nuevo_pedido.actualizar_dinero_generado_cliente()
+                nuevo_pedido.save()
+                
+                for producto_id, cantidad in productos_dict.items():
+                    verificar_producto = get_object_or_404(Producto, pk=producto_id)
+                    producto_pedido = ProductosPedido(
+                        producto = verificar_producto,
+                        pedido = nuevo_pedido,
+                        cantidad=cantidad
+                    )
+                    producto_pedido.save()
+                    
+                
                 
                 print(f"cliente: {cliente}\nnota:{pedido_nota}\nProductos:{productos_dict}")
                 return JsonResponse({'success': True, 'msg': 'Venta completada'})
