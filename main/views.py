@@ -99,7 +99,7 @@ def getCartPrice(request):
 @login_required
 def Orders(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
-    PEDIDOS_POR_PAGINA = 1
+    PEDIDOS_POR_PAGINA = 10
     current_time = timezone.now()
     orders_info = []
 

@@ -21,13 +21,13 @@ var myInput = document.getElementById('myInput')
 form_registrar_cliente.addEventListener('submit', e =>{
     e.preventDefault();
     const val = val_cliente_registro();
-    if (val !== "0") createToastNotify(0, "Error al registrar", val);
+    if (val !== "0") createToastNotify(1, "Error al registrar", val);
     else form_registrar_cliente.submit();
     
 });
 
 const val_cliente_registro = () =>{
-    if (reg_cliente_nombre.textContent.trim().length < 4 || reg_cliente_direccion.textContent.trim().length < 4) return "Nombre o dirección demasiado corta.";
+    if (reg_cliente_nombre.value.trim().length < 4 || reg_cliente_direccion.value.trim().length < 4) return "Nombre o dirección demasiado corta.";
     return "0";
 }
 
