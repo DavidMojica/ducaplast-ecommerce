@@ -4,32 +4,62 @@
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
 
-<main class="d-flex justify-content-evenly">
+<main class="container d-flex justify-content-evenly mt-4">
     {% if success %}
     <section class="d-flex flex-column">
-        <article>
-            <h5>Hora de venta: <span class="{{pedido.get_status_tiempo}}">{{pedido.hora}}</span></h5>
-            <p class="">Direccion de entrega: {{cliente.direccion}}</p>
-            <p>Estado del pedido: {{pedido.estado}}</p>
-
+        <article class="card bg-light mb-3">
+            <section class="card-head">
+                <h5 class="card-title text-center">Información general</h5>
+            </section>
+            <section class="card-body">
+                <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
+                <p class="card-text">Dirección de entrega: {{cliente.direccion}}</p>
+                <p class="card-text">Estado del pedido: {{pedido.estado}}</p>
+                <p>
+                    {% if pedido.estado_id == 0 %}
+                    Este pedido está a la espera de ser despachado.
+                    {% elif pedido.estado_id == 1 %}
+                    Este pedido está siendo despachado por:
+                    {% elif pedido.estado_id == 2 %}
+                    Este pedido salió a reparto
+                    {% elif pedido.estado_id == 3 %}
+                    Este pedido fue entregado a esta hora: por:
+                    {% elif pedido.estado_id == 4 %}
+                    Este pedido fue completado a esta hora: 
+                    {% endif %}
+                </p>
+            </section>
         </article>
+        {% if user.tipo_usuario == 2 %}
+        <article class="card bg-light mb-3">
+            <section class="card-head">
+                <h5 class="card-title text-center">Despachador</h5>
+            </section>
+        </article>
+        {% endif %}
     </section>
     <section>
-        <span class="badge bg-success">Verificado</span>
-        {% for p in productos %}
-        <ul>
-            <li>a</li>
-        </ul>
-        {% endfor %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td>{{ p.producto.descripcion }}</td>
+                    <td>{{ p.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </section>  
-
-    
-    
     {% else %}
-    <span class="badge bg-danger">no verificado</span>
-
+    <div class="alert alert-danger" role="alert">no verificado</div>
     {% endif %}
-    
 </main>
+
 
 {% endblock %}
