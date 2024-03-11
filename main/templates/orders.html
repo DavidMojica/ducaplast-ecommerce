@@ -16,7 +16,7 @@
                 <section class="card-body">
                     {% for p in pedidos %}
                     <!-- Pedido -->
-                    <a href="{% url 'order_detail' %}?order={{p.id}}">
+                    <a href="{% url 'order_detail' order=p.id %}">
                         <article class="card bg-gray">
                             <header class="card-header bg-primary text-white">
                                 <h4>Pedido #{{p.id}}</h4>

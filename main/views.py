@@ -100,10 +100,18 @@ def getCartPrice(request):
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     if user.tipo_usuario_id == 2:
-        pedido = Pedido.objects.filter(pk=order)
-        if pedido.vendedor == user.id:
+        pedido = get_object_or_404(Pedido, pk=order)
+        if pedido.vendedor_id == user.id:
+            print(order)
+            cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
+            productos = ProductosPedido.objects.filter(pedido_id=order)
+            print(productos)
             return render(request, HTMLORDERDETAIL, {
-                'success': True
+                'success': True,
+                'pedido': pedido,
+                'user': user,
+                'cliente': cliente,
+                'productos': productos
             })
         else:
             return render(request, HTMLORDERDETAIL, {
