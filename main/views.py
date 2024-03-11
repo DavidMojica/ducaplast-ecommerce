@@ -1,4 +1,5 @@
-from datetime import timezone
+from datetime import timedelta
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -98,54 +99,43 @@ def getCartPrice(request):
 @login_required
 def Orders(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
-    PEDIDOS_POR_PAGINA = 10
-    pedidos = None
-    print(type(user.id))
-    #Vendedor
-    if user.tipo_usuario_id == 2:
+    PEDIDOS_POR_PAGINA = 1
+    current_time = timezone.now()
+    orders_info = []
+
+    if user.tipo_usuario_id == 2:  # Vendedor
         pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
-        
+    else:
+        pedidos = Pedido.objects.all().order_by('-id')
+
     for pedido in pedidos:
-    # Obtener la fecha del pedido
-        fecha_pedido = pedido.fecha
-
-        # Obtener la fecha y hora actual
-        fecha_actual = timezone.now()
-
-        # Calcular la diferencia de tiempo entre la fecha actual y la fecha del pedido
-        diferencia_tiempo = fecha_actual - fecha_pedido
-
-        # Obtener el número total de minutos transcurridos
-        minutos_transcurridos = diferencia_tiempo.total_seconds() // 60
-
-        # Mostrar el tiempo transcurrido según corresponda
-        if minutos_transcurridos < 60:
-            # Si han pasado menos de 60 minutos, mostrar los minutos transcurridos
-            tiempo_transcurrido = "Han pasado aproximadamente {} minutos".format(minutos_transcurridos)
-        elif minutos_transcurridos < 1440:
-            # Si han pasado menos de 1440 minutos (24 horas), mostrar las horas transcurridas
-            horas_transcurridas = minutos_transcurridos // 60
-            tiempo_transcurrido = "Han pasado aproximadamente {} horas".format(horas_transcurridas)
+        pedido_age = current_time - pedido.fecha
+        if pedido_age < timedelta(hours=1):
+            status_class = 'bg-success'
+        elif timedelta(hours=1) <= pedido_age <= timedelta(hours=3):
+            status_class = 'bg-warning'
         else:
-            # Si han pasado más de 1440 minutos (24 horas), mostrar los días transcurridos
-            dias_transcurridos = minutos_transcurridos // 1440
-            tiempo_transcurrido = "Han pasado aproximadamente {} días".format(dias_transcurridos)
+            status_class = 'bg-danger'
 
-        # Imprimir el tiempo transcurrido para el pedido actual
-        print("Para el pedido {}:".format(pedido.id))
-        print(tiempo_transcurrido)
-        
+        orders_info.append({
+            'pedido': pedido,
+            'status_class': status_class
+        })
+
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
-    
+
     try:
         pedidos_paginados = paginator.page(page_number)
     except PageNotAnInteger:
         pedidos_paginados = paginator.page(1)
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
-    
-    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados})
+
+    # Combina pedidos_paginados y orders_info en una lista de tuplas
+    orders_combined = zip(pedidos_paginados, orders_info)
+
+    return render(request, HTMLORDERS, {'pedidos': orders_combined})
 
 @unloginRequired
 def Home(request):
