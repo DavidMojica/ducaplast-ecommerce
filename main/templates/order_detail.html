@@ -40,9 +40,73 @@
                     {% if pedido.estado_id == 0 %}
                     <p>Este pedido está a la espera de ser despachado.</p>
                     <button class="btn btn-primary">Despachar</button>
+                    {% elif pedido.estado_id == 1 %}
+                    <p>Este pedido está siendo despachado</p>
+                    <button class="btn btn-primary">Despacho completado</button>
+                    {% else %}
+                    <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
+                    Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>
+                    </p>
                     {% endif %}
                 </section>
             </article>
+            {% elif user.tipo_usuario_id == 4 %}
+            <section class="card-body">
+                {% if pedido.estado_id == 0 %}
+                <p>Este pedido está a la espera de ser despachado.</p>
+                {% elif pedido.estado_id == 1 %}
+                <p>Este pedido está siendo despachado</p>
+                {% else %}
+                <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
+                Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            <section class="card-body">
+                {% if pedido.estado.id < 2 %}
+                <p>Este pedido aún no puede ser facturado</p>
+                {% elif pedido.estado.id == 2 %}
+                <p>Este pedido está siendo facturado</p>
+                <button class="btn btn-primary">Marcar como facturado</button>
+                {% else %}
+                <p>Este pedido fue facturado por {{p.facturado_por__first_name}} {{p.facturado_por__last_name}} <br>
+                    Hora: <span class="badge bg-success">{{p.facturado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            {% elif user.tipo_usuario_id == 5 %}
+            <section class="card-body">
+                {% if pedido.estado_id == 0 %}
+                <p>Este pedido está a la espera de ser despachado.</p>
+                {% elif pedido.estado_id == 1 %}
+                <p>Este pedido está siendo despachado</p>
+                {% else %}
+                <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
+                Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            <section class="card-body">
+                {% if pedido.estado.id < 2 %}
+                <p>Este pedido aún no puede ser facturado</p>
+                {% elif pedido.estado.id == 2 %}
+                <p>Este pedido está siendo facturado</p>
+                <button class="btn btn-primary">Marcar como facturado</button>
+                {% else %}
+                <p>Este pedido fue facturado por {{p.facturado_por__first_name}} {{p.facturado_por__last_name}} <br>
+                    Hora: <span class="badge bg-success">{{p.facturado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            <section class="card-body">
+                {% if pedido.estado.id < 3 %}
+                <p>Este pedido aún no puede ser repartido</p>
+                {% if pedido.estaido.id == 3 %}
+                <p>Este pedido está listo para ser repartido</p>
+                {% else %}
+                <p>Este pedido ya fue repartido</p>
+                {% endif %}
+            </section>
             {% endif %}
         </div>
         <div class="col-md-6">
@@ -73,7 +137,4 @@
     <div class="alert alert-danger" role="alert">no verificado</div>
     {% endif %}
 </main>
-
-
-
 {% endblock %}

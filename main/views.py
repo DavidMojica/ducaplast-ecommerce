@@ -207,7 +207,7 @@ def Logout(request):
     logout(request)
     return redirect(reverse('home'))
 
-@login_required
+
 def Registro(request):
     newForm = RegistroUsuariosForm()
     if request.method == "POST":
