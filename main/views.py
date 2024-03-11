@@ -33,6 +33,7 @@ HTMLREGISTRO = "registro.html"
 HTMLCATALOGO = "catalogo.html"
 HTMLCARRITO = "cart.html"
 HTMLORDERS = "orders.html"
+HTMLORDERDETAIL = "order_detail.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -95,32 +96,34 @@ def getCartPrice(request):
         return total_productos
     
 #-------------Views-----------#
+@login_required
+def OrderDetail(request, order):
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id == 2:
+        pedido = Pedido.objects.filter(pk=order)
+        if pedido.vendedor == user.id:
+            return render(request, HTMLORDERDETAIL, {
+                'success': True
+            })
+        else:
+            return render(request, HTMLORDERDETAIL, {
+                'success': False
+            })
+    
+    return render(request, HTMLORDERDETAIL, {
+        'success': False
+    })
+
 
 @login_required
 def Orders(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     PEDIDOS_POR_PAGINA = 10
-    current_time = timezone.now()
-    orders_info = []
 
     if user.tipo_usuario_id == 2:  # Vendedor
         pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
     else:
         pedidos = Pedido.objects.all().order_by('-id')
-
-    for pedido in pedidos:
-        pedido_age = current_time - pedido.fecha
-        if pedido_age < timedelta(hours=1):
-            status_class = 'bg-success'
-        elif timedelta(hours=1) <= pedido_age <= timedelta(hours=3):
-            status_class = 'bg-warning'
-        else:
-            status_class = 'bg-danger'
-
-        orders_info.append({
-            'pedido': pedido,
-            'status_class': status_class
-        })
 
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
@@ -132,10 +135,7 @@ def Orders(request):
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
 
-    # Combina pedidos_paginados y orders_info en una lista de tuplas
-    orders_combined = zip(pedidos_paginados, orders_info)
-
-    return render(request, HTMLORDERS, {'pedidos': orders_combined})
+    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados})
 
 @unloginRequired
 def Home(request):
