@@ -115,7 +115,20 @@ def OrderDetail(request, order):
             return render(request, HTMLORDERDETAIL, {
                 'success': False
             })
-    
+    elif user.tipo_usuario_id == 3:
+        pedido = get_object_or_404(Pedido, pk=order)
+        cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
+        productos = ProductosPedido.objects.filter(pedido_id=order)
+        return render(request, HTMLORDERDETAIL, {
+            'success': True,
+            'pedido': pedido,
+            'user': user,
+            'cliente': cliente,
+            'productos': productos
+        })
+
+        
+        
     return render(request, HTMLORDERDETAIL, {
         'success': False
     })

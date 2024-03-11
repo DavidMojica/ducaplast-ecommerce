@@ -3,12 +3,14 @@ insert into main_tipousuario (id, description) values(0, 'Gerente');
 insert into main_tipousuario (id, description) values(1, 'Administrador');
 insert into main_tipousuario (id, description) values(2, 'Vendedor');
 insert into main_tipousuario (id, description) values(3, 'Despachador');
-insert into main_tipousuario (id, description) values(4, 'Repartidor');
+insert into main_tipousuario (id, description) values(4, 'Facturador');
+insert into main_tipousuario (id, description) values(5, 'Repartidor');
 --select * from main_tipousuario
 
 insert into main_estados (id, description) values(0, 'Recibido');
 insert into main_estados (id, description) values(1, 'En despacho');
-insert into main_estados (id, description) values(2, 'En reparto');
-insert into main_estados (id, description) values(3, 'Entregado');
-insert into main_estados (id, description) values(4, 'Pagado');
+insert into main_estados (id, description) values(2, 'En facturacion');
+insert into main_estados (id, description) values(3, 'En reparto');
+insert into main_estados (id, description) values(4, 'Entregado');
+insert into main_estados (id, description) values(5, 'Pagado');
 --select * from main_estados
