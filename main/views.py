@@ -201,22 +201,26 @@ from .models import Pedido, Usuarios
 def Orders(request, filtered=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     PEDIDOS_POR_PAGINA = 10
+    history=False
+    pedidos = []
 
     if not filtered:
         if user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
-        elif user.tipo_usuario_id == 3:
-            pedidos = Pedido.objects.filter(vendedor=user.id, estado_id=1).order_by('-id')
-        
-        else:
-            pedidos = None
+        elif user.tipo_usuario_id == 3: #Despachador
+            pedidos = Pedido.objects.filter(estado_id__in=[0, 1]).order_by('-id')
+        elif user.tipo_usuario_id == 4:
+            pedidos = Pedido.objects.filter(estado_id=2).order_by('-id')
+
     elif filtered == "historial": #No aplica para vendedor
+        history=True
         if user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
             pedidos = [handler_despacho.pedido for handler_despacho in handler_despachos]
             pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
-    else:
-        pedidos = None        
+        elif user.tipo_usuario_id == 4:
+            pedidos = Pedido.objects.filter(facturado_por=user.id)
+   
 
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
@@ -228,7 +232,9 @@ def Orders(request, filtered=None):
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
 
-    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados})
+    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados,
+                                        'user': user,
+                                        'history': history})
 
 
 @unloginRequired

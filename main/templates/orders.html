@@ -10,8 +10,25 @@
         <article class="row d-flex justify-content-center my-4">
             <article class="card mb-4 bg-gray text-light col-md-8">
                 <header class="card-header">
-                    <h5 class="mb-0" id="productos_cantidad">Historial de ventas</h5>
-                    
+                    <h5 class="mb-0" id="productos_cantidad">
+                        {% if user.tipo_usuario_id == 2 %}
+                        Mi historial de ventas
+                        {% elif user.tipo_usuario_id == 3 %}
+                            {% if not history %}
+                            Pedidos para despachar
+                            {% else %}
+                            Pedidos despachados por mí
+                            {% endif %}
+                        {% elif user.tipo_usuario_id == 4 %}
+                            {% if not history %}
+                            Pedidos listos para facturación
+                            {% else %}
+                            Pedidos facturados por mí
+                            {% endif %}
+                        {% elif user.tipo_usuario_id == 5 %}
+                        Mi historial de entregas
+                        {% endif %}
+                    </h5>
                 </header>
                 <section class="card-body">
                     {% for p in pedidos %}
