@@ -39,6 +39,10 @@ class Usuarios(AbstractUser):
         if not self.password:
             self.set_unusable_password()
         super(Usuarios, self).save(*args, **kwargs)
+        
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ID: {self.id}"
+
 
 
 class Pedido(models.Model):
@@ -93,4 +97,8 @@ class Producto(models.Model):
 class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
-    cantidad = models.IntegerField(default=1)    
+    cantidad = models.IntegerField(default=1)   
+    
+class HandlerDespacho(models.Model):
+    despachador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE) 

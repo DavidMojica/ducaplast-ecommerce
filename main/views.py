@@ -8,8 +8,8 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido
+from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
 
@@ -51,7 +51,9 @@ ERROR_9 = "Alguna(s) de las contraseñas no cumplen con la longitud minima."
 ERROR_10 = "Las contraseñas nuevas no coinciden"
 ERROR_11 = "Nombre o apellidos no cumplen con la longitud minima."
 ERROR_12 = "Formato de email no válido"
-
+ERROR_13 = "Acceso no autorizado"
+ERROR_14 = "Usted no puede marcar este pedido como completo porque usted no estaba ayudando en el despacho del pedido"
+ERROR_15 = "Usted ya está ayudando en el despacho de este pedido"
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
@@ -95,10 +97,52 @@ def getCartPrice(request):
             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
         return total_productos
     
+    
+@login_required
+def ayudarEnDespacho(request, user, pedido):
+    handler = HandlerDespacho(despachador = user, pedido = pedido)
+    handler.save()
+    
 #-------------Views-----------#
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
+    
+    if request.method == 'POST':
+        if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds:
+            pedido = get_object_or_404(Pedido, pk=order)
+            if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
+                pedido.estado_id = 1
+                pedido.save()
+                ayudarEnDespacho(request, user, pedido)
+                
+            elif 'ayudarDespacho' in request.POST:
+                despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+                if not despachadores_activos.filter(vendedor_id=user.id).exists():
+                    ayudarEnDespacho(request, user, pedido)
+                else:
+                    return render(request, HTMLORDERDETAIL, {
+                        'success': False,
+                        'msg': ERROR_15
+                    })
+            elif 'completarDespacho' in request.POST:
+                despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+                if despachadores_activos.filter(vendedor_id=user.id).exists():
+                    pedido.estado_id = 2
+                    pedido.despachado_hora = timezone.now()
+                    pedido.save()
+                else:
+                    return render(request, HTMLORDERDETAIL, {
+                        'success': False,
+                        'msg': ERROR_14
+                    })
+                                    
+        else:
+            return render(request, HTMLORDERDETAIL, {
+                'success': False,
+                'msg': ERROR_13
+            })
+    
     if user.tipo_usuario_id == 2:
         pedido = get_object_or_404(Pedido, pk=order)
         if pedido.vendedor_id == user.id:
@@ -113,10 +157,21 @@ def OrderDetail(request, order):
             })
         else:
             return render(request, HTMLORDERDETAIL, {
-                'success': False
+                'success': False,
+                'msg': ERROR_13
             })
     elif user.tipo_usuario_id == 3:
         pedido = get_object_or_404(Pedido, pk=order)
+        despachadores_activos = None
+        puede_ayudar = False
+        if pedido.estado_id == 1:
+            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+            puede_ayudar = not despachadores_activos.filter(vendedor_id=user.id).exists()
+        elif pedido.estado_id == 2:
+            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+            
+            
+        
         cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
         productos = ProductosPedido.objects.filter(pedido_id=order)
         return render(request, HTMLORDERDETAIL, {
@@ -124,25 +179,50 @@ def OrderDetail(request, order):
             'pedido': pedido,
             'user': user,
             'cliente': cliente,
-            'productos': productos
+            'productos': productos,
+            'despachadoresActivos': despachadores_activos,
+            'puede_ayudar': puede_ayudar
         })
-
-        
+    elif user.tipo_usuario_id == 4:
+        pedido = get_object_or_404(Pedido, pk=order)
+        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+        return render(request, HTMLORDERDETAIL, {
+                'success': True,
+                'pedido': pedido,
+                'user': user,
+                'despachadoresActivos': despachadores_activos,
+                'form': SeleccionarRepartidor()
+            })
         
     return render(request, HTMLORDERDETAIL, {
-        'success': False
+        'success': False,
+        'msg': ERROR_13
     })
 
-
 @login_required
-def Orders(request):
+def Orders(request, filtered=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     PEDIDOS_POR_PAGINA = 10
+    history=False
+    pedidos = []
 
-    if user.tipo_usuario_id == 2:  # Vendedor
-        pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
-    else:
-        pedidos = Pedido.objects.all().order_by('-id')
+    if not filtered:
+        if user.tipo_usuario_id == 2:  # Vendedor
+            pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
+        elif user.tipo_usuario_id == 3: #Despachador
+            pedidos = Pedido.objects.filter(estado_id__in=[0, 1]).order_by('-id')
+        elif user.tipo_usuario_id == 4:
+            pedidos = Pedido.objects.filter(estado_id=2).order_by('-id')
+
+    elif filtered == "historial": #No aplica para vendedor
+        history=True
+        if user.tipo_usuario_id == 3:  # Despachador
+            handler_despachos = HandlerDespacho.objects.filter(despachador=user)
+            pedidos = [handler_despacho.pedido for handler_despacho in handler_despachos]
+            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
+        elif user.tipo_usuario_id == 4:
+            pedidos = Pedido.objects.filter(facturado_por=user.id)
+   
 
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
@@ -154,7 +234,10 @@ def Orders(request):
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
 
-    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados})
+    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados,
+                                        'user': user,
+                                        'history': history})
+
 
 @unloginRequired
 def Home(request):

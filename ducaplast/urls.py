@@ -28,6 +28,7 @@ urlpatterns = [
     path('carthandler/', views.CartHandler, name="carthandler"),
     path('cart/', views.Cart, name='cart'),
     path('orders/',views.Orders, name="orders"),
-    path('order_detail/<int:order>', views.OrderDetail, name="order_detail"),
+    path('orders/<str:filtered>',views.Orders, name="filtered_orders"),
+    path('order_detail/<int:order>/', views.OrderDetail, name="order_detail"),
     
 ]
