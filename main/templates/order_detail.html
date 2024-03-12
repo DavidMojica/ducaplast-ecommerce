@@ -10,7 +10,7 @@
         <div class="col-md-6">
             <article class="card mb-3">
                 <section class="card-header">
-                    <h5 class="card-title text-center">Información general</h5>
+                    <h5 class="card-title text-center">Información general del pedido <span class="badge bg-primary">{{pedido.id}}</span></h5>
                 </section>
                 <section class="card-body">
                     <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
@@ -20,7 +20,7 @@
                         {% if pedido.estado_id == 0 %}
                         Este pedido está a la espera de ser despachado.
                         {% elif pedido.estado_id == 1 %}
-                        Este pedido está siendo despachado por:
+                        Este pedido está siendo despachado 
                         {% elif pedido.estado_id == 2 %}
                         Este pedido salió a reparto
                         {% elif pedido.estado_id == 3 %}
@@ -39,9 +39,43 @@
                 <section class="card-body">
                     {% if pedido.estado_id == 0 %}
                     <p>Este pedido está a la espera de ser despachado.</p>
-                    <button class="btn btn-primary">Despachar</button>
+                    <!-- trigger -->
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
+                    <!-- modal -->
+                    <section class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                        <article class="modal-dialog modal-dialog-centered">
+                          <article class="modal-content">
+                            <section class="modal-header">
+                              <h5 class="modal-title">Confirmar despacho</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </section>
+                            <section class="modal-body">
+                              <p>¿Realmente quiere comenzar este despacho?</p>
+                            </section>
+                            <section class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                              <form action="" method="POST" id="confirmar_despacho">
+                                {% csrf_token %}
+                                <input type="hidden" name="confirmar_despacho">
+                                <button type="submit" class="btn btn-warning">Confirmar</button>
+                              </form>
+                            </section>
+                          </article>
+                        </article>
+                      </section>
+
+
                     {% elif pedido.estado_id == 1 %}
-                    <p>Este pedido está siendo despachado</p>
+                    <p>Este pedido está siendo despachado por:</p>
+                    <ul class="list-group">
+                        {% for d in despachadoresActivos %}
+                        <li class="list-item">
+                            <p>{{d.first_name}} {{d.last_name}} <br>
+                            Cod. empleado {{d.id}}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
                     <button class="btn btn-primary">Despacho completado</button>
                     {% else %}
                     <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
@@ -101,7 +135,7 @@
             <section class="card-body">
                 {% if pedido.estado.id < 3 %}
                 <p>Este pedido aún no puede ser repartido</p>
-                {% if pedido.estaido.id == 3 %}
+                {% elif pedido.estaido.id == 3 %}
                 <p>Este pedido está listo para ser repartido</p>
                 {% else %}
                 <p>Este pedido ya fue repartido</p>

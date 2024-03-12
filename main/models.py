@@ -41,6 +41,7 @@ class Usuarios(AbstractUser):
         super(Usuarios, self).save(*args, **kwargs)
 
 
+
 class Pedido(models.Model):
     id = models.AutoField(primary_key=True)
     vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
@@ -93,4 +94,8 @@ class Producto(models.Model):
 class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
-    cantidad = models.IntegerField(default=1)    
+    cantidad = models.IntegerField(default=1)   
+    
+class HandlerDespacho(models.Model):
+    vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE) 

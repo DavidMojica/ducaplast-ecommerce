@@ -9,7 +9,7 @@ from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
 
@@ -99,6 +99,21 @@ def getCartPrice(request):
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
+    
+    if request.method == 'POST':
+        if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds:
+            pedido = get_object_or_404(Pedido, pk=order)
+            if pedido.estado_id == 0:
+                pedido.estado_id = 1
+                pedido.save()
+                
+                handler = HandlerDespacho(
+                    vendedor = user,
+                    pedido = pedido
+                )
+                
+                handler.save()
+    
     if user.tipo_usuario_id == 2:
         pedido = get_object_or_404(Pedido, pk=order)
         if pedido.vendedor_id == user.id:
@@ -117,6 +132,10 @@ def OrderDetail(request, order):
             })
     elif user.tipo_usuario_id == 3:
         pedido = get_object_or_404(Pedido, pk=order)
+        despachadores_activos = None
+        if pedido.estado_id == 1:
+            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+        
         cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
         productos = ProductosPedido.objects.filter(pedido_id=order)
         return render(request, HTMLORDERDETAIL, {
@@ -124,7 +143,8 @@ def OrderDetail(request, order):
             'pedido': pedido,
             'user': user,
             'cliente': cliente,
-            'productos': productos
+            'productos': productos,
+            'despachadoresActivos': despachadores_activos
         })
 
         
