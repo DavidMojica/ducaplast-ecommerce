@@ -100,7 +100,7 @@ def getCartPrice(request):
     
 @login_required
 def ayudarEnDespacho(request, user, pedido):
-    handler = HandlerDespacho(vendedor = user, pedido = pedido)
+    handler = HandlerDespacho(despachador = user, pedido = pedido)
     handler.save()
     
 #-------------Views-----------#
@@ -158,7 +158,7 @@ def OrderDetail(request, order):
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
-                'error': ERROR_13
+                'msg': ERROR_13
             })
     elif user.tipo_usuario_id == 3:
         pedido = get_object_or_404(Pedido, pk=order)
@@ -187,19 +187,36 @@ def OrderDetail(request, order):
         
         
     return render(request, HTMLORDERDETAIL, {
-        'success': False
+        'success': False,
+        'msg': ERROR_13
     })
 
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Pedido, Usuarios
+
 @login_required
-def Orders(request):
+def Orders(request, filtered=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     PEDIDOS_POR_PAGINA = 10
 
-    if user.tipo_usuario_id == 2:  # Vendedor
-        pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
+    if not filtered:
+        if user.tipo_usuario_id == 2:  # Vendedor
+            pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
+        elif user.tipo_usuario_id == 3:
+            pedidos = Pedido.objects.filter(vendedor=user.id, estado_id=1).order_by('-id')
+        
+        else:
+            pedidos = None
+    elif filtered == "historial": #No aplica para vendedor
+        if user.tipo_usuario_id == 3:  # Despachador
+            handler_despachos = HandlerDespacho.objects.filter(despachador=user)
+            pedidos = [handler_despacho.pedido for handler_despacho in handler_despachos]
+            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
     else:
-        pedidos = Pedido.objects.all().order_by('-id')
+        pedidos = None        
 
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
@@ -212,6 +229,7 @@ def Orders(request):
         pedidos_paginados = paginator.page(paginator.num_pages)
 
     return render(request, HTMLORDERS, {'pedidos': pedidos_paginados})
+
 
 @unloginRequired
 def Home(request):

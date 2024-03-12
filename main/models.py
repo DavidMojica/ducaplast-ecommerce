@@ -97,5 +97,5 @@ class ProductosPedido(models.Model):
     cantidad = models.IntegerField(default=1)   
     
 class HandlerDespacho(models.Model):
-    vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    despachador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE) 
