@@ -67,16 +67,24 @@
 
                     {% elif pedido.estado_id == 1 %}
                     <p>Este pedido está siendo despachado por:</p>
-                    <ul class="list-group">
+                    <ul class="list-group list-group-flush">
                         {% for d in despachadoresActivos %}
-                        <li class="list-item">
-                            <p>{{d.first_name}} {{d.last_name}} <br>
-                            Cod. empleado {{d.id}}</p>
+                        <li class="list-group-item">
+                            <p>{{d.vendedor.first_name}} {{d.vendedor.last_name}} <br>
+                            Cod. empleado {{d.vendedor.id}}</p>
                         </li>
-                        {% endfor %}
+                        {% endfor %}          
                     </ul>
                     
                     <button class="btn btn-primary">Despacho completado</button>
+                    {% if puede_ayudar %}
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="ayudarDespacho">
+                        <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
+                    </form>
+                    {% endif %}
+
                     {% else %}
                     <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
                     Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>

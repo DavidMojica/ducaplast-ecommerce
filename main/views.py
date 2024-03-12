@@ -95,6 +95,12 @@ def getCartPrice(request):
             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
         return total_productos
     
+    
+@login_required
+def ayudarEnDespacho(request, user, pedido):
+    handler = HandlerDespacho(vendedor = user, pedido = pedido)
+    handler.save()
+    
 #-------------Views-----------#
 @login_required
 def OrderDetail(request, order):
@@ -103,16 +109,14 @@ def OrderDetail(request, order):
     if request.method == 'POST':
         if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds:
             pedido = get_object_or_404(Pedido, pk=order)
-            if pedido.estado_id == 0:
+            if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
+                ayudarEnDespacho(request, user, pedido)
                 
-                handler = HandlerDespacho(
-                    vendedor = user,
-                    pedido = pedido
-                )
+            elif 'ayudarDespacho' in request.POST:
+                ayudarEnDespacho(request, user, pedido)
                 
-                handler.save()
     
     if user.tipo_usuario_id == 2:
         pedido = get_object_or_404(Pedido, pk=order)
@@ -133,8 +137,12 @@ def OrderDetail(request, order):
     elif user.tipo_usuario_id == 3:
         pedido = get_object_or_404(Pedido, pk=order)
         despachadores_activos = None
+        puede_ayudar = False
         if pedido.estado_id == 1:
             despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+            puede_ayudar = not despachadores_activos.filter(usuario_id=user.id).exists()
+            
+            
         
         cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
         productos = ProductosPedido.objects.filter(pedido_id=order)
@@ -144,7 +152,8 @@ def OrderDetail(request, order):
             'user': user,
             'cliente': cliente,
             'productos': productos,
-            'despachadoresActivos': despachadores_activos
+            'despachadoresActivos': despachadores_activos,
+            'puede_ayudar': puede_ayudar
         })
 
         
