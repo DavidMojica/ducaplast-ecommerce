@@ -4,8 +4,137 @@
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
 
-<main>
-    
+<main class="container mt-4">
+    {% if success %}
+    <section class="row">
+        <div class="col-md-6">
+            <article class="card mb-3">
+                <section class="card-header">
+                    <h5 class="card-title text-center">Información general</h5>
+                </section>
+                <section class="card-body">
+                    <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
+                    <p class="card-text">Dirección de entrega: {{cliente.direccion}}</p>
+                    <p class="card-text">Estado del pedido: {{pedido.estado}}</p>
+                    <p>
+                        {% if pedido.estado_id == 0 %}
+                        Este pedido está a la espera de ser despachado.
+                        {% elif pedido.estado_id == 1 %}
+                        Este pedido está siendo despachado por:
+                        {% elif pedido.estado_id == 2 %}
+                        Este pedido salió a reparto
+                        {% elif pedido.estado_id == 3 %}
+                        Este pedido fue entregado a esta hora: por:
+                        {% elif pedido.estado_id == 4 %}
+                        Este pedido fue completado a esta hora: 
+                        {% endif %}
+                    </p>
+                </section>
+            </article>
+            {% if user.tipo_usuario_id == 3 %}
+            <article class="card mb-3">
+                <section class="card-header">
+                    <h5 class="card-title text-center">Despachador</h5>
+                </section>
+                <section class="card-body">
+                    {% if pedido.estado_id == 0 %}
+                    <p>Este pedido está a la espera de ser despachado.</p>
+                    <button class="btn btn-primary">Despachar</button>
+                    {% elif pedido.estado_id == 1 %}
+                    <p>Este pedido está siendo despachado</p>
+                    <button class="btn btn-primary">Despacho completado</button>
+                    {% else %}
+                    <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
+                    Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>
+                    </p>
+                    {% endif %}
+                </section>
+            </article>
+            {% elif user.tipo_usuario_id == 4 %}
+            <section class="card-body">
+                {% if pedido.estado_id == 0 %}
+                <p>Este pedido está a la espera de ser despachado.</p>
+                {% elif pedido.estado_id == 1 %}
+                <p>Este pedido está siendo despachado</p>
+                {% else %}
+                <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
+                Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            <section class="card-body">
+                {% if pedido.estado.id < 2 %}
+                <p>Este pedido aún no puede ser facturado</p>
+                {% elif pedido.estado.id == 2 %}
+                <p>Este pedido está siendo facturado</p>
+                <button class="btn btn-primary">Marcar como facturado</button>
+                {% else %}
+                <p>Este pedido fue facturado por {{p.facturado_por__first_name}} {{p.facturado_por__last_name}} <br>
+                    Hora: <span class="badge bg-success">{{p.facturado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            {% elif user.tipo_usuario_id == 5 %}
+            <section class="card-body">
+                {% if pedido.estado_id == 0 %}
+                <p>Este pedido está a la espera de ser despachado.</p>
+                {% elif pedido.estado_id == 1 %}
+                <p>Este pedido está siendo despachado</p>
+                {% else %}
+                <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
+                Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            <section class="card-body">
+                {% if pedido.estado.id < 2 %}
+                <p>Este pedido aún no puede ser facturado</p>
+                {% elif pedido.estado.id == 2 %}
+                <p>Este pedido está siendo facturado</p>
+                <button class="btn btn-primary">Marcar como facturado</button>
+                {% else %}
+                <p>Este pedido fue facturado por {{p.facturado_por__first_name}} {{p.facturado_por__last_name}} <br>
+                    Hora: <span class="badge bg-success">{{p.facturado_hora}}</span>
+                </p>
+                {% endif %}
+            </section>
+            <section class="card-body">
+                {% if pedido.estado.id < 3 %}
+                <p>Este pedido aún no puede ser repartido</p>
+                {% if pedido.estaido.id == 3 %}
+                <p>Este pedido está listo para ser repartido</p>
+                {% else %}
+                <p>Este pedido ya fue repartido</p>
+                {% endif %}
+            </section>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <article class="card">
+                <section class="card-body">
+                    <h5 class="card-title">Productos en el pedido:</h5>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Producto</th>
+                                <th scope="col">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in productos %}
+                            <tr>
+                                <td>{{ p.producto.descripcion }}</td>
+                                <td>{{ p.cantidad }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            </article>
+        </div>
+    </section>
+    {% else %}
+    <div class="alert alert-danger" role="alert">no verificado</div>
+    {% endif %}
 </main>
-
 {% endblock %}

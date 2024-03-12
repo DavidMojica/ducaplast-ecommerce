@@ -16,36 +16,38 @@
                 <section class="card-body">
                     {% for p in pedidos %}
                     <!-- Pedido -->
-                    <article class="card bg-gray">
-                        <header class="card-header bg-primary text-white">
-                            <h4>Pedido #{{p.id}}</h4>
-                        </header>
-                        <section class="card-body">
-                            <section class="row">
-                                <article class="col">
-                                    <p>
-                                        Estado:
-                                        <span class="badge bg-danger">{{p.estado}}</span>
-                                    </p>
-                                </article>
-                                <aside class="col text-center">
-                                    <span class="badge bg-success">
-                                </aside>
+                    <a href="{% url 'order_detail' order=p.id %}" class="text-decoration-none text-white">
+                        <article class="card bg-gray">
+                            <header class="card-header bg-primary text-white">
+                                <h4>Pedido #{{p.id}}</h4>
+                            </header>
+                            <section class="card-body">
+                                <section class="row">
+                                    <article class="col">
+                                        <p>
+                                            Estado:
+                                            <span class="badge bg-danger">{{p.estado}}</span>
+                                        </p>
+                                    </article>
+                                    <aside class="col text-center">
+                                        <span class="badge {{p.get_status_tiempo}}">{{p.fecha}}</span>
+                                    </aside>
+                                </section>
+                                
+                                <section class="row">
+                                    <article class="col">
+                                        <p>Vendido por: {{p.vendedor.first_name}} {{p.vendedor.last_name}} <br> (Cod. Empleado: {{p.vendedor_id}})</p>
+                                    </article>
+                                    <aside class="col text-center">
+                                        <p>
+                                            <strong>Cod. cliente:</strong> {{p.cliente_id}} <br>
+                                            <strong>Valor pedido:</strong> ${{p.valor}}
+                                        </p>
+                                    </aside>
+                                </section>
                             </section>
-                            
-                            <section class="row">
-                                <article class="col">
-                                    <p>Vendido por: {{p.vendedor.first_name}} {{p.vendedor.last_name}} <br> (Cod. Empleado: {{p.vendedor_id}})</p>
-                                </article>
-                                <aside class="col text-center">
-                                    <p>
-                                        <strong>Cod. cliente:</strong> {{p.cliente_id}} <br>
-                                        <strong>Valor pedido:</strong> ${{p.valor}}
-                                    </p>
-                                </aside>
-                            </section>
-                        </section>
-                    </article>
+                        </article>
+                    </a>
                     <!-- End pedido -->                
                     {% endfor %}
 

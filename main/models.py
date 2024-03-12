@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your models here.
 class TipoUsuario(models.Model):
@@ -38,6 +40,7 @@ class Usuarios(AbstractUser):
             self.set_unusable_password()
         super(Usuarios, self).save(*args, **kwargs)
 
+
 class Pedido(models.Model):
     id = models.AutoField(primary_key=True)
     vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
@@ -47,7 +50,23 @@ class Pedido(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
+    despachado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="despachado_por")
+    despachado_hora = models.DateTimeField(null=True, blank=True)
+    facturado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="facturado_por")
+    facturado_hora = models.DateTimeField(null=True, blank=True)
+    repartido_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="repartido_por")
+    repartido_hora = models.DateTimeField(null=True, blank=True)
     
+    def get_status_tiempo(self):
+        current_time = timezone.now()
+        pedido_age = current_time - self.fecha
+        if pedido_age < timedelta(hours=1):
+            return 'bg-success'
+        elif timedelta(hours=1) <= pedido_age <= timedelta(hours=3):
+            return 'bg-warning'
+        else:
+            return 'bg-danger'
+        
     def descontar_cantidad_producto(self):
         productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
         for producto_pedido in productos_pedido:
