@@ -52,7 +52,8 @@ ERROR_10 = "Las contraseñas nuevas no coinciden"
 ERROR_11 = "Nombre o apellidos no cumplen con la longitud minima."
 ERROR_12 = "Formato de email no válido"
 ERROR_13 = "Acceso no autorizado"
-
+ERROR_14 = "Usted no puede marcar este pedido como completo porque usted no estaba ayudando en el despacho del pedido"
+ERROR_15 = "Usted ya está ayudando en el despacho de este pedido"
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
@@ -119,6 +120,23 @@ def OrderDetail(request, order):
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
                 if not despachadores_activos.filter(vendedor_id=user.id).exists():
                     ayudarEnDespacho(request, user, pedido)
+                else:
+                    return render(request, HTMLORDERDETAIL, {
+                        'success': False,
+                        'msg': ERROR_15
+                    })
+            elif 'completarDespacho' in request.POST:
+                despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+                if despachadores_activos.filter(vendedor_id=user.id).exists():
+                    pedido.estado_id = 2
+                    pedido.despachado_hora = timezone.now()
+                    pedido.save()
+                else:
+                    return render(request, HTMLORDERDETAIL, {
+                        'success': False,
+                        'msg': ERROR_14
+                    })
+                                    
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
@@ -149,6 +167,8 @@ def OrderDetail(request, order):
         if pedido.estado_id == 1:
             despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
             puede_ayudar = not despachadores_activos.filter(vendedor_id=user.id).exists()
+        elif pedido.estado_id == 2:
+            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
             
             
         

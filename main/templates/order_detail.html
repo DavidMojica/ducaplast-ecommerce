@@ -22,7 +22,7 @@
                         {% elif pedido.estado_id == 1 %}
                         Este pedido está siendo despachado 
                         {% elif pedido.estado_id == 2 %}
-                        Este pedido salió a reparto
+                        Este pedido está siendo facturado
                         {% elif pedido.estado_id == 3 %}
                         Este pedido fue entregado a esta hora: por:
                         {% elif pedido.estado_id == 4 %}
@@ -99,36 +99,43 @@
                           </article>
                         </article>
                     </section>
-                    {% if puede_ayudar %}
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
-                    <!-- modal -->
-                    <section class="modal fade" id="modalH" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
-                        <article class="modal-dialog modal-dialog-centered">
-                          <article class="modal-content">
-                            <section class="modal-header">
-                              <h5 class="modal-title">Confirmar ayudar en despacho</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </section>
-                            <section class="modal-body">
-                              <p>¿Realmente quiere ayudar en este despacho?</p>
-                            </section>
-                            <section class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                              <form action="" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="ayudarDespacho">
-                                <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
-                                </form>
-                            </section>
-                          </article>
-                        </article>
-                    </section>
-                    
-                    {% endif %}
+                        {% if puede_ayudar %}
+                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
+                        <!-- modal -->
+                        <section class="modal fade" id="modalH" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
+                            <article class="modal-dialog modal-dialog-centered">
+                            <article class="modal-content">
+                                <section class="modal-header">
+                                <h5 class="modal-title">Confirmar ayudar en despacho</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </section>
+                                <section class="modal-body">
+                                <p>¿Realmente quiere ayudar en este despacho?</p>
+                                </section>
+                                <section class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                <form action="" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ayudarDespacho">
+                                    <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
+                                    </form>
+                                </section>
+                            </article>
+                            </article>
+                        </section>
+                        {% endif %}
 
                     {% else %}
-                    <p>Este pedido fue despachado por: {{p.despachado_por__first_name}} {{p.despachado_por__last_name}} <br>
-                    Hora: <span class="badge bg-success">{{p.despachado_hora}}</span>
+                    <h5>Este pedido fue despachado por:</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for d in despachadoresActivos %}
+                        <li class="list-group-item">
+                            <p>{{d.vendedor.first_name}} {{d.vendedor.last_name}} <br>
+                            Cod. empleado {{d.vendedor.id}}</p>
+                        </li>
+                        {% endfor %}          
+                    </ul>
+                    <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
                     </p>
                     {% endif %}
                 </section>
