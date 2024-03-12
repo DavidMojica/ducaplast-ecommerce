@@ -62,7 +62,7 @@
                             </section>
                           </article>
                         </article>
-                      </section>
+                    </section>
 
 
                     {% elif pedido.estado_id == 1 %}
@@ -76,13 +76,54 @@
                         {% endfor %}          
                     </ul>
                     
-                    <button class="btn btn-primary">Despacho completado</button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalC">Marcar como completo</button>
+                    <!-- modal -->
+                    <section class="modal fade" id="modalC" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
+                        <article class="modal-dialog modal-dialog-centered">
+                          <article class="modal-content">
+                            <section class="modal-header">
+                              <h5 class="modal-title">Confirmar marcar como completo</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </section>
+                            <section class="modal-body">
+                              <p>¿Este despacho ya está listo para ser facturado?</p>
+                            </section>
+                            <section class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                              <form action="" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="completarDespacho">
+                                <button type="submit" class="btn btn-success">Sí, está listo</button>
+                                </form>
+                            </section>
+                          </article>
+                        </article>
+                    </section>
                     {% if puede_ayudar %}
-                    <form action="" method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" name="ayudarDespacho">
-                        <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
-                    </form>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
+                    <!-- modal -->
+                    <section class="modal fade" id="modalH" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
+                        <article class="modal-dialog modal-dialog-centered">
+                          <article class="modal-content">
+                            <section class="modal-header">
+                              <h5 class="modal-title">Confirmar ayudar en despacho</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </section>
+                            <section class="modal-body">
+                              <p>¿Realmente quiere ayudar en este despacho?</p>
+                            </section>
+                            <section class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                              <form action="" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="ayudarDespacho">
+                                <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
+                                </form>
+                            </section>
+                          </article>
+                        </article>
+                    </section>
+                    
                     {% endif %}
 
                     {% else %}
@@ -176,7 +217,7 @@
         </div>
     </section>
     {% else %}
-    <div class="alert alert-danger" role="alert">no verificado</div>
+    <div class="alert alert-danger" role="alert">{{error}}</div>
     {% endif %}
 </main>
 {% endblock %}
