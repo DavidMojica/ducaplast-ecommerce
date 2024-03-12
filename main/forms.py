@@ -3,6 +3,16 @@ import re
 from django import forms
 from .models import TipoUsuario, Usuarios, Clientes
 
+class SeleccionarRepartidor(forms.Form):
+    repartidor = forms.ModelChoiceField(
+        label="Repartidor",
+        widget=forms.Select(attrs={'class': 'form-select', 'placeholder':'Seleccione repartidor'}),
+        queryset=Usuarios.objects.filter(tipo_usuario_id=5),
+        empty_label="Seleccione repartidor",
+        required=True
+    )
+
+
 class DetallesPedido(forms.Form):
     cliente = forms.ModelChoiceField(
         label="Nombre del cliente",

@@ -39,6 +39,9 @@ class Usuarios(AbstractUser):
         if not self.password:
             self.set_unusable_password()
         super(Usuarios, self).save(*args, **kwargs)
+        
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ID: {self.id}"
 
 
 

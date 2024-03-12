@@ -8,7 +8,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido
+from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -183,19 +183,21 @@ def OrderDetail(request, order):
             'despachadoresActivos': despachadores_activos,
             'puede_ayudar': puede_ayudar
         })
-
-        
+    elif user.tipo_usuario_id == 4:
+        pedido = get_object_or_404(Pedido, pk=order)
+        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+        return render(request, HTMLORDERDETAIL, {
+                'success': True,
+                'pedido': pedido,
+                'user': user,
+                'despachadoresActivos': despachadores_activos,
+                'form': SeleccionarRepartidor()
+            })
         
     return render(request, HTMLORDERDETAIL, {
         'success': False,
         'msg': ERROR_13
     })
-
-
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Pedido, Usuarios
 
 @login_required
 def Orders(request, filtered=None):
