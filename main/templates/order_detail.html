@@ -196,10 +196,10 @@
                             </section>
                             <section class="modal-body">
                               <p>Seleccione el repartidor</p>
-                              <form action="" method="POST" id="confirmar_despacho">
+                              <form action="" method="POST" id="confirmarFacturacion">
                                 {% csrf_token %}
                                 {{form.repartidor}}
-                                <input type="hidden" name="confirmar_repartidor">
+                                <input type="hidden" name="confirmarFacturacion">
                                 <button type="submit" class="btn btn-warning mt-4">Confirmo facturación y repartidor</button>
                               </form>                              
                             </section>

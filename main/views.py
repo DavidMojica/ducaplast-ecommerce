@@ -136,6 +136,11 @@ def OrderDetail(request, order):
                         'success': False,
                         'msg': ERROR_14
                     })
+            elif 'confirmarFacturacion' in request.POST:
+                pedido.estado_id = 3
+                pedido.facturado_por = user
+                pedido.facturado_hora = timezone.now()
+                pedido.save()
                                     
         else:
             return render(request, HTMLORDERDETAIL, {
