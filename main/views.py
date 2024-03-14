@@ -109,8 +109,8 @@ def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     
     if request.method == 'POST':
+        pedido = get_object_or_404(Pedido, pk=order)
         if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
-            pedido = get_object_or_404(Pedido, pk=order)
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
@@ -138,18 +138,17 @@ def OrderDetail(request, order):
                     })
             
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
-            if 'confFacturacion' in request.POST:
+            if 'confirmarFacturacion' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if form.is_valid():
                     pedido.estado_id = 3
                     pedido.facturado_por = user
                     pedido.facturado_hora = timezone.now()
-                    pedido.save()
-                    
                     pedidoActivo = PedidosActivos(
-                        pedido=pedido,
-                        repartidor= get_object_or_404(Usuarios, pk=form.cleaned_data.get('repartidor'))
+                        pedido = pedido,
+                        repartidor =  get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
                     )
+                    pedido.save()
                     pedidoActivo.save()
                 else:
                     return render(request, HTMLORDERDETAIL,{
