@@ -9,7 +9,7 @@ from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho, PedidosActivos
 
 import re, json
 
@@ -109,8 +109,8 @@ def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     
     if request.method == 'POST':
-        if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds:
-            pedido = get_object_or_404(Pedido, pk=order)
+        pedido = get_object_or_404(Pedido, pk=order)
+        if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
@@ -136,18 +136,37 @@ def OrderDetail(request, order):
                         'success': False,
                         'msg': ERROR_14
                     })
-                                    
+            
+        elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
+            if 'confirmarFacturacion' in request.POST:
+                form = SeleccionarRepartidor(request.POST)
+                if form.is_valid():
+                    pedido.estado_id = 3
+                    pedido.facturado_por = user
+                    pedido.facturado_hora = timezone.now()
+                    pedidoActivo = PedidosActivos(
+                        pedido = pedido,
+                        repartidor =  get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                    )
+                    pedido.save()
+                    pedidoActivo.save()
+                else:
+                    return render(request, HTMLORDERDETAIL,{
+                        'success': False,
+                        'msg': ERROR_2
+                    })            
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
                 'msg': ERROR_13
             })
-    
+         
+    #GET   
+    pedido = get_object_or_404(Pedido, pk=order)
+    cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
+    productos = ProductosPedido.objects.filter(pedido_id=order)
     if user.tipo_usuario_id == 2:
-        pedido = get_object_or_404(Pedido, pk=order)
         if pedido.vendedor_id == user.id:
-            cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
-            productos = ProductosPedido.objects.filter(pedido_id=order)
             return render(request, HTMLORDERDETAIL, {
                 'success': True,
                 'pedido': pedido,
@@ -161,7 +180,6 @@ def OrderDetail(request, order):
                 'msg': ERROR_13
             })
     elif user.tipo_usuario_id == 3:
-        pedido = get_object_or_404(Pedido, pk=order)
         despachadores_activos = None
         puede_ayudar = False
         if pedido.estado_id == 1:
@@ -170,10 +188,6 @@ def OrderDetail(request, order):
         elif pedido.estado_id == 2:
             despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
             
-            
-        
-        cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
-        productos = ProductosPedido.objects.filter(pedido_id=order)
         return render(request, HTMLORDERDETAIL, {
             'success': True,
             'pedido': pedido,
@@ -189,11 +203,26 @@ def OrderDetail(request, order):
         return render(request, HTMLORDERDETAIL, {
                 'success': True,
                 'pedido': pedido,
+                'cliente': cliente,
+                'productos': productos,
                 'user': user,
                 'despachadoresActivos': despachadores_activos,
                 'form': SeleccionarRepartidor()
             })
+    elif user.tipo_usuario_id == 5:
+        pedidoActivo = PedidosActivos.objects.filter(repartidor=user)
         
+        if pedidoActivo:
+            return render(request,HTMLORDERDETAIL, {
+                'success': True,
+                'pedido': pedido,
+                'cliente': cliente,
+                'productos': productos,
+                'user': user,
+            })
+        else:
+            return render(request, HTMLORDERDETAIL, {})
+    
     return render(request, HTMLORDERDETAIL, {
         'success': False,
         'msg': ERROR_13
@@ -213,6 +242,11 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(estado_id__in=[0, 1]).order_by('-id')
         elif user.tipo_usuario_id == 4:
             pedidos = Pedido.objects.filter(estado_id=2).order_by('-id')
+        elif user.tipo_usuario_id == 5:
+            pedidoActivo = PedidosActivos.objects.filter(pk=user.id)
+            pedido = get_object_or_404(Pedido, pk=pedidoActivo.pedido)
+            pedidos = Pedido.objects.filter(estado_id=3, pk=pedido.pk)
+
 
     elif filtered == "historial": #No aplica para vendedor
         history=True
@@ -275,6 +309,8 @@ def Home(request):
                 elif userType == 3:
                     return redirect(reverse('registro'))
                 elif userType == 4:
+                    return redirect(reverse('registro'))
+                elif userType == 5:
                     return redirect(reverse('registro'))
                 else:
                     logout(request)

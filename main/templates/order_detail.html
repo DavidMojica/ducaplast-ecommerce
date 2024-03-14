@@ -24,7 +24,7 @@
                         {% elif pedido.estado_id == 2 %}
                         Este pedido está siendo facturado
                         {% elif pedido.estado_id == 3 %}
-                        Este pedido fue entregado a esta hora: por:
+                        Este pedido salió a reparto
                         {% elif pedido.estado_id == 4 %}
                         Este pedido fue completado a esta hora: 
                         {% endif %}
@@ -118,7 +118,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="ayudarDespacho">
                                     <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
-                                    </form>
+                                </form>
                                 </section>
                             </article>
                             </article>
@@ -174,6 +174,39 @@
                 </section>
             </article>
 
+            {% elif user.tipo_usuario_id == 5 %}
+            <article class="card mb-3">
+                <section class="card-header">
+                    <h5 class="card-title text-center">Despacho</h5>
+                </section>
+                <section class="card-body">
+                    {% if pedido.estado_id == 0 %}
+                    <p>Este pedido está a la espera de ser despachado.</p>
+                    {% elif pedido.estado_id == 1 %}
+                    <p>Este pedido está siendo despachado por:</p>
+                    <ul class="list-group list-group-flush">
+                        {% for d in despachadoresActivos %}
+                        <li class="list-group-item">
+                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
+                            Cod. empleado {{d.despachador.id}}</p>
+                        </li>
+                        {% endfor %}          
+                    </ul>
+                    {% else %}
+                    <h5>Este pedido fue despachado por:</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for d in despachadoresActivos %}
+                        <li class="list-group-item">
+                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
+                            Cod. empleado {{d.despachador.id}}</p>
+                        </li>
+                        {% endfor %}          
+                    </ul>
+                    <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
+                    </p>
+                    {% endif %}
+                </section>
+            </article>
             <!-- Facturacion -->
             <section class="card mb-3">
                 <article class="card-header text-center">
@@ -196,10 +229,10 @@
                             </section>
                             <section class="modal-body">
                               <p>Seleccione el repartidor</p>
-                              <form action="" method="POST" id="confirmar_despacho">
+                              <form action="" method="POST" id="confirmarFacturacion">
                                 {% csrf_token %}
                                 {{form.repartidor}}
-                                <input type="hidden" name="confirmar_repartidor">
+                                <input type="hidden" name="confirmarFacturacion">
                                 <button type="submit" class="btn btn-warning mt-4">Confirmo facturación y repartidor</button>
                               </form>                              
                             </section>
@@ -207,13 +240,31 @@
                         </article>
                     </section>
                     {% else %}
-                    <p>Este pedido fue facturado por {{p.facturado_por__first_name}} {{p.facturado_por__last_name}} <br>
-                        Hora: <span class="badge bg-success">{{p.facturado_hora}}</span>
+                    <h5>Este pedido fue facturado por </h5>
+                    <p>
+                        {{pedido.facturado_por.first_name}} {{pedido.facturado_por.last_name}} <br>
+                        Hora: <span class="badge bg-success">{{pedido.facturado_hora}}</span>
                     </p>
                     {% endif %}
                 </article>
             </section>
+            <!-- Reparto -->
+            <section class="card mb-3">
+                <article class="card-header text-center">
+                    <h5>Reparto</h5>
+                </article>
+                <article class="card-body">
+                    {% if pedido.estado.id < 3 %}
+                    <p>Este pedido aún no puede ser repartido</p>
+                    {% elif pedido.estado.id == 3 %}
+                    <p>Se te ha asignado esta entrega, por favor marque el botón cuando entregue el pedido</p>
+                    <button class="btn btn-primary">Marcar como entregado</button>
+                </article>
+
+            </section>
             {% elif user.tipo_usuario_id == 5 %}
+
+
             <section class="card-body">
                 {% if pedido.estado_id == 0 %}
                 <p>Este pedido está a la espera de ser despachado.</p>
