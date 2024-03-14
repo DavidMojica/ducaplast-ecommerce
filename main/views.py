@@ -9,7 +9,7 @@ from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho, PedidosActivos
 
 import re, json
 
@@ -109,7 +109,7 @@ def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     
     if request.method == 'POST':
-        if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds:
+        if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
             pedido = get_object_or_404(Pedido, pk=order)
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
                 pedido.estado_id = 1
@@ -136,12 +136,26 @@ def OrderDetail(request, order):
                         'success': False,
                         'msg': ERROR_14
                     })
-            elif 'confirmarFacturacion' in request.POST:
-                pedido.estado_id = 3
-                pedido.facturado_por = user
-                pedido.facturado_hora = timezone.now()
-                pedido.save()
-                                    
+            
+        elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
+            if 'confFacturacion' in request.POST:
+                form = SeleccionarRepartidor(request.POST)
+                if form.is_valid():
+                    pedido.estado_id = 3
+                    pedido.facturado_por = user
+                    pedido.facturado_hora = timezone.now()
+                    pedido.save()
+                    
+                    pedidoActivo = PedidosActivos(
+                        pedido=pedido,
+                        repartidor= get_object_or_404(Usuarios, pk=form.cleaned_data.get('repartidor'))
+                    )
+                    pedidoActivo.save()
+                else:
+                    return render(request, HTMLORDERDETAIL,{
+                        'success': False,
+                        'msg': ERROR_2
+                    })            
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,

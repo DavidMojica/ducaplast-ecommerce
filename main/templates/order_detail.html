@@ -118,7 +118,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="ayudarDespacho">
                                     <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
-                                    </form>
+                                </form>
                                 </section>
                             </article>
                             </article>
@@ -199,7 +199,7 @@
                               <form action="" method="POST" id="confirmarFacturacion">
                                 {% csrf_token %}
                                 {{form.repartidor}}
-                                <input type="hidden" name="confirmarFacturacion">
+                                <input type="hidden" name="confFacturacion">
                                 <button type="submit" class="btn btn-warning mt-4">Confirmo facturación y repartidor</button>
                               </form>                              
                             </section>
