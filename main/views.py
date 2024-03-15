@@ -158,7 +158,9 @@ def OrderDetail(request, order):
                     return render(request, HTMLORDERDETAIL,{
                         'success': False,
                         'msg': ERROR_2
-                    })            
+                    })       
+                 
+                 
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
@@ -212,21 +214,22 @@ def OrderDetail(request, order):
                 'productos': productos,
                 'user': user,
                 'despachadoresActivos': despachadores_activos,
-                'form': SeleccionarRepartidor()
+                
             })
     elif user.tipo_usuario_id == 5:
-        pedidoActivo = PedidosActivos.objects.filter(repartidor=user)
+        pedido = get_object_or_404(Pedido, pk=order)
+        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
         
-        if pedidoActivo:
-            return render(request,HTMLORDERDETAIL, {
-                'success': True,
-                'pedido': pedido,
-                'cliente': cliente,
-                'productos': productos,
-                'user': user,
-            })
-        else:
-            return render(request, HTMLORDERDETAIL, {})
+        return render(request,HTMLORDERDETAIL, {
+            'success': True,
+            'pedido': pedido,
+            'cliente': cliente,
+            'productos': productos,
+            'user': user,
+            'form': SeleccionarRepartidor(),
+            'despachadoresActivos': despachadores_activos,
+        })
+
     
     return render(request, HTMLORDERDETAIL, {
         'success': False,
@@ -248,9 +251,7 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 4:
             pedidos = Pedido.objects.filter(estado_id=2).order_by('-id')
         elif user.tipo_usuario_id == 5:
-            pedidoActivo = PedidosActivos.objects.filter(pk=user.id)
-            pedido = get_object_or_404(Pedido, pk=pedidoActivo.pedido)
-            pedidos = Pedido.objects.filter(estado_id=3, pk=pedido.pk)
+            pedidos = Pedido.objects.filter(estado_id=3).order_by('-id')
 
 
     elif filtered == "historial": #No aplica para vendedor
