@@ -43,8 +43,6 @@ class Usuarios(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ID: {self.id}"
 
-
-
 class Pedido(models.Model):
     id = models.AutoField(primary_key=True)
     vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)

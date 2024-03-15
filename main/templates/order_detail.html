@@ -7,7 +7,7 @@
 <main class="container mt-4">
     {% if success %}
     <section class="row">
-        <div class="col-md-6">
+        <section class="col-md-6">
             <article class="card mb-3">
                 <section class="card-header">
                     <h5 class="card-title text-center">Información general del pedido <span class="badge bg-primary">{{pedido.id}}</span></h5>
@@ -31,6 +31,7 @@
                     </p>
                 </section>
             </article>
+            <!-- Despachador -->
             {% if user.tipo_usuario_id == 3 %}
             <article class="card mb-3">
                 <section class="card-header">
@@ -39,6 +40,7 @@
                 <section class="card-body">
                     {% if pedido.estado_id == 0 %}
                     <p>Este pedido está a la espera de ser despachado.</p>
+                    
                     <!-- trigger -->
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
                     <!-- modal -->
@@ -70,8 +72,9 @@
                     <ul class="list-group list-group-flush">
                         {% for d in despachadoresActivos %}
                         <li class="list-group-item">
-                            <p>{{d.vendedor.first_name}} {{d.vendedor.last_name}} <br>
-                            Cod. empleado {{d.vendedor.id}}</p>
+                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
+                            <span class="badge bg-primary">Cod. empleado {{d.despachador.id}}</span>
+                        </p>
                         </li>
                         {% endfor %}          
                     </ul>
@@ -99,6 +102,7 @@
                           </article>
                         </article>
                     </section>
+                    
                         {% if puede_ayudar %}
                         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
                         <!-- modal -->
@@ -124,7 +128,7 @@
                             </article>
                         </section>
                         {% endif %}
-
+                        
                     {% else %}
                     <h5>Este pedido fue despachado por:</h5>
                     <ul class="list-group list-group-flush">
@@ -138,43 +142,12 @@
                     <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
                     </p>
                     {% endif %}
+                    
                 </section>
             </article>
-            {% elif user.tipo_usuario_id == 4 %}
-            <article class="card mb-3">
-                <section class="card-header">
-                    <h5 class="card-title text-center">Despacho</h5>
-                </section>
-                <section class="card-body">
-                    {% if pedido.estado_id == 0 %}
-                    <p>Este pedido está a la espera de ser despachado.</p>
-                    {% elif pedido.estado_id == 1 %}
-                    <p>Este pedido está siendo despachado por:</p>
-                    <ul class="list-group list-group-flush">
-                        {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            Cod. empleado {{d.despachador.id}}</p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    {% else %}
-                    <h5>Este pedido fue despachado por:</h5>
-                    <ul class="list-group list-group-flush">
-                        {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            Cod. empleado {{d.despachador.id}}</p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
-                    </p>
-                    {% endif %}
-                </section>
-            </article>
+            
 
-            {% elif user.tipo_usuario_id == 5 %}
+            {% elif user.tipo_usuario_id == 4 %}
             <article class="card mb-3">
                 <section class="card-header">
                     <h5 class="card-title text-center">Despacho</h5>
@@ -248,23 +221,9 @@
                     {% endif %}
                 </article>
             </section>
-            <!-- Reparto -->
-            <section class="card mb-3">
-                <article class="card-header text-center">
-                    <h5>Reparto</h5>
-                </article>
-                <article class="card-body">
-                    {% if pedido.estado.id < 3 %}
-                    <p>Este pedido aún no puede ser repartido</p>
-                    {% elif pedido.estado.id == 3 %}
-                    <p>Se te ha asignado esta entrega, por favor marque el botón cuando entregue el pedido</p>
-                    <button class="btn btn-primary">Marcar como entregado</button>
-                </article>
-
-            </section>
+            
+            
             {% elif user.tipo_usuario_id == 5 %}
-
-
             <section class="card-body">
                 {% if pedido.estado_id == 0 %}
                 <p>Este pedido está a la espera de ser despachado.</p>
@@ -298,8 +257,10 @@
                 {% endif %}
             </section>
             {% endif %}
-        </div>
-        <div class="col-md-6">
+            
+        </section>
+        <!-- Productos va aquí -->
+        <aside class="col-md-6">
             <article class="card">
                 <section class="card-body">
                     <h5 class="card-title">Productos en el pedido:</h5>
@@ -321,10 +282,15 @@
                     </table>
                 </section>
             </article>
-        </div>
+        </aside>
+        
     </section>
     {% else %}
     <div class="alert alert-danger" role="alert">{{msg}}</div>
     {% endif %}
+
+    
+    
+    
 </main>
 {% endblock %}

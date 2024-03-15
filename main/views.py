@@ -100,6 +100,7 @@ def getCartPrice(request):
     
 @login_required
 def ayudarEnDespacho(request, user, pedido):
+    print(f"{user} {pedido}")
     handler = HandlerDespacho(despachador = user, pedido = pedido)
     handler.save()
     
@@ -107,18 +108,20 @@ def ayudarEnDespacho(request, user, pedido):
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
-    
+    print(user.tipo_usuario)
+    #Post
     if request.method == 'POST':
         pedido = get_object_or_404(Pedido, pk=order)
         if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
+                
                 pedido.estado_id = 1
                 pedido.save()
                 ayudarEnDespacho(request, user, pedido)
                 
             elif 'ayudarDespacho' in request.POST:
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-                if not despachadores_activos.filter(vendedor_id=user.id).exists():
+                if not despachadores_activos.filter(despachador_id=user.id).exists():
                     ayudarEnDespacho(request, user, pedido)
                 else:
                     return render(request, HTMLORDERDETAIL, {
@@ -127,7 +130,8 @@ def OrderDetail(request, order):
                     })
             elif 'completarDespacho' in request.POST:
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-                if despachadores_activos.filter(vendedor_id=user.id).exists():
+                print(f"--------> ")
+                if despachadores_activos.filter(despachador_id=user.id).exists():
                     pedido.estado_id = 2
                     pedido.despachado_hora = timezone.now()
                     pedido.save()
@@ -165,6 +169,7 @@ def OrderDetail(request, order):
     pedido = get_object_or_404(Pedido, pk=order)
     cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
     productos = ProductosPedido.objects.filter(pedido_id=order)
+    print(productos)
     if user.tipo_usuario_id == 2:
         if pedido.vendedor_id == user.id:
             return render(request, HTMLORDERDETAIL, {
@@ -184,7 +189,7 @@ def OrderDetail(request, order):
         puede_ayudar = False
         if pedido.estado_id == 1:
             despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-            puede_ayudar = not despachadores_activos.filter(vendedor_id=user.id).exists()
+            puede_ayudar = not despachadores_activos.filter(despachador_id=user.id).exists()
         elif pedido.estado_id == 2:
             despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
             
@@ -325,7 +330,6 @@ def Home(request):
 def Logout(request):
     logout(request)
     return redirect(reverse('home'))
-
 
 def Registro(request):
     newForm = RegistroUsuariosForm()
