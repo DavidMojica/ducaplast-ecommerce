@@ -43,11 +43,9 @@ class Usuarios(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ID: {self.id}"
 
-
-
 class Pedido(models.Model):
     id = models.AutoField(primary_key=True)
-    vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name="vendedor")
     cliente = models.ForeignKey(Clientes, on_delete=models.CASCADE)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
     direccion = models.CharField(max_length=300)
@@ -58,8 +56,10 @@ class Pedido(models.Model):
     despachado_hora = models.DateTimeField(null=True, blank=True)
     facturado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="facturado_por")
     facturado_hora = models.DateTimeField(null=True, blank=True)
+    asignador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
+    asignacion_hora = models.DateTimeField(null=True, blank=True)
     repartido_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="repartido_por")
-    repartido_hora = models.DateTimeField(null=True, blank=True)
+    # repartido_hora = models.DateTimeField(null=True, blank=True)
     
     def get_status_tiempo(self):
         current_time = timezone.now()
@@ -98,10 +98,6 @@ class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)   
-    
-class PedidosActivos(models.Model):
-    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
-    repartidor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     
 class HandlerDespacho(models.Model):
     despachador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
