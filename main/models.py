@@ -59,7 +59,7 @@ class Pedido(models.Model):
     asignador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
     asignacion_hora = models.DateTimeField(null=True, blank=True)
     repartido_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="repartido_por")
-    repartido_hora = models.DateTimeField(null=True, blank=True)
+    # repartido_hora = models.DateTimeField(null=True, blank=True)
     
     def get_status_tiempo(self):
         current_time = timezone.now()
@@ -98,10 +98,6 @@ class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)   
-    
-class RepartosActivos(models.Model):
-    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
-    repartidor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     
 class HandlerDespacho(models.Model):
     despachador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)

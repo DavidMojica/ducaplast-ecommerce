@@ -298,12 +298,16 @@
                                 {% csrf_token %}
                                 {{form.repartidor}}
                                 <input type="hidden" name="confirmarRepartidor">
+                                <button type="submit" class="btn btn-warning mt-4">Confirmar repartidor</button>                             
                             </form> 
-                            <button type="submit" class="btn btn-warning mt-4">Confirmar repartidor</button>                             
                             </section>
                         </article>
                         </article>
                     </section>
+                    {% elif pedido.estado.id == 4 %}
+                    <h5>Este pedido está siendo repartido</h5>
+                    <p>Asignó el repartidor: {{pedido.asignador_reparto}} <br>
+                    Repartidor: {{pedido.repartido_por}}</p>
                     {% else %}
                     <p>Este pedido ya fue repartido</p>
                     {% endif %}

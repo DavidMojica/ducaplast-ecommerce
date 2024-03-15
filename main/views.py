@@ -9,7 +9,7 @@ from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho, RepartosActivos
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
 
@@ -155,21 +155,19 @@ def OrderDetail(request, order):
                     pedido.estado_id = 4
                     pedido.asignador_reparto = user
                     pedido.asignacion_hora = timezone.now()
-                    pedidoActivo = RepartosActivos(
-                        pedido = pedido,
-                        repartidor = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
-                    )
+                    pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
                     pedido.save()
-                    pedidoActivo.save()
                 else:
                     return render(request, HTMLORDERDETAIL,{
                         'success': False,
                         'msg': ERROR_2
                     }) 
-
                     
-                 
-                 
+            else:
+                return render(request,HTMLORDERDETAIL,{
+                    'success':False,
+                    'msg': ERROR_13
+                })
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
