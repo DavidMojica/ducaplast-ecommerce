@@ -45,7 +45,7 @@ class Usuarios(AbstractUser):
 
 class Pedido(models.Model):
     id = models.AutoField(primary_key=True)
-    vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name="vendedor")
     cliente = models.ForeignKey(Clientes, on_delete=models.CASCADE)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
     direccion = models.CharField(max_length=300)
@@ -56,6 +56,8 @@ class Pedido(models.Model):
     despachado_hora = models.DateTimeField(null=True, blank=True)
     facturado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="facturado_por")
     facturado_hora = models.DateTimeField(null=True, blank=True)
+    asignador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
+    asignacion_hora = models.DateTimeField(null=True, blank=True)
     repartido_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="repartido_por")
     repartido_hora = models.DateTimeField(null=True, blank=True)
     
@@ -97,7 +99,7 @@ class ProductosPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)   
     
-class PedidosActivos(models.Model):
+class RepartosActivos(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     repartidor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     

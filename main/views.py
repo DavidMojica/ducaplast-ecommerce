@@ -9,7 +9,7 @@ from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho, PedidosActivos
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho, RepartosActivos
 
 import re, json
 
@@ -143,14 +143,21 @@ def OrderDetail(request, order):
             
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
             if 'confirmarFacturacion' in request.POST:
+                pedido.estado_id = 3
+                pedido.facturado_por = user
+                pedido.facturado_hora = timezone.now()
+                pedido.save()
+      
+        elif user.tipo_usuario_id == 5 or user.tipo_usuario in adminIds: # Asignadores
+            if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if form.is_valid():
-                    pedido.estado_id = 3
-                    pedido.facturado_por = user
-                    pedido.facturado_hora = timezone.now()
-                    pedidoActivo = PedidosActivos(
+                    pedido.estado_id = 4
+                    pedido.asignador_reparto = user
+                    pedido.asignacion_hora = timezone.now()
+                    pedidoActivo = RepartosActivos(
                         pedido = pedido,
-                        repartidor =  get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                        repartidor = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
                     )
                     pedido.save()
                     pedidoActivo.save()
@@ -158,7 +165,9 @@ def OrderDetail(request, order):
                     return render(request, HTMLORDERDETAIL,{
                         'success': False,
                         'msg': ERROR_2
-                    })       
+                    }) 
+
+                    
                  
                  
         else:
@@ -216,7 +225,7 @@ def OrderDetail(request, order):
                 'despachadoresActivos': despachadores_activos,
                 
             })
-    elif user.tipo_usuario_id == 5:
+    elif user.tipo_usuario_id == 5: #Asignador
         pedido = get_object_or_404(Pedido, pk=order)
         despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
         

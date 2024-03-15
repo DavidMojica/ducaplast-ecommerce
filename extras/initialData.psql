@@ -4,7 +4,8 @@ insert into main_tipousuario (id, description) values(1, 'Administrador');
 insert into main_tipousuario (id, description) values(2, 'Vendedor');
 insert into main_tipousuario (id, description) values(3, 'Despachador');
 insert into main_tipousuario (id, description) values(4, 'Facturador');
-insert into main_tipousuario (id, description) values(5, 'Repartidor');
+insert into main_tipousuario (id, description) values(5, 'Asignador');
+insert into main_tipousuario (id, description) values(6, 'Repartidor');
 --select * from main_tipousuario
 
 insert into main_estados (id, description) values(0, 'Pendiente de despacho');

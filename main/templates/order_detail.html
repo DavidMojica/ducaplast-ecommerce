@@ -264,23 +264,6 @@
                     <p>Este pedido aún no puede ser facturado</p>
                     {% elif pedido.estado.id == 2 %}
                     <p>Este pedido está listo para ser facturado</p>
-                    <!-- trigger -->
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Seleccionar repartidor</button>
-                    <!-- modal -->
-                    <section class="modal fade" id="modalFacturacion" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                        <article class="modal-dialog modal-dialog-centered">
-                          <article class="modal-content">
-                            <section class="modal-header">
-                              <h5 class="modal-title">Confirmar facturacion y repartidor</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </section>
-                            <section class="modal-body">
-                              <p>Antes de continuar asegurese de haber facturado completamente el pedido.</p>
-                              <button type="submit" class="btn btn-warning mt-4">Confirmar facturacion</button>                             
-                            </section>
-                          </article>
-                        </article>
-                    </section>
                     {% else %}
                     <h5>Este pedido fue facturado por </h5>
                     <p>
@@ -299,14 +282,28 @@
                     <p>Este pedido aún no puede ser repartido</p>
                     {% elif pedido.estado.id == 3 %}
                     <p>Este pedido está listo para ser repartido</p>
-                    <button class="btn btn-primary">Seleccionar repartidor</button>
-    
-    
-                    <form action="" method="POST" id="confirmarFacturacion">
-                        {% csrf_token %}
-                        {{form.repartidor}}
-                        <input type="hidden" name="confirmarFacturacion">
-                      </form> 
+                    <!-- trigger -->
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Seleccionar repartidor</button>
+                    <!-- modal -->
+                    <section class="modal fade" id="modalFacturacion" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                        <article class="modal-dialog modal-dialog-centered">
+                        <article class="modal-content">
+                            <section class="modal-header">
+                            <h5 class="modal-title">Seleccionar repartidor</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </section>
+                            <section class="modal-body">
+                            <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
+                            <form action="" method="POST" id="confirmarRepartidor">
+                                {% csrf_token %}
+                                {{form.repartidor}}
+                                <input type="hidden" name="confirmarRepartidor">
+                            </form> 
+                            <button type="submit" class="btn btn-warning mt-4">Confirmar repartidor</button>                             
+                            </section>
+                        </article>
+                        </article>
+                    </section>
                     {% else %}
                     <p>Este pedido ya fue repartido</p>
                     {% endif %}
