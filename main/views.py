@@ -60,6 +60,7 @@ ERROR_15 = "Usted ya está ayudando en el despacho de este pedido"
 ERROR_16 = "Su cuenta está desactivada. Contacte con el administrador."
 ERROR_17 = "Este pedido ya fue facturado por alguien más"
 ERROR_18 = "Este pedido ya fue marcado como despachado por alguien más"
+ERROR_19 = "El repartidor de este pedido ya fue elegido por alguien más"
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
@@ -114,7 +115,7 @@ def ayudarEnDespacho(request, user, pedido):
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
-    issue = None
+    issue = ""
     print(user.tipo_usuario)
     #Post
     if request.method == 'POST':
@@ -156,20 +157,24 @@ def OrderDetail(request, order):
         elif user.tipo_usuario_id == 5 or user.tipo_usuario in adminIds: # Asignadores
             if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
-                if form.is_valid():
-                    pedido.estado_id = 4
-                    pedido.asignador_reparto = user
-                    pedido.asignacion_hora = timezone.now()
-                    pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
-                    pedido.save()
+                if not pedido.estado_id >= 4:
+                    if form.is_valid():
+                        pedido.estado_id = 4
+                        pedido.asignador_reparto = user
+                        pedido.asignacion_hora = timezone.now()
+                        pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                        pedido.save()
+                    else:
+                        return render(request, HTMLORDERDETAIL,{
+                            'success': False,
+                            'msg': ERROR_2
+                        }) 
                 else:
-                    return render(request, HTMLORDERDETAIL,{
-                        'success': False,
-                        'msg': ERROR_2
-                    }) 
+                    issue = ERROR_19
             elif 'modificarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if form.is_valid():
+                    pedido.asignacion_hora = timezone.now()
                     pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
                     pedido.save()
                     
@@ -221,7 +226,7 @@ def OrderDetail(request, order):
             'productos': productos,
             'despachadoresActivos': despachadores_activos,
             'puede_ayudar': puede_ayudar,
-            'issue': issue
+            'issue3': issue
         })
     elif user.tipo_usuario_id == 4:
         pedido = get_object_or_404(Pedido, pk=order)
@@ -233,27 +238,23 @@ def OrderDetail(request, order):
                 'productos': productos,
                 'user': user,
                 'despachadoresActivos': despachadores_activos,
-                'issue': issue
+                'issue4': issue
             })
     elif user.tipo_usuario_id == 5: #Asignador
         pedido = get_object_or_404(Pedido, pk=order)
-        if pedido.asignador_reparto_id == user.id:
-            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-            
-            return render(request,HTMLORDERDETAIL, {
-                'success': True,
-                'pedido': pedido,
-                'cliente': cliente,
-                'productos': productos,
-                'user': user,
-                'form': SeleccionarRepartidor(),
-                'despachadoresActivos': despachadores_activos,
-            })
-        else:
-            return render(request, HTMLORDERDETAIL, {
-                'success': False,
-                'msg': ERROR_13
-            })
+        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+        
+        return render(request,HTMLORDERDETAIL, {
+            'success': True,
+            'pedido': pedido,
+            'cliente': cliente,
+            'productos': productos,
+            'user': user,
+            'form': SeleccionarRepartidor(),
+            'despachadoresActivos': despachadores_activos,
+            'issue5': issue
+        })
+
     return render(request, HTMLORDERDETAIL, {
         'success': False,
         'msg': ERROR_13

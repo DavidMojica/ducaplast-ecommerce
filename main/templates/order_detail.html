@@ -8,15 +8,16 @@
     {% if success %}
     <section class="row">
         <section class="col-md-6">
+            <!-- Información general -->
             <article class="card mb-3">
                 <section class="card-header">
                     <h5 class="card-title text-center">Información general del pedido <span class="badge bg-primary">{{pedido.id}}</span></h5>
                 </section>
                 <section class="card-body">
                     <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
-                    <p class="card-text">Dirección de entrega: {{cliente.direccion}}</p>
-                    <p class="card-text">Estado del pedido: {{pedido.estado}}</p>
-                    <p>
+                    <p class="card-text">Dirección de entrega: {{cliente.direccion}} <br>
+                        Valor pedido: <strong>${{pedido.valor}}</strong></p>
+                    <p class="card-text">Estado del pedido: {{pedido.estado}} <br>
                         {% if pedido.estado_id == 0 %}
                         Este pedido está a la espera de ser despachado.
                         {% elif pedido.estado_id == 1 %}
@@ -33,9 +34,14 @@
                         Descripción no disponible
                         {% endif %}
                     </p>
+                    {% if pedido.nota %}
+                        <h5>Nota de venta:</h5>
+                        <p class="text-bold">{{pedido.nota}}</p>
+                    {% else %}
+                        <p class="text-bold">Este pedido no tiene nota de venta.</p>
+                    {% endif %}
                 </section>
             </article>
-
             <!-- Despacho -->
             <article class="card mb-3">
                 <section class="card-header">
@@ -43,9 +49,8 @@
                 </section>
                 <section class="card-body">
                     {% if pedido.estado_id == 0 %}
-                        <p>Este pedido está a la espera de ser despachado.</p>
+                        <h5>Este pedido está a la espera de ser despachado.</h5>
                         {% if user.tipo_usuario_id == 3 %}
-                        <!-- Inscribirse a despacho -->
                             <!-- trigger -->
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
                             <!-- modal -->
@@ -72,7 +77,7 @@
                             </section>
                         {% endif %}
                     {% elif pedido.estado_id == 1 %}
-                        <p>Este pedido está siendo despachado por:</p>
+                        <h5>Este pedido está siendo despachado por:</h5>
                         <ul class="list-group list-group-flush">
                             {% for d in despachadoresActivos %}
                             <li class="list-group-item">
@@ -143,9 +148,9 @@
                             </li>
                             {% endfor %}          
                         </ul>
-                        <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
+                        <p>Hora de despacho: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
                         </p>
-                        <span class="badge bg-danger">{{issue}}</span>
+                        <span class="badge bg-danger">{{issue3}}</span>
                     {% endif %}
                 </section>
             </article>
@@ -156,9 +161,9 @@
                 </article>
                 <article class="card-body">
                     {% if pedido.estado.id < 2 %}
-                        <p>Este pedido aún no puede ser facturado</p>
+                        <h5>Este pedido aún no puede ser facturado</h5>
                     {% elif pedido.estado.id == 2 %}
-                        <p>Este pedido está listo para ser facturado</p>
+                        <h5>Este pedido está listo para ser facturado</h5>
                         {% if user.tipo_usuario_id == 4 %}
                             <!-- trigger -->
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Facturación lista</button>
@@ -185,10 +190,10 @@
                     {% else %}
                     <h5>Este pedido fue facturado por </h5>
                     <p>
-                        {{pedido.facturado_por.first_name}} {{pedido.facturado_por.last_name}} <br>
-                        Hora: <span class="badge bg-success">{{pedido.facturado_hora}}</span>
+                        {{pedido.facturado_por}} <br>
+                        Hora de facturación: <span class="badge bg-info">{{pedido.facturado_hora}}</span>
                     </p>
-                    <span class="badge bg-danger">{{issue}}</span>
+                    <span class="badge bg-danger">{{issue4}}</span>
                     {% endif %}
                 </article>
             </section>
@@ -229,36 +234,38 @@
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
                         <p>Asignó el repartidor: {{pedido.asignador_reparto}} <br>
-                        Repartidor: {{pedido.repartido_por.first_name}} {{pedido.repartido_por.last_name}}</p>
-                        <!-- trigger -->
-                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalAsignadorModificar">Modificar repartidor</button>
-                        <!-- modal -->
-                        <section class="modal fade" id="modalAsignadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                            <article class="modal-dialog modal-dialog-centered">
-                            <article class="modal-content">
-                                <section class="modal-header">
-                                <h5 class="modal-title">Modificar repartidor</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </section>
-                                <section class="modal-body">
-                                <p>Modificar al repartidor</p>
-                                <form action="" method="POST" id="modificarRepartidor">
-                                    {% csrf_token %}
-                                    {{form.repartidor}}
-                                    <input type="hidden" name="modificarRepartidor">
-                                    <button type="submit" class="btn btn-warning mt-4">Guardar modificacion</button>                             
-                                </form> 
-                                </section>
-                            </article>
-                            </article>
-                        </section>
+                        Repartidor elegido: {{pedido.repartido_por}} <br>
+                        Hora de asignacion: <span class="badge bg-info">{{pedido.asignacion_hora}}</span></p>
+                        {% if user.tipo_usuario_id == 5 %}
+                            <!-- trigger -->
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalAsignadorModificar">Modificar repartidor</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modalAsignadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                    <h5 class="modal-title">Modificar repartidor</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                    <p>Modificar al repartidor</p>
+                                    <form action="" method="POST" id="modificarRepartidor">
+                                        {% csrf_token %}
+                                        {{form.repartidor}}
+                                        <input type="hidden" name="modificarRepartidor">
+                                        <button type="submit" class="btn btn-warning mt-4">Guardar modificacion</button>                             
+                                    </form> 
+                                    </section>
+                                </article>
+                                </article>
+                            </section>
+                        {% endif %} <br>
+                        <span class="badge bg-danger">{{issue5}}</span>
                     {% else %}
                     <p>Este pedido ya fue repartido</p>
                     {% endif %}
                 </article>
             </section>
-            
-            
         </section>
         <!-- Productos va aquí -->
         <aside class="col-md-6">
@@ -284,14 +291,9 @@
                 </section>
             </article>
         </aside>
-        
     </section>
     {% else %}
     <div class="alert alert-danger" role="alert">{{msg}}</div>
     {% endif %}
-
-    
-    
-    
 </main>
 {% endblock %}
