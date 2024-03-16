@@ -3,20 +3,30 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
+<link rel="stylesheet" href="{% static 'styles/ToastNotify.css' %}">
+<script src="{% static 'javascript/ToastNotify.js' %}" defer></script>
+<script src="{% static 'javascript/order_detail.js' %}" defer></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 
 <main class="container mt-4">
     {% if success %}
     <section class="row">
         <section class="col-md-6">
+            <!-- Información general -->
             <article class="card mb-3">
                 <section class="card-header">
                     <h5 class="card-title text-center">Información general del pedido <span class="badge bg-primary">{{pedido.id}}</span></h5>
                 </section>
                 <section class="card-body">
                     <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
-                    <p class="card-text">Dirección de entrega: {{cliente.direccion}}</p>
-                    <p class="card-text">Estado del pedido: {{pedido.estado}}</p>
-                    <p>
+                    <p class="card-text">
+                        Cliente: <strong>{{cliente}}</strong> <br>
+                        Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
+                        Valor pedido: <strong  class="price">${{pedido.valor}}</strong> <br>
+                        Vendedor: <strong>{{pedido.vendedor}}</strong>
+                    </p>
+                    <p class="card-text">Estado del pedido: {{pedido.estado}} <br>
                         {% if pedido.estado_id == 0 %}
                         Este pedido está a la espera de ser despachado.
                         {% elif pedido.estado_id == 1 %}
@@ -33,310 +43,242 @@
                         Descripción no disponible
                         {% endif %}
                     </p>
+                    {% if pedido.nota %}
+                        <h5>Nota de venta:</h5>
+                        <p class="text-bold">{{pedido.nota}}</p>
+                    {% else %}
+                        <p class="text-bold">Este pedido no tiene nota de venta.</p>
+                    {% endif %}
                 </section>
             </article>
-            <!-- Despachador -->
-            {% if user.tipo_usuario_id == 3 %}
+            <!-- Despacho -->
             <article class="card mb-3">
                 <section class="card-header">
-                    <h5 class="card-title text-center">Despachador</h5>
+                    <h5 class="card-title text-center">Despacho</h5>
                 </section>
                 <section class="card-body">
                     {% if pedido.estado_id == 0 %}
-                    <p>Este pedido está a la espera de ser despachado.</p>
-                    
-                    <!-- trigger -->
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
-                    <!-- modal -->
-                    <section class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                        <article class="modal-dialog modal-dialog-centered">
-                          <article class="modal-content">
-                            <section class="modal-header">
-                              <h5 class="modal-title">Confirmar despacho</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5>Este pedido está a la espera de ser despachado.</h5>
+                        {% if user.tipo_usuario_id == 3 %}
+                            <!-- trigger -->
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                    <h5 class="modal-title">Confirmar despacho</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                    <p>¿Realmente quiere comenzar este despacho?</p>
+                                    </section>
+                                    <section class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                    <form action="" method="POST" id="confirmar_despacho">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="confirmar_despacho">
+                                        <button type="submit" class="btn btn-warning">Confirmar</button>
+                                    </form>
+                                    </section>
+                                </article>
+                                </article>
                             </section>
-                            <section class="modal-body">
-                              <p>¿Realmente quiere comenzar este despacho?</p>
-                            </section>
-                            <section class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                              <form action="" method="POST" id="confirmar_despacho">
-                                {% csrf_token %}
-                                <input type="hidden" name="confirmar_despacho">
-                                <button type="submit" class="btn btn-warning">Confirmar</button>
-                              </form>
-                            </section>
-                          </article>
-                        </article>
-                    </section>
-
-
-                    {% elif pedido.estado_id == 1 %}
-                    <p>Este pedido está siendo despachado por:</p>
-                    <ul class="list-group list-group-flush">
-                        {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            <span class="badge bg-primary">Cod. empleado {{d.despachador.id}}</span>
-                        </p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalC">Marcar como completo</button>
-                    <!-- modal -->
-                    <section class="modal fade" id="modalC" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
-                        <article class="modal-dialog modal-dialog-centered">
-                          <article class="modal-content">
-                            <section class="modal-header">
-                              <h5 class="modal-title">Confirmar marcar como completo</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </section>
-                            <section class="modal-body">
-                              <p>¿Este despacho ya está listo para ser facturado?</p>
-                            </section>
-                            <section class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                              <form action="" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="completarDespacho">
-                                <button type="submit" class="btn btn-success">Sí, está listo</button>
-                                </form>
-                            </section>
-                          </article>
-                        </article>
-                    </section>
-                    
-                        {% if puede_ayudar %}
-                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
-                        <!-- modal -->
-                        <section class="modal fade" id="modalH" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
-                            <article class="modal-dialog modal-dialog-centered">
-                            <article class="modal-content">
-                                <section class="modal-header">
-                                <h5 class="modal-title">Confirmar ayudar en despacho</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </section>
-                                <section class="modal-body">
-                                <p>¿Realmente quiere ayudar en este despacho?</p>
-                                </section>
-                                <section class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                <form action="" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="ayudarDespacho">
-                                    <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
-                                </form>
-                                </section>
-                            </article>
-                            </article>
-                        </section>
                         {% endif %}
-                        
-                    {% else %}
-                    <h5>Este pedido fue despachado por:</h5>
-                    <ul class="list-group list-group-flush">
-                        {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            Cod. empleado {{d.vendedor.id}}</p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
-                    </p>
-                    {% endif %}
-                    
-                </section>
-            </article>
-            <!-- Facturador -->
-            {% elif user.tipo_usuario_id == 4 %}
-            <article class="card mb-3">
-                <section class="card-header">
-                    <h5 class="card-title text-center">Despacho</h5>
-                </section>
-                <section class="card-body">
-                    {% if pedido.estado_id == 0 %}
-                    <p>Este pedido está a la espera de ser despachado.</p>
                     {% elif pedido.estado_id == 1 %}
-                    <p>Este pedido está siendo despachado por:</p>
-                    <ul class="list-group list-group-flush">
+                        <h5>Este pedido está siendo despachado por:</h5>
+                        <ul class="list-group list-group-flush">
+                            {% for d in despachadoresActivos %}
+                            <li class="list-group-item">
+                                <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
+                                Cod. empleado {{d.despachador.id}}</p>
+                            </li>
+                            {% endfor %}          
+                        </ul>
                         {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            Cod. empleado {{d.despachador.id}}</p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    {% else %}
-                    <h5>Este pedido fue despachado por:</h5>
-                    <ul class="list-group list-group-flush">
-                        {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            Cod. empleado {{d.despachador.id}}</p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
-                    </p>
+                            {% if user.id == d.despachador.id %}
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalC">Marcar como completo</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modalC" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                    <h5 class="modal-title">Confirmar marcar como completo</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                    <p>¿Este despacho ya está listo para ser facturado?</p>
+                                    </section>
+                                    <section class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                    <form action="" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="completarDespacho">
+                                        <button type="submit" class="btn btn-success">Sí, está listo</button>
+                                        </form>
+                                    </section>
+                                </article>
+                                </article>
+                            </section>
+                            {% endif %}
+                        {% endfor %}
+                        {% if puede_ayudar %}
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modalH" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                    <h5 class="modal-title">Confirmar ayudar en despacho</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                    <p>¿Realmente quiere ayudar en este despacho?</p>
+                                    </section>
+                                    <section class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                    <form action="" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="ayudarDespacho">
+                                        <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
+                                    </form>
+                                    </section>
+                                </article>
+                                </article>
+                            </section>
+                        {% endif %}
+                    {% elif pedido.estado_id > 1 %}
+                        <h5>Este pedido fue despachado por:</h5>
+                        <ul class="list-group list-group-flush">
+                            {% for d in despachadoresActivos %}
+                            <li class="list-group-item">
+                                <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
+                                Cod. empleado {{d.despachador.id}}</p>
+                            </li>
+                            {% endfor %}          
+                        </ul>
+                        <p>Hora de despacho: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
+                        </p>
+                        <span class="badge bg-danger">{{issue3}}</span>
+                    {% endif %}
+                    {% if pedido.notaDespachador %}
+                        <h5 class="mt-3">Nota de despacho</h5>
+                        <p>{{pedido.notaDespachador}}</p>
                     {% endif %}
                 </section>
             </article>
-            
+            <!-- Facturacion -->
             <section class="card mb-3">
                 <article class="card-header text-center">
                     <h5>Facturación</h5>
                 </article>
                 <article class="card-body">
                     {% if pedido.estado.id < 2 %}
-                    <p>Este pedido aún no puede ser facturado</p>
+                        <h5>Este pedido aún no puede ser facturado</h5>
                     {% elif pedido.estado.id == 2 %}
-                    <p>Este pedido está listo para ser facturado</p>
-                    <!-- trigger -->
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Seleccionar repartidor</button>
-                    <!-- modal -->
-                    <section class="modal fade" id="modalFacturacion" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                        <article class="modal-dialog modal-dialog-centered">
-                          <article class="modal-content">
-                            <section class="modal-header">
-                              <h5 class="modal-title">Confirmar facturacion y repartidor</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5>Este pedido está listo para ser facturado</h5>
+                        {% if user.tipo_usuario_id == 4 %}
+                            <!-- trigger -->
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Facturación lista</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modalFacturacion" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                    <h5 class="modal-title">Confirmar facturacion y repartidor</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                    <p>Antes de continuar asegurese de haber facturado completamente el pedido.</p>
+                                    <form action="" method="POST">
+                                         {% csrf_token %}
+                                         <input type="hidden" name="confirmarFacturacion">   
+                                        <button type="submit" class="btn btn-warning mt-4">Confirmar facturacion</button>                             
+                                    </form>
+                                    </section>
+                                </article>
+                                </article>
                             </section>
-                            <section class="modal-body">
-                              <p>Antes de continuar asegurese de haber facturado completamente el pedido.</p>
-                              <button type="submit" class="btn btn-warning mt-4">Confirmar facturacion</button>                             
-                            </section>
-                          </article>
-                        </article>
-                    </section>
+                        {% endif %}
                     {% else %}
                     <h5>Este pedido fue facturado por </h5>
                     <p>
-                        {{pedido.facturado_por.first_name}} {{pedido.facturado_por.last_name}} <br>
-                        Hora: <span class="badge bg-success">{{pedido.facturado_hora}}</span>
+                        {{pedido.facturado_por}} <br>
+                        Hora de facturación: <span class="badge bg-info">{{pedido.facturado_hora}}</span>
                     </p>
+                    <span class="badge bg-danger">{{issue4}}</span>
                     {% endif %}
                 </article>
             </section>
-            
-            <!-- Repartidor -->
-            {% elif user.tipo_usuario_id == 5 %}
-            <article class="card mb-3">
-                <section class="card-header">
-                    <h5 class="card-title text-center">Despacho</h5>
-                </section>
-                <section class="card-body">
-                    {% if pedido.estado_id == 0 %}
-                    <p>Este pedido está a la espera de ser despachado.</p>
-                    {% elif pedido.estado_id == 1 %}
-                    <p>Este pedido está siendo despachado por:</p>
-                    <ul class="list-group list-group-flush">
-                        {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            Cod. empleado {{d.despachador.id}}</p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    {% else %}
-                    <h5>Este pedido fue despachado por:</h5>
-                    <ul class="list-group list-group-flush">
-                        {% for d in despachadoresActivos %}
-                        <li class="list-group-item">
-                            <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                            Cod. empleado {{d.despachador.id}}</p>
-                        </li>
-                        {% endfor %}          
-                    </ul>
-                    <p>Hora: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
-                    </p>
-                    {% endif %}
-                </section>
-            </article>
-
-            <section class="card mb-3">
-                <article class="card-header text-center">
-                    <h5>Facturación</h5>
-                </article>
-                <article class="card-body">
-                    {% if pedido.estado.id < 2 %}
-                    <p>Este pedido aún no puede ser facturado</p>
-                    {% elif pedido.estado.id == 2 %}
-                    <p>Este pedido está listo para ser facturado</p>
-                    {% else %}
-                    <h5>Este pedido fue facturado por </h5>
-                    <p>
-                        {{pedido.facturado_por.first_name}} {{pedido.facturado_por.last_name}} <br>
-                        Hora: <span class="badge bg-success">{{pedido.facturado_hora}}</span>
-                    </p>
-                    {% endif %}
-                </article>
-            </section>
+            <!-- Asignacion -->
             <section class="card mb-3">
                 <article class="card-header text-center">
                     <h5>Reparto</h5>
                 </article>
                 <article class="card-body">
                     {% if pedido.estado.id < 3 %}
-                    <p>Este pedido aún no puede ser repartido</p>
+                        <h5>Este pedido aún no puede ser repartido</h5>
                     {% elif pedido.estado.id == 3 %}
-                    <p>Este pedido está listo para ser repartido</p>
-                    <!-- trigger -->
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Seleccionar repartidor</button>
-                    <!-- modal -->
-                    <section class="modal fade" id="modalAsignador" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                        <article class="modal-dialog modal-dialog-centered">
-                        <article class="modal-content">
-                            <section class="modal-header">
-                            <h5 class="modal-title">Seleccionar repartidor</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5>Este pedido está listo para ser repartido</h5>
+                        {% if user.tipo_usuario_id == 5 %}
+                            <!-- trigger -->
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Seleccionar repartidor</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modalAsignador" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                    <h5 class="modal-title">Seleccionar repartidor</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                    <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
+                                    <form action="" method="POST" id="confirmarRepartidor">
+                                        {% csrf_token %}
+                                        {{form.repartidor}}
+                                        <input type="hidden" name="confirmarRepartidor">
+                                        <button type="submit" class="btn btn-warning mt-4">Confirmar repartidor</button>                             
+                                    </form> 
+                                    </section>
+                                </article>
+                                </article>
                             </section>
-                            <section class="modal-body">
-                            <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
-                            <form action="" method="POST" id="confirmarRepartidor">
-                                {% csrf_token %}
-                                {{form.repartidor}}
-                                <input type="hidden" name="confirmarRepartidor">
-                                <button type="submit" class="btn btn-warning mt-4">Confirmar repartidor</button>                             
-                            </form> 
-                            </section>
-                        </article>
-                        </article>
-                    </section>
+                        {% endif %}
                     {% elif pedido.estado.id == 4 %}
-                    <h5>Este pedido está siendo repartido</h5>
-                    <p>Asignó el repartidor: {{pedido.asignador_reparto}} <br>
-                    Repartidor: {{pedido.repartido_por.first_name}} {{pedido.repartido_por.last_name}}</p>
-                    <!-- trigger -->
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalAsignadorModificar">Modificar repartidor</button>
-                    <!-- modal -->
-                    <section class="modal fade" id="modalAsignadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                        <article class="modal-dialog modal-dialog-centered">
-                        <article class="modal-content">
-                            <section class="modal-header">
-                            <h5 class="modal-title">Modificar repartidor</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5>Este pedido está siendo repartido</h5>
+                        <p>Asignó el repartidor: {{pedido.asignador_reparto}} <br>
+                        Repartidor elegido: {{pedido.repartido_por}} <br>
+                        Hora de asignacion: <span class="badge bg-info">{{pedido.asignacion_hora}}</span></p>
+                        {% if user.tipo_usuario_id == 5 %}
+                            <!-- trigger -->
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalAsignadorModificar">Modificar repartidor</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modalAsignadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                    <h5 class="modal-title">Modificar repartidor</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                    <p>Modificar al repartidor</p>
+                                    <form action="" method="POST" id="modificarRepartidor">
+                                        {% csrf_token %}
+                                        {{form.repartidor}}
+                                        <input type="hidden" name="modificarRepartidor">
+                                        <button type="submit" class="btn btn-warning mt-4">Guardar modificacion</button>                             
+                                    </form> 
+                                    </section>
+                                </article>
+                                </article>
                             </section>
-                            <section class="modal-body">
-                            <p>Modificar al repartidor</p>
-                            <form action="" method="POST" id="confirmarRepartidor">
-                                {% csrf_token %}
-                                {{form.repartidor}}
-                                <input type="hidden" name="confirmarRepartidor">
-                                <button type="submit" class="btn btn-warning mt-4">Guardar modificacion</button>                             
-                            </form> 
-                            </section>
-                        </article>
-                        </article>
-                    </section>
+                        {% endif %} <br>
+                        <span class="badge bg-danger">{{issue5}}</span>
                     {% else %}
                     <p>Este pedido ya fue repartido</p>
                     {% endif %}
                 </article>
             </section>
-            {% endif %}
-            
         </section>
         <!-- Productos va aquí -->
         <aside class="col-md-6">
@@ -352,24 +294,79 @@
                         </thead>
                         <tbody>
                             {% for p in productos %}
-                            <tr>
-                                <td>{{ p.producto.descripcion }}</td>
-                                <td>{{ p.cantidad }}</td>
-                            </tr>
+                                <tr id="p-{{p.producto_id}}">
+                                    <td>{{ p.producto.descripcion }}</td>
+                                    {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                        <td class="modificarCantidad">
+                                            <input type="hidden" name="" value="{{p.producto_id}}">
+                                            <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
+                                        </td>
+                                        <td>
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-primary btn-sm me-1 mb-2 cart-handler" title="Eliminar item" data-bs-toggle="modal" data-bs-target="#modalBorrarProducto-{{p.producto_id}}">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalBorrarProducto-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                <article class="modal-content">
+                                                    <section class="modal-header">
+                                                    <h5 class="modal-title">Borrar producto</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </section>
+                                                    <section class="modal-body">
+                                                    <p>¿Está seguro de borrar {{p.producto.descripcion}} del pedido? Esta acción es irreversible</p>
+                                                    <form action="" method="POST" id="modificarRepartidor">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger mt-4 delete-item" data-producto-id="{{p.producto_id}}">Borrar producto</button>                             
+                                                    </form> 
+                                                    </section>
+                                                </article>
+                                                </article>
+                                            </section>
+                                        </td>
+                                    {% else %}
+                                        <td>{{ p.cantidad }}</td>
+                                    {% endif %}
+                                </tr>
                             {% endfor %}
                         </tbody>
+                        <tfoot class="">
+                            <tr>
+                                <td>
+                                    <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
+                                </td>
+                                {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                <td>
+                                    <form action="" method="POST" id="modificarCantidad">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="modificarCantidad">
+                                        <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
+                                      </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                            {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                            <tr>
+                                <td><p>Nota al pedido. No es obligatorio.</p></td>
+                                <td class="text-center">
+                                    <form action="" method="post" id="notaDespacho">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="notaDespacho" id="notaDespacho">
+                                        <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{{pedido.notaDespachador}}</textarea>
+                                        <button type="submit" class="btn btn-success">Guardar nota</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tfoot>
                     </table>
                 </section>
             </article>
         </aside>
-        
     </section>
     {% else %}
     <div class="alert alert-danger" role="alert">{{msg}}</div>
     {% endif %}
-
-    
-    
-    
 </main>
 {% endblock %}

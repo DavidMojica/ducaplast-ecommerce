@@ -18,6 +18,7 @@ NOMBRELENGTHMIN = 2
 APELLIDOSLENGTHMIN = 3
 DOCLENGTHMIN = 6 #Minimo de carácteres para el documento
 PASSLENGTHMIN = 8 #Minimo de carácteres para la contraseña
+TIPOREPARTIDOR = 6
 
 carrito = None
 
@@ -39,6 +40,8 @@ HTMLORDERDETAIL = "order_detail.html"
 EXITO_1 = "El usuario ha sido creado correctamente."
 EXITO_2 = "Sus datos fueron actualizados correctamente"
 EXITO_3 = "Contraseña actualizada correctamente"
+EXITO_4 = "El usuario se ha creado correctamente, pero como es repartidor no tiene acceso al sistema todavía."
+EXITO_5 = "El repartidor se actualizó correctamente"
 ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
@@ -54,6 +57,10 @@ ERROR_12 = "Formato de email no válido"
 ERROR_13 = "Acceso no autorizado"
 ERROR_14 = "Usted no puede marcar este pedido como completo porque usted no estaba ayudando en el despacho del pedido"
 ERROR_15 = "Usted ya está ayudando en el despacho de este pedido"
+ERROR_16 = "Su cuenta está desactivada. Contacte con el administrador."
+ERROR_17 = "Este pedido ya fue facturado por alguien más"
+ERROR_18 = "Este pedido ya fue marcado como despachado por alguien más"
+ERROR_19 = "El repartidor de este pedido ya fue elegido por alguien más"
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
@@ -97,7 +104,16 @@ def getCartPrice(request):
             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
         return total_productos
     
-    
+#Devuelve el precio actualizado con el IVA
+@login_required
+def calcular_total_actualizado(request):
+    carrito = request.session.get('carrito', {})
+    total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
+    iva_actualizado = total_productos_actualizado * 0.19
+    total_actualizado = round(total_productos_actualizado + iva_actualizado)
+    return total_actualizado
+
+
 @login_required
 def ayudarEnDespacho(request, user, pedido):
     print(f"{user} {pedido}")
@@ -108,13 +124,14 @@ def ayudarEnDespacho(request, user, pedido):
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
+    issue = ""
     print(user.tipo_usuario)
     #Post
     if request.method == 'POST':
+        carrito = request.session.get('carrito', {})
         pedido = get_object_or_404(Pedido, pk=order)
         if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
-                
                 pedido.estado_id = 1
                 pedido.save()
                 ayudarEnDespacho(request, user, pedido)
@@ -124,44 +141,100 @@ def OrderDetail(request, order):
                 if not despachadores_activos.filter(despachador_id=user.id).exists():
                     ayudarEnDespacho(request, user, pedido)
                 else:
-                    return render(request, HTMLORDERDETAIL, {
-                        'success': False,
-                        'msg': ERROR_15
-                    })
+                    issue = ERROR_15
             elif 'completarDespacho' in request.POST:
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-                print(f"--------> ")
-                if despachadores_activos.filter(despachador_id=user.id).exists():
-                    pedido.estado_id = 2
-                    pedido.despachado_hora = timezone.now()
-                    pedido.save()
+                if not pedido.estado_id >= 2:
+                    if despachadores_activos.filter(despachador_id=user.id).exists():
+                        total_actualizado = calcular_total_actualizado(request)
+                        pedido.estado_id = 2
+                        pedido.valor =total_actualizado
+                        pedido.despachado_hora = timezone.now()
+                        pedido.save()
+                    else:
+                        issue = ERROR_14
                 else:
-                    return render(request, HTMLORDERDETAIL, {
-                        'success': False,
-                        'msg': ERROR_14
-                    })
-            
+                    issue = ERROR_18
+            elif 'modificarProductos' in request.POST:
+                productosModificados = request.POST.get('productos')
+                try:
+                    productosModificados = json.loads(productosModificados)
+                except json.JSONDecodeError:
+                    return JsonResponse({'success': False, 'msg': "JSON no válido"})
+                
+                if not productosModificados:
+                    return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
+
+                carrito.clear()
+                request.session['carrito'] = carrito
+                productosEnPedido = ProductosPedido.objects.filter(pedido=pedido)
+                
+                for producto_id, cantidad in productosModificados.items():
+                    producto_real = get_object_or_404(Producto, pk=producto_id)
+                    carrito[producto_id] = {
+                        'precio': producto_real.precio,
+                        'cantidad_existencias': producto_real.cantidad,
+                        'cantidad': cantidad,
+                        'total_producto': int(cantidad) * int(producto_real.precio)
+                    }
+                    
+                    # Actualizar los objetos ProductosPedido
+                    producto_en_pedido = productosEnPedido.get(producto=producto_real)
+                    producto_en_pedido.cantidad = cantidad
+                    producto_en_pedido.total_producto = int(cantidad) * producto_real.precio
+                    producto_en_pedido.save()
+                    
+                total_actualizado = calcular_total_actualizado(request)
+                request.session['carrito'] = carrito
+                return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
+            elif 'borrarProducto' in request.POST:
+                producto_id = request.POST.get('producto_id')
+                del carrito[producto_id]
+                request.session['carrito'] = carrito
+                print("entro")
+                # Eliminar el producto de la tabla ProductosPedido
+                ProductosPedido.objects.filter(pedido=pedido, producto_id=producto_id).delete()
+                total_actualizado = calcular_total_actualizado(request)
+                return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
+            elif 'notaDespacho' in request.POST:
+                notaPedido = request.POST.get('notaPedido')
+                pedido.notaDespachador = notaPedido.strip()
+                pedido.save()
+
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
             if 'confirmarFacturacion' in request.POST:
-                pedido.estado_id = 3
-                pedido.facturado_por = user
-                pedido.facturado_hora = timezone.now()
-                pedido.save()
+                if not pedido.estado_id >= 3:
+                    pedido.estado_id = 3
+                    pedido.facturado_por = user
+                    pedido.facturado_hora = timezone.now()
+                    pedido.actualizar_dinero_generado_cliente()
+                    pedido.save()
+                else:
+                    issue = ERROR_17
       
         elif user.tipo_usuario_id == 5 or user.tipo_usuario in adminIds: # Asignadores
             if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
+                if not pedido.estado_id >= 4:
+                    if form.is_valid():
+                        pedido.estado_id = 4
+                        pedido.asignador_reparto = user
+                        pedido.asignacion_hora = timezone.now()
+                        pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                        pedido.save()
+                    else:
+                        return render(request, HTMLORDERDETAIL,{
+                            'success': False,
+                            'msg': ERROR_2
+                        }) 
+                else:
+                    issue = ERROR_19
+            elif 'modificarRepartidor' in request.POST:
+                form = SeleccionarRepartidor(request.POST)
                 if form.is_valid():
-                    pedido.estado_id = 4
-                    pedido.asignador_reparto = user
                     pedido.asignacion_hora = timezone.now()
                     pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
                     pedido.save()
-                else:
-                    return render(request, HTMLORDERDETAIL,{
-                        'success': False,
-                        'msg': ERROR_2
-                    }) 
                     
             else:
                 return render(request,HTMLORDERDETAIL,{
@@ -193,7 +266,7 @@ def OrderDetail(request, order):
                 'success': False,
                 'msg': ERROR_13
             })
-    elif user.tipo_usuario_id == 3:
+    elif user.tipo_usuario_id == 3: #Despachadores
         despachadores_activos = None
         puede_ayudar = False
         if pedido.estado_id == 1:
@@ -201,6 +274,7 @@ def OrderDetail(request, order):
             puede_ayudar = not despachadores_activos.filter(despachador_id=user.id).exists()
         elif pedido.estado_id == 2:
             despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+            print(despachadores_activos)
             
         return render(request, HTMLORDERDETAIL, {
             'success': True,
@@ -209,7 +283,8 @@ def OrderDetail(request, order):
             'cliente': cliente,
             'productos': productos,
             'despachadoresActivos': despachadores_activos,
-            'puede_ayudar': puede_ayudar
+            'puede_ayudar': puede_ayudar,
+            'issue3': issue
         })
     elif user.tipo_usuario_id == 4:
         pedido = get_object_or_404(Pedido, pk=order)
@@ -221,7 +296,7 @@ def OrderDetail(request, order):
                 'productos': productos,
                 'user': user,
                 'despachadoresActivos': despachadores_activos,
-                
+                'issue4': issue
             })
     elif user.tipo_usuario_id == 5: #Asignador
         pedido = get_object_or_404(Pedido, pk=order)
@@ -235,9 +310,9 @@ def OrderDetail(request, order):
             'user': user,
             'form': SeleccionarRepartidor(),
             'despachadoresActivos': despachadores_activos,
+            'issue5': issue
         })
 
-    
     return render(request, HTMLORDERDETAIL, {
         'success': False,
         'msg': ERROR_13
@@ -261,7 +336,7 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(estado_id=3).order_by('-id')
 
 
-    elif filtered == "historial": #No aplica para vendedor
+    elif filtered == "historial": 
         history=True
         if user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
@@ -269,6 +344,8 @@ def Orders(request, filtered=None):
             pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
         elif user.tipo_usuario_id == 4:
             pedidos = Pedido.objects.filter(facturado_por=user.id)
+        elif user.tipo_usuario_id == 5:
+            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id)
    
 
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
@@ -300,38 +377,23 @@ def Home(request):
             #Verificar el minimo de carácteres para cada campo
             if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
                 recycledForm = InicioSesionForm(initial={'documento': documento})
-                return render(request, HTMLHOME, {'form': recycledForm,
-                                                     'error': ERROR_6})
-            
+                return render(request, HTMLHOME, {'form': recycledForm,'error': ERROR_6})        
             logedUser = authenticate(request, username=documento, password=password)
             
             #Verificar que el usuario exista y su contraseña sea correcta
             if logedUser is None:
                 recycledForm = InicioSesionForm(initial={'documento': documento})
-                return render(request, HTMLHOME, {'form': recycledForm,
-                                                    'error':ERROR_4})
+                return render(request, HTMLHOME, {'form': recycledForm,'error':ERROR_4})
+            
+            login(request, logedUser)
+            userType = logedUser.tipo_usuario_id
+            if userType in [0,1,2,3,4,5]:
+                return redirect(reverse('registro')) 
             else:
-                login(request, logedUser)
-                userType = logedUser.tipo_usuario_id
-                if userType == 0:
-                    return redirect(reverse('registro'))
-                elif userType == 1:
-                    return redirect(reverse('registro'))
-                elif userType == 2:
-                    return redirect(reverse('registro'))
-                elif userType == 3:
-                    return redirect(reverse('registro'))
-                elif userType == 4:
-                    return redirect(reverse('registro'))
-                elif userType == 5:
-                    return redirect(reverse('registro'))
-                else:
-                    logout(request)
-                    return render(request, HTMLHOME, {'form': newForm,
-                                                         'error': ERROR_5})
+                logout(request)
+                return render(request, HTMLHOME, {'form': newForm,'error': ERROR_5})
         else:
-            return render(request, HTMLHOME,{'form':newForm,
-                                                'error': ERROR_2})
+            return render(request, HTMLHOME,{'form':newForm, 'error': ERROR_2})
     return render(request, HTMLHOME, {'form': newForm})
 
 @login_required
@@ -341,6 +403,7 @@ def Logout(request):
 
 def Registro(request):
     newForm = RegistroUsuariosForm()
+    #Post
     if request.method == "POST":
         form = RegistroUsuariosForm(request.POST)
         #Verificar que el documento no se haya registrado antes.
@@ -357,8 +420,10 @@ def Registro(request):
             form = stripForm(form)
             #Guardar el usuario nuevo
             try:
+                event = None
                 documento = form.cleaned_data['username']
                 password = form.cleaned_data['password']
+                tipo_usuario = form.cleaned_data['tipo_usuario']
                 
                 if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
                     return render(request, HTMLREGISTRO, {
@@ -371,11 +436,14 @@ def Registro(request):
                 user.username = documento
                 user.set_password(password)
                 user.email = form.cleaned_data['email']
+                #Desactivar el acceso si el usuario es tipo repartidor
+                user.is_active = tipo_usuario.id != TIPOREPARTIDOR
+                event = EXITO_4 if not user.is_active else EXITO_1
                 user.save()
                 
                 return render(request, HTMLREGISTRO, {
                     "form": newForm,
-                    "evento": EXITO_1,
+                    "evento": event,
                     "exito": True,
                     "documento": f"Usuario login: {documento}",
                     "password": f"Contraseña: {form.cleaned_data['password']}"
@@ -610,7 +678,6 @@ def Cart(request):
                 valor=getCartPrice(request) + getCartPrice(request)*0.19,
                 nota=pedido_nota
             )
-            nuevo_pedido.actualizar_dinero_generado_cliente()
             nuevo_pedido.save()
             
             #Añadir productos al pedido
