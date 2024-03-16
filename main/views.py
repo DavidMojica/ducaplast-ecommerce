@@ -58,6 +58,8 @@ ERROR_13 = "Acceso no autorizado"
 ERROR_14 = "Usted no puede marcar este pedido como completo porque usted no estaba ayudando en el despacho del pedido"
 ERROR_15 = "Usted ya está ayudando en el despacho de este pedido"
 ERROR_16 = "Su cuenta está desactivada. Contacte con el administrador."
+ERROR_17 = "Este pedido ya fue facturado por alguien más"
+ERROR_18 = "Este pedido ya fue marcado como despachado por alguien más"
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
@@ -112,6 +114,7 @@ def ayudarEnDespacho(request, user, pedido):
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
+    issue = None
     print(user.tipo_usuario)
     #Post
     if request.method == 'POST':
@@ -127,29 +130,28 @@ def OrderDetail(request, order):
                 if not despachadores_activos.filter(despachador_id=user.id).exists():
                     ayudarEnDespacho(request, user, pedido)
                 else:
-                    return render(request, HTMLORDERDETAIL, {
-                        'success': False,
-                        'msg': ERROR_15
-                    })
+                    issue = ERROR_15
             elif 'completarDespacho' in request.POST:
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-                print(f"--------> ")
-                if despachadores_activos.filter(despachador_id=user.id).exists():
-                    pedido.estado_id = 2
-                    pedido.despachado_hora = timezone.now()
-                    pedido.save()
+                if not pedido.estado_id >= 2:
+                    if despachadores_activos.filter(despachador_id=user.id).exists():
+                        pedido.estado_id = 2
+                        pedido.despachado_hora = timezone.now()
+                        pedido.save()
+                    else:
+                        issue = ERROR_14
                 else:
-                    return render(request, HTMLORDERDETAIL, {
-                        'success': False,
-                        'msg': ERROR_14
-                    })
+                    issue = ERROR_18
             
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
             if 'confirmarFacturacion' in request.POST:
-                pedido.estado_id = 3
-                pedido.facturado_por = user
-                pedido.facturado_hora = timezone.now()
-                pedido.save()
+                if not pedido.estado_id >= 3:
+                    pedido.estado_id = 3
+                    pedido.facturado_por = user
+                    pedido.facturado_hora = timezone.now()
+                    pedido.save()
+                else:
+                    issue = ERROR_17
       
         elif user.tipo_usuario_id == 5 or user.tipo_usuario in adminIds: # Asignadores
             if 'confirmarRepartidor' in request.POST:
@@ -201,7 +203,7 @@ def OrderDetail(request, order):
                 'success': False,
                 'msg': ERROR_13
             })
-    elif user.tipo_usuario_id == 3:
+    elif user.tipo_usuario_id == 3: #Despachadores
         despachadores_activos = None
         puede_ayudar = False
         if pedido.estado_id == 1:
@@ -218,24 +220,20 @@ def OrderDetail(request, order):
             'cliente': cliente,
             'productos': productos,
             'despachadoresActivos': despachadores_activos,
-            'puede_ayudar': puede_ayudar
+            'puede_ayudar': puede_ayudar,
+            'issue': issue
         })
     elif user.tipo_usuario_id == 4:
         pedido = get_object_or_404(Pedido, pk=order)
-        if pedido.facturado_por_id == user.id:
-            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-            return render(request, HTMLORDERDETAIL, {
-                    'success': True,
-                    'pedido': pedido,
-                    'cliente': cliente,
-                    'productos': productos,
-                    'user': user,
-                    'despachadoresActivos': despachadores_activos,
-                })
-        else:
-            return render(request, HTMLORDERDETAIL, {
-                'success': False,
-                'msg': ERROR_13
+        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+        return render(request, HTMLORDERDETAIL, {
+                'success': True,
+                'pedido': pedido,
+                'cliente': cliente,
+                'productos': productos,
+                'user': user,
+                'despachadoresActivos': despachadores_activos,
+                'issue': issue
             })
     elif user.tipo_usuario_id == 5: #Asignador
         pedido = get_object_or_404(Pedido, pk=order)
