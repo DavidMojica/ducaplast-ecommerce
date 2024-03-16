@@ -294,7 +294,7 @@
                                     <td>{{ p.producto.descripcion }}</td>
                                     {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
                                         <td class="modificarCantidad">
-                                            <input type="hidden" name="" value="{{p.id}}">
+                                            <input type="hidden" name="" value="{{p.producto_id}}">
                                             <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
                                         </td>
                                     {% else %}

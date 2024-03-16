@@ -154,22 +154,30 @@ def OrderDetail(request, order):
                 if not productosModificados:
                     return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
 
-                print(productosModificados)
+                carrito.clear()
+                request.session['carrito'] = carrito
+                productosEnPedido = ProductosPedido.objects.filter(pedido=pedido)
                 
                 for producto_id, cantidad in productosModificados.items():
                     producto_real = get_object_or_404(Producto, pk=producto_id)
-                    print(producto_id)
                     carrito[producto_id] = {
                         'precio': producto_real.precio,
                         'cantidad_existencias': producto_real.cantidad,
                         'cantidad': cantidad,
                         'total_producto': int(cantidad) * int(producto_real.precio)
                     }
-                    print(carrito)
+                    
+                    # Actualizar los objetos ProductosPedido
+                    producto_en_pedido = productosEnPedido.get(producto=producto_real)
+                    producto_en_pedido.cantidad = cantidad
+                    producto_en_pedido.total_producto = int(cantidad) * producto_real.precio
+                    producto_en_pedido.save()
+                    
+                    
+                    
                 total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-                print(total_productos_actualizado)
                 iva_actualizado = total_productos_actualizado * 0.19
-                total_actualizado = total_productos_actualizado + iva_actualizado
+                total_actualizado = round(total_productos_actualizado + iva_actualizado)
                 request.session['carrito'] = carrito
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
         
