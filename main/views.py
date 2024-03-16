@@ -18,6 +18,7 @@ NOMBRELENGTHMIN = 2
 APELLIDOSLENGTHMIN = 3
 DOCLENGTHMIN = 6 #Minimo de carácteres para el documento
 PASSLENGTHMIN = 8 #Minimo de carácteres para la contraseña
+TIPOREPARTIDOR = 6
 
 carrito = None
 
@@ -39,6 +40,8 @@ HTMLORDERDETAIL = "order_detail.html"
 EXITO_1 = "El usuario ha sido creado correctamente."
 EXITO_2 = "Sus datos fueron actualizados correctamente"
 EXITO_3 = "Contraseña actualizada correctamente"
+EXITO_4 = "El usuario se ha creado correctamente, pero como es repartidor no tiene acceso al sistema todavía."
+EXITO_5 = "El repartidor se actualizó correctamente"
 ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
@@ -54,6 +57,7 @@ ERROR_12 = "Formato de email no válido"
 ERROR_13 = "Acceso no autorizado"
 ERROR_14 = "Usted no puede marcar este pedido como completo porque usted no estaba ayudando en el despacho del pedido"
 ERROR_15 = "Usted ya está ayudando en el despacho de este pedido"
+ERROR_16 = "Su cuenta está desactivada. Contacte con el administrador."
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
@@ -162,6 +166,12 @@ def OrderDetail(request, order):
                         'success': False,
                         'msg': ERROR_2
                     }) 
+            elif 'modificarRepartidor' in request.POST:
+                form = SeleccionarRepartidor(request.POST)
+                if form.is_valid():
+                    pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                    pedido.save()
+                    msg = EXITO_5
                     
             else:
                 return render(request,HTMLORDERDETAIL,{
@@ -300,38 +310,23 @@ def Home(request):
             #Verificar el minimo de carácteres para cada campo
             if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
                 recycledForm = InicioSesionForm(initial={'documento': documento})
-                return render(request, HTMLHOME, {'form': recycledForm,
-                                                     'error': ERROR_6})
-            
+                return render(request, HTMLHOME, {'form': recycledForm,'error': ERROR_6})        
             logedUser = authenticate(request, username=documento, password=password)
             
             #Verificar que el usuario exista y su contraseña sea correcta
             if logedUser is None:
                 recycledForm = InicioSesionForm(initial={'documento': documento})
-                return render(request, HTMLHOME, {'form': recycledForm,
-                                                    'error':ERROR_4})
+                return render(request, HTMLHOME, {'form': recycledForm,'error':ERROR_4})
+            
+            login(request, logedUser)
+            userType = logedUser.tipo_usuario_id
+            if userType in [0,1,2,3,4,5]:
+                return redirect(reverse('registro')) 
             else:
-                login(request, logedUser)
-                userType = logedUser.tipo_usuario_id
-                if userType == 0:
-                    return redirect(reverse('registro'))
-                elif userType == 1:
-                    return redirect(reverse('registro'))
-                elif userType == 2:
-                    return redirect(reverse('registro'))
-                elif userType == 3:
-                    return redirect(reverse('registro'))
-                elif userType == 4:
-                    return redirect(reverse('registro'))
-                elif userType == 5:
-                    return redirect(reverse('registro'))
-                else:
-                    logout(request)
-                    return render(request, HTMLHOME, {'form': newForm,
-                                                         'error': ERROR_5})
+                logout(request)
+                return render(request, HTMLHOME, {'form': newForm,'error': ERROR_5})
         else:
-            return render(request, HTMLHOME,{'form':newForm,
-                                                'error': ERROR_2})
+            return render(request, HTMLHOME,{'form':newForm, 'error': ERROR_2})
     return render(request, HTMLHOME, {'form': newForm})
 
 @login_required
@@ -341,6 +336,7 @@ def Logout(request):
 
 def Registro(request):
     newForm = RegistroUsuariosForm()
+    #Post
     if request.method == "POST":
         form = RegistroUsuariosForm(request.POST)
         #Verificar que el documento no se haya registrado antes.
@@ -357,8 +353,10 @@ def Registro(request):
             form = stripForm(form)
             #Guardar el usuario nuevo
             try:
+                event = None
                 documento = form.cleaned_data['username']
                 password = form.cleaned_data['password']
+                tipo_usuario = form.cleaned_data['tipo_usuario']
                 
                 if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
                     return render(request, HTMLREGISTRO, {
@@ -371,11 +369,14 @@ def Registro(request):
                 user.username = documento
                 user.set_password(password)
                 user.email = form.cleaned_data['email']
+                #Desactivar el acceso si el usuario es tipo repartidor
+                user.is_active = tipo_usuario.id != TIPOREPARTIDOR
+                event = EXITO_4 if not user.is_active else EXITO_1
                 user.save()
                 
                 return render(request, HTMLREGISTRO, {
                     "form": newForm,
-                    "evento": EXITO_1,
+                    "evento": event,
                     "exito": True,
                     "documento": f"Usuario login: {documento}",
                     "password": f"Contraseña: {form.cleaned_data['password']}"

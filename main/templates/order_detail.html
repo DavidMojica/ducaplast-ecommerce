@@ -320,10 +320,10 @@
                             </section>
                             <section class="modal-body">
                             <p>Modificar al repartidor</p>
-                            <form action="" method="POST" id="confirmarRepartidor">
+                            <form action="" method="POST" id="modificarRepartidor">
                                 {% csrf_token %}
                                 {{form.repartidor}}
-                                <input type="hidden" name="confirmarRepartidor">
+                                <input type="hidden" name="modificarRepartidor">
                                 <button type="submit" class="btn btn-warning mt-4">Guardar modificacion</button>                             
                             </form> 
                             </section>
