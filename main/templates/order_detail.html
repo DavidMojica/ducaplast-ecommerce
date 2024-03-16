@@ -3,7 +3,11 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
+<link rel="stylesheet" href="{% static 'styles/ToastNotify.css' %}">
+<script src="{% static 'javascript/ToastNotify.js' %}" defer></script>
 <script src="{% static 'javascript/order_detail.js' %}" defer></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 
 <main class="container mt-4">
     {% if success %}
@@ -19,7 +23,7 @@
                     <p class="card-text">
                         Cliente: <strong>{{cliente}}</strong> <br>
                         Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
-                        Valor pedido: <strong>${{pedido.valor}}</strong> <br>
+                        Valor pedido: <strong  class="price">${{pedido.valor}}</strong> <br>
                         Vendedor: <strong>{{pedido.vendedor}}</strong>
                     </p>
                     <p class="card-text">Estado del pedido: {{pedido.estado}} <br>
@@ -302,7 +306,7 @@
                         <tfoot class="">
                             <tr>
                                 <td>
-                                    <p>Valor: <strong>${{pedido.valor}}</strong></p>
+                                    <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
                                 </td>
                                 <td>
                                     {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}

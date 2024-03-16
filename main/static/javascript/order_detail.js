@@ -2,9 +2,10 @@ const btnModificarCantidad = document.getElementById('btnModificarCantidad');
 let productosActualizados = {};
 
 $(btnModificarCantidad).on('click', function(e){
+    e.preventDefault();
     const modificarCantidad = document.querySelectorAll('.modificarCantidad');
     modificarCantidad.forEach((fila)=>{
-        productosActualizados[fila.querySelector('input[type="hidden"]').value] = fila.querySelector('input[type="number"]').value;
+        productosActualizados[parseInt(fila.querySelector('input[type="hidden"]').value)] = fila.querySelector('input[type="number"]').value;
     });
 
     let url = $(this).attr('action');
@@ -22,7 +23,8 @@ $(btnModificarCantidad).on('click', function(e){
         dataType: 'json',
         success: data => {
             if (data.success){
-
+                console.log(data.total_actualizado)
+                $('.price').text(data.total_actualizado);
             }
             else createToastNotify(1, "Error", data.msg);
         },

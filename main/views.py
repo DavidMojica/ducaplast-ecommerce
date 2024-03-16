@@ -119,6 +119,7 @@ def OrderDetail(request, order):
     print(user.tipo_usuario)
     #Post
     if request.method == 'POST':
+        carrito = request.session.get('carrito', {})
         pedido = get_object_or_404(Pedido, pk=order)
         if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
@@ -144,8 +145,34 @@ def OrderDetail(request, order):
                 else:
                     issue = ERROR_18
             elif 'modificarProductos' in request.POST:
-                pass
-            
+                productosModificados = request.POST.get('productos')
+                try:
+                    productosModificados = json.loads(productosModificados)
+                except json.JSONDecodeError:
+                    return JsonResponse({'success': False, 'msg': "JSON no válido"})
+                
+                if not productosModificados:
+                    return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
+
+                print(productosModificados)
+                
+                for producto_id, cantidad in productosModificados.items():
+                    producto_real = get_object_or_404(Producto, pk=producto_id)
+                    print(producto_id)
+                    carrito[producto_id] = {
+                        'precio': producto_real.precio,
+                        'cantidad_existencias': producto_real.cantidad,
+                        'cantidad': cantidad,
+                        'total_producto': int(cantidad) * int(producto_real.precio)
+                    }
+                    print(carrito)
+                total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
+                print(total_productos_actualizado)
+                iva_actualizado = total_productos_actualizado * 0.19
+                total_actualizado = total_productos_actualizado + iva_actualizado
+                request.session['carrito'] = carrito
+                return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
+        
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
             if 'confirmarFacturacion' in request.POST:
                 if not pedido.estado_id >= 3:
