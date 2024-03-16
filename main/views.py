@@ -209,6 +209,7 @@ def OrderDetail(request, order):
             puede_ayudar = not despachadores_activos.filter(despachador_id=user.id).exists()
         elif pedido.estado_id == 2:
             despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+            print(despachadores_activos)
             
         return render(request, HTMLORDERDETAIL, {
             'success': True,
