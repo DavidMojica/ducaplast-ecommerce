@@ -122,6 +122,10 @@
                             </section>
                             {% endif %}
                         {% endfor %}
+                        {% if pedido.notaDespachador %}
+                        <h5 class="mt-3">Nota de despacho</h5>
+                        <p>{{pedido.notaDespachador}}</p>
+                        {% endif %}
                         {% if puede_ayudar %}
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
                             <!-- modal -->
@@ -340,6 +344,17 @@
                                         <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
                                       </form>
                                     {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><p>Nota al pedido. No es obligatorio.</p></td>
+                                <td class="text-center">
+                                    <form action="" method="post" id="notaDespacho">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="notaDespacho" id="notaDespacho">
+                                        <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{{pedido.notaDespachador}}</textarea>
+                                        <button type="submit" class="btn btn-success">Guardar nota</button>
+                                    </form>
                                 </td>
                             </tr>
                         </tfoot>

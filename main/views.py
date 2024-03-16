@@ -184,7 +184,6 @@ def OrderDetail(request, order):
                 total_actualizado = round(total_productos_actualizado + iva_actualizado)
                 request.session['carrito'] = carrito
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
-        
             elif 'borrarProducto' in request.POST:
                 producto_id = request.POST.get('producto_id')
                 del carrito[producto_id]
@@ -197,7 +196,10 @@ def OrderDetail(request, order):
                 iva_actualizado = total_productos_actualizado * 0.19
                 total_actualizado = round(total_productos_actualizado + iva_actualizado)
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
-
+            elif 'notaDespacho' in request.POST:
+                notaPedido = request.POST.get('notaPedido')
+                pedido.notaDespachador = notaPedido.strip()
+                pedido.save()
 
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
             if 'confirmarFacturacion' in request.POST:
@@ -205,6 +207,7 @@ def OrderDetail(request, order):
                     pedido.estado_id = 3
                     pedido.facturado_por = user
                     pedido.facturado_hora = timezone.now()
+                    pedido.actualizar_dinero_generado_cliente()
                     pedido.save()
                 else:
                     issue = ERROR_17
@@ -675,7 +678,6 @@ def Cart(request):
                 valor=getCartPrice(request) + getCartPrice(request)*0.19,
                 nota=pedido_nota
             )
-            nuevo_pedido.actualizar_dinero_generado_cliente()
             nuevo_pedido.save()
             
             #Añadir productos al pedido

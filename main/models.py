@@ -52,6 +52,7 @@ class Pedido(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
+    notaDespachador = models.CharField(max_length=500, null=True, blank=True)
     despachado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="despachado_por")
     despachado_hora = models.DateTimeField(null=True, blank=True)
     facturado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="facturado_por")
