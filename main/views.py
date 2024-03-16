@@ -118,7 +118,6 @@ def OrderDetail(request, order):
         pedido = get_object_or_404(Pedido, pk=order)
         if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
-                
                 pedido.estado_id = 1
                 pedido.save()
                 ayudarEnDespacho(request, user, pedido)
@@ -171,7 +170,6 @@ def OrderDetail(request, order):
                 if form.is_valid():
                     pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
                     pedido.save()
-                    msg = EXITO_5
                     
             else:
                 return render(request,HTMLORDERDETAIL,{
@@ -223,31 +221,40 @@ def OrderDetail(request, order):
         })
     elif user.tipo_usuario_id == 4:
         pedido = get_object_or_404(Pedido, pk=order)
-        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-        return render(request, HTMLORDERDETAIL, {
+        if pedido.facturado_por_id == user.id:
+            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+            return render(request, HTMLORDERDETAIL, {
+                    'success': True,
+                    'pedido': pedido,
+                    'cliente': cliente,
+                    'productos': productos,
+                    'user': user,
+                    'despachadoresActivos': despachadores_activos,
+                })
+        else:
+            return render(request, HTMLORDERDETAIL, {
+                'success': False,
+                'msg': ERROR_13
+            })
+    elif user.tipo_usuario_id == 5: #Asignador
+        pedido = get_object_or_404(Pedido, pk=order)
+        if pedido.asignador_reparto_id == user.id:
+            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+            
+            return render(request,HTMLORDERDETAIL, {
                 'success': True,
                 'pedido': pedido,
                 'cliente': cliente,
                 'productos': productos,
                 'user': user,
+                'form': SeleccionarRepartidor(),
                 'despachadoresActivos': despachadores_activos,
-                
             })
-    elif user.tipo_usuario_id == 5: #Asignador
-        pedido = get_object_or_404(Pedido, pk=order)
-        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-        
-        return render(request,HTMLORDERDETAIL, {
-            'success': True,
-            'pedido': pedido,
-            'cliente': cliente,
-            'productos': productos,
-            'user': user,
-            'form': SeleccionarRepartidor(),
-            'despachadoresActivos': despachadores_activos,
-        })
-
-    
+        else:
+            return render(request, HTMLORDERDETAIL, {
+                'success': False,
+                'msg': ERROR_13
+            })
     return render(request, HTMLORDERDETAIL, {
         'success': False,
         'msg': ERROR_13
@@ -271,7 +278,7 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(estado_id=3).order_by('-id')
 
 
-    elif filtered == "historial": #No aplica para vendedor
+    elif filtered == "historial": 
         history=True
         if user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
@@ -279,6 +286,8 @@ def Orders(request, filtered=None):
             pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
         elif user.tipo_usuario_id == 4:
             pedidos = Pedido.objects.filter(facturado_por=user.id)
+        elif user.tipo_usuario_id == 5:
+            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id)
    
 
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
