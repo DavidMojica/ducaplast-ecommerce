@@ -290,12 +290,36 @@
                         </thead>
                         <tbody>
                             {% for p in productos %}
-                                <tr>
+                                <tr id="p-{{p.producto_id}}">
                                     <td>{{ p.producto.descripcion }}</td>
                                     {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
                                         <td class="modificarCantidad">
                                             <input type="hidden" name="" value="{{p.producto_id}}">
                                             <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
+                                        </td>
+                                        <td>
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-primary btn-sm me-1 mb-2 cart-handler" title="Eliminar item" data-bs-toggle="modal" data-bs-target="#modalBorrarProducto-{{p.producto_id}}">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalBorrarProducto-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                <article class="modal-content">
+                                                    <section class="modal-header">
+                                                    <h5 class="modal-title">Borrar producto</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </section>
+                                                    <section class="modal-body">
+                                                    <p>¿Está seguro de borrar {{p.producto.descripcion}} del pedido? Esta acción es irreversible</p>
+                                                    <form action="" method="POST" id="modificarRepartidor">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger mt-4 delete-item" data-producto-id="{{p.producto_id}}">Borrar producto</button>                             
+                                                    </form> 
+                                                    </section>
+                                                </article>
+                                                </article>
+                                            </section>
                                         </td>
                                     {% else %}
                                         <td>{{ p.cantidad }}</td>

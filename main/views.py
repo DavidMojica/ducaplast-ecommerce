@@ -137,7 +137,12 @@ def OrderDetail(request, order):
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if despachadores_activos.filter(despachador_id=user.id).exists():
+                        total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
+                        iva_actualizado = total_productos_actualizado * 0.19
+                        total_actualizado = round(total_productos_actualizado + iva_actualizado)
+                        
                         pedido.estado_id = 2
+                        pedido.valor =total_actualizado
                         pedido.despachado_hora = timezone.now()
                         pedido.save()
                     else:
@@ -174,13 +179,26 @@ def OrderDetail(request, order):
                     producto_en_pedido.save()
                     
                     
-                    
                 total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
                 iva_actualizado = total_productos_actualizado * 0.19
                 total_actualizado = round(total_productos_actualizado + iva_actualizado)
                 request.session['carrito'] = carrito
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
         
+            elif 'borrarProducto' in request.POST:
+                producto_id = request.POST.get('producto_id')
+                del carrito[producto_id]
+                request.session['carrito'] = carrito
+                print("entro")
+                # Eliminar el producto de la tabla ProductosPedido
+                ProductosPedido.objects.filter(pedido=pedido, producto_id=producto_id).delete()
+                
+                total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
+                iva_actualizado = total_productos_actualizado * 0.19
+                total_actualizado = round(total_productos_actualizado + iva_actualizado)
+                return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
+
+
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
             if 'confirmarFacturacion' in request.POST:
                 if not pedido.estado_id >= 3:
