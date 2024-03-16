@@ -104,7 +104,16 @@ def getCartPrice(request):
             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
         return total_productos
     
-    
+#Devuelve el precio actualizado con el IVA
+@login_required
+def calcular_total_actualizado(request):
+    carrito = request.session.get('carrito', {})
+    total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
+    iva_actualizado = total_productos_actualizado * 0.19
+    total_actualizado = round(total_productos_actualizado + iva_actualizado)
+    return total_actualizado
+
+
 @login_required
 def ayudarEnDespacho(request, user, pedido):
     print(f"{user} {pedido}")
@@ -137,10 +146,7 @@ def OrderDetail(request, order):
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if despachadores_activos.filter(despachador_id=user.id).exists():
-                        total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-                        iva_actualizado = total_productos_actualizado * 0.19
-                        total_actualizado = round(total_productos_actualizado + iva_actualizado)
-                        
+                        total_actualizado = calcular_total_actualizado(request)
                         pedido.estado_id = 2
                         pedido.valor =total_actualizado
                         pedido.despachado_hora = timezone.now()
@@ -178,10 +184,7 @@ def OrderDetail(request, order):
                     producto_en_pedido.total_producto = int(cantidad) * producto_real.precio
                     producto_en_pedido.save()
                     
-                    
-                total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-                iva_actualizado = total_productos_actualizado * 0.19
-                total_actualizado = round(total_productos_actualizado + iva_actualizado)
+                total_actualizado = calcular_total_actualizado(request)
                 request.session['carrito'] = carrito
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
             elif 'borrarProducto' in request.POST:
@@ -191,10 +194,7 @@ def OrderDetail(request, order):
                 print("entro")
                 # Eliminar el producto de la tabla ProductosPedido
                 ProductosPedido.objects.filter(pedido=pedido, producto_id=producto_id).delete()
-                
-                total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-                iva_actualizado = total_productos_actualizado * 0.19
-                total_actualizado = round(total_productos_actualizado + iva_actualizado)
+                total_actualizado = calcular_total_actualizado(request)
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
             elif 'notaDespacho' in request.POST:
                 notaPedido = request.POST.get('notaPedido')

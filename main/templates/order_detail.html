@@ -122,10 +122,6 @@
                             </section>
                             {% endif %}
                         {% endfor %}
-                        {% if pedido.notaDespachador %}
-                        <h5 class="mt-3">Nota de despacho</h5>
-                        <p>{{pedido.notaDespachador}}</p>
-                        {% endif %}
                         {% if puede_ayudar %}
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
                             <!-- modal -->
@@ -164,6 +160,10 @@
                         <p>Hora de despacho: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
                         </p>
                         <span class="badge bg-danger">{{issue3}}</span>
+                    {% endif %}
+                    {% if pedido.notaDespachador %}
+                        <h5 class="mt-3">Nota de despacho</h5>
+                        <p>{{pedido.notaDespachador}}</p>
                     {% endif %}
                 </section>
             </article>
@@ -336,16 +336,17 @@
                                 <td>
                                     <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
                                 </td>
+                                {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
                                 <td>
-                                    {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
                                     <form action="" method="POST" id="modificarCantidad">
                                         {% csrf_token %}
                                         <input type="hidden" name="modificarCantidad">
                                         <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
                                       </form>
-                                    {% endif %}
-                                </td>
+                                    </td>
+                                {% endif %}
                             </tr>
+                            {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
                             <tr>
                                 <td><p>Nota al pedido. No es obligatorio.</p></td>
                                 <td class="text-center">
@@ -357,6 +358,7 @@
                                     </form>
                                 </td>
                             </tr>
+                            {% endif %}
                         </tfoot>
                     </table>
                 </section>
