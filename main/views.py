@@ -143,6 +143,8 @@ def OrderDetail(request, order):
                         issue = ERROR_14
                 else:
                     issue = ERROR_18
+            elif 'modificarProductos' in request.POST:
+                pass
             
         elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
             if 'confirmarFacturacion' in request.POST:

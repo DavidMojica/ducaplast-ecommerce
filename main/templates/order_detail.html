@@ -3,6 +3,7 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
+<script src="{% static 'javascript/order_detail.js' %}" defer></script>
 
 <main class="container mt-4">
     {% if success %}
@@ -15,8 +16,12 @@
                 </section>
                 <section class="card-body">
                     <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
-                    <p class="card-text">Dirección de entrega: {{cliente.direccion}} <br>
-                        Valor pedido: <strong>${{pedido.valor}}</strong></p>
+                    <p class="card-text">
+                        Cliente: <strong>{{cliente}}</strong> <br>
+                        Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
+                        Valor pedido: <strong>${{pedido.valor}}</strong> <br>
+                        Vendedor: <strong>{{pedido.vendedor}}</strong>
+                    </p>
                     <p class="card-text">Estado del pedido: {{pedido.estado}} <br>
                         {% if pedido.estado_id == 0 %}
                         Este pedido está a la espera de ser despachado.
@@ -204,9 +209,9 @@
                 </article>
                 <article class="card-body">
                     {% if pedido.estado.id < 3 %}
-                        <p>Este pedido aún no puede ser repartido</p>
+                        <h5>Este pedido aún no puede ser repartido</h5>
                     {% elif pedido.estado.id == 3 %}
-                        <p>Este pedido está listo para ser repartido</p>
+                        <h5>Este pedido está listo para ser repartido</h5>
                         {% if user.tipo_usuario_id == 5 %}
                             <!-- trigger -->
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Seleccionar repartidor</button>
@@ -281,12 +286,35 @@
                         </thead>
                         <tbody>
                             {% for p in productos %}
-                            <tr>
-                                <td>{{ p.producto.descripcion }}</td>
-                                <td>{{ p.cantidad }}</td>
-                            </tr>
+                                <tr>
+                                    <td>{{ p.producto.descripcion }}</td>
+                                    {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                        <td class="modificarCantidad">
+                                            <input type="hidden" name="" value="{{p.id}}">
+                                            <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
+                                        </td>
+                                    {% else %}
+                                        <td>{{ p.cantidad }}</td>
+                                    {% endif %}
+                                </tr>
                             {% endfor %}
                         </tbody>
+                        <tfoot class="">
+                            <tr>
+                                <td>
+                                    <p>Valor: <strong>${{pedido.valor}}</strong></p>
+                                </td>
+                                <td>
+                                    {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                    <form action="" method="POST" id="modificarCantidad">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="modificarCantidad">
+                                        <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
+                                      </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </section>
             </article>
