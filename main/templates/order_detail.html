@@ -58,7 +58,7 @@
                 <section class="card-body">
                     {% if pedido.estado_id == 0 %}
                         <h5>Este pedido está a la espera de ser despachado.</h5>
-                        {% if user.tipo_usuario_id == 3 %}
+                        {% if user.tipo_usuario_id == 3 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
                             <!-- modal -->
@@ -333,7 +333,7 @@
                             {% for p in productos %}
                                 <tr id="p-{{p.producto_id}}">
                                     <td>{{ p.producto.descripcion }}</td>
-                                    {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                    {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
                                         <td class="modificarCantidad">
                                             <input type="hidden" name="" value="{{p.producto_id}}">
                                             <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
@@ -355,7 +355,9 @@
                                                     <p>¿Está seguro de borrar {{p.producto.descripcion}} del pedido? Esta acción es irreversible</p>
                                                     <form action="" method="POST" id="modificarRepartidor">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger mt-4 delete-item" data-producto-id="{{p.producto_id}}">Borrar producto</button>                             
+                                                        <input type="hidden" name="borrarProducto">
+                                                        <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                        <button type="submit" class="btn btn-danger mt-4 delete-item">Borrar producto</button>                             
                                                     </form> 
                                                     </section>
                                                 </article>
@@ -373,7 +375,7 @@
                                 <td>
                                     <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
                                 </td>
-                                {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
                                 <td>
                                     <form action="" method="POST" id="modificarCantidad">
                                         {% csrf_token %}
@@ -383,14 +385,14 @@
                                     </td>
                                 {% endif %}
                             </tr>
-                            {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                            {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
                             <tr>
                                 <td><p>Nota al pedido. No es obligatorio.</p></td>
                                 <td class="text-center">
                                     <form action="" method="post" id="notaDespacho">
                                         {% csrf_token %}
                                         <input type="hidden" name="notaDespacho" id="notaDespacho">
-                                        <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{{pedido.notaDespachador}}</textarea>
+                                        <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaDespachador and pedido.notaDespachador is not None %} {{pedido.notaDespachador}} {% endif %}</textarea>
                                         <button type="submit" class="btn btn-success">Guardar nota</button>
                                     </form>
                                 </td>

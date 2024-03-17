@@ -116,21 +116,68 @@ def calcular_total_actualizado(request):
 
 @login_required
 def ayudarEnDespacho(request, user, pedido):
-    print(f"{user} {pedido}")
     handler = HandlerDespacho(despachador = user, pedido = pedido)
     handler.save()
-    
+  
+  
+def getPuedeAyudar(pedido, despachadores_activos, user):
+    if pedido.estado_id in [1, 2]:
+        return not despachadores_activos.filter(despachador_id=user.id).exists()
+    return False  
+
+def loadCart(request, pedido, initial=True):
+    carrito = {}
+    productos = ProductosPedido.objects.filter(pedido_id=pedido)
+
+    for producto_pedido in productos:
+        producto_real = get_object_or_404(Producto, pk=producto_pedido.producto.id)
+        carrito[producto_pedido.producto_id] = {
+            'precio': producto_real.precio,
+            'cantidad_existencias': producto_real.cantidad,
+            'cantidad': producto_pedido.cantidad,
+            'total_producto': int(producto_pedido.cantidad) * int(producto_real.precio)
+        }
+    request.session['carrito'] = carrito
+    if not initial:
+        pedido.valor = calcular_total_actualizado(request)
+        pedido.save()
+    return carrito
+
+def updateCart(request, pedido, productos_modificados):
+    carrito = {}
+    productos_en_pedido = ProductosPedido.objects.filter(pedido=pedido)
+    for producto_id, cantidad in productos_modificados.items():
+        producto_real = get_object_or_404(Producto, pk=producto_id)
+        carrito[int(producto_id)] = {
+            'precio': producto_real.precio,
+            'cantidad_existencias': producto_real.cantidad,
+            'cantidad': cantidad,
+            'total_producto': int(cantidad) * int(producto_real.precio)
+        }
+        producto_en_pedido = productos_en_pedido.get(producto=producto_real)
+        producto_en_pedido.cantidad = cantidad
+        producto_en_pedido.total_producto = int(cantidad) * producto_real.precio
+        producto_en_pedido.save()
+    request.session['carrito'] = carrito
+    pedido.valor = calcular_total_actualizado(request)
+    pedido.save()
+    return carrito
+
 #-------------Views-----------#
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     issue = ""
+    pedido = get_object_or_404(Pedido, pk=order)
+    cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
+    productos = ProductosPedido.objects.filter(pedido_id=order)
+    despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido)
+    carrito = loadCart(request, pedido)
 
+    print(f"log1 {carrito}")
     #Post
     if request.method == 'POST':
-        carrito = request.session.get('carrito', {})
-        pedido = get_object_or_404(Pedido, pk=order)
-        if user.tipo_usuario_id == 3 or user.tipo_usuario in adminIds: #Despachadores
+        if user.tipo_usuario_id == 3 or user.tipo_usuario_id in adminIds: #Despachadores
             if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
@@ -143,12 +190,14 @@ def OrderDetail(request, order):
                 else:
                     issue = ERROR_15
             elif 'completarDespacho' in request.POST:
+                request.session['carrito'] = carrito
+                print(f"log3 {carrito}")
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if despachadores_activos.filter(despachador_id=user.id).exists():
                         total_actualizado = calcular_total_actualizado(request)
                         pedido.estado_id = 2
-                        pedido.valor =total_actualizado
+                        pedido.valor = total_actualizado
                         pedido.despachado_hora = timezone.now()
                         pedido.save()
                     else:
@@ -164,38 +213,19 @@ def OrderDetail(request, order):
                 
                 if not productosModificados:
                     return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
-
-                carrito.clear()
-                request.session['carrito'] = carrito
-                productosEnPedido = ProductosPedido.objects.filter(pedido=pedido)
                 
-                for producto_id, cantidad in productosModificados.items():
-                    producto_real = get_object_or_404(Producto, pk=producto_id)
-                    carrito[producto_id] = {
-                        'precio': producto_real.precio,
-                        'cantidad_existencias': producto_real.cantidad,
-                        'cantidad': cantidad,
-                        'total_producto': int(cantidad) * int(producto_real.precio)
-                    }
-                    
-                    # Actualizar los objetos ProductosPedido
-                    producto_en_pedido = productosEnPedido.get(producto=producto_real)
-                    producto_en_pedido.cantidad = cantidad
-                    producto_en_pedido.total_producto = int(cantidad) * producto_real.precio
-                    producto_en_pedido.save()
-                    
+                print(f"logmod{productosModificados}")
+                carrito = updateCart(request,pedido,productosModificados)
                 total_actualizado = calcular_total_actualizado(request)
-                request.session['carrito'] = carrito
+                print(f"log2 {carrito}")
+                print(f"{total_actualizado}")
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
             elif 'borrarProducto' in request.POST:
-                producto_id = request.POST.get('producto_id')
-                del carrito[producto_id]
-                request.session['carrito'] = carrito
-                print("entro")
-                # Eliminar el producto de la tabla ProductosPedido
+                producto_id = int(request.POST.get('producto_id'))
                 ProductosPedido.objects.filter(pedido=pedido, producto_id=producto_id).delete()
-                total_actualizado = calcular_total_actualizado(request)
-                return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
+                carrito = loadCart(request, pedido, False)
+                print(f"log4 {carrito}")
+                total_actualizado = calcular_total_actualizado(request)  
             elif 'notaDespacho' in request.POST:
                 notaPedido = request.POST.get('notaPedido')
                 pedido.notaDespachador = notaPedido.strip()
@@ -248,10 +278,7 @@ def OrderDetail(request, order):
             })
          
     #GET   
-    pedido = get_object_or_404(Pedido, pk=order)
-    cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
-    productos = ProductosPedido.objects.filter(pedido_id=order)
-    despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido)
+    
     data = {
         'success': True,
         'pedido': pedido,
@@ -268,15 +295,14 @@ def OrderDetail(request, order):
     elif user.tipo_usuario_id == 2:
         return render(request, HTMLORDERDETAIL, {**data}) if pedido.vendedor_id == user.id else render(request, HTMLORDERDETAIL, {'success': False, 'msg': ERROR_13})
     elif user.tipo_usuario_id == 3: #Despachadores
-        puede_ayudar = False
-        if pedido.estado_id in [1, 2]:
-            puede_ayudar = not despachadores_activos.filter(despachador_id=user.id).exists()
-        data['puede_ayudar'] = puede_ayudar
+        data['puede_ayudar'] = getPuedeAyudar(pedido, despachadores_activos, user)
         return render(request, HTMLORDERDETAIL, {**data, 'issue3':issue})
     elif user.tipo_usuario_id in [4,5]: #Facturadores - asignadores
         form = SeleccionarRepartidor() if user.tipo_usuario_id == 5 else None
         issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
         return render(request, HTMLORDERDETAIL, {**data, 'form': form, issue_key: issue})
+
+
 
 @login_required
 def Orders(request, filtered=None):
