@@ -125,7 +125,7 @@ def ayudarEnDespacho(request, user, pedido):
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     issue = ""
-    print(user.tipo_usuario)
+
     #Post
     if request.method == 'POST':
         carrito = request.session.get('carrito', {})
@@ -251,72 +251,31 @@ def OrderDetail(request, order):
     pedido = get_object_or_404(Pedido, pk=order)
     cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
     productos = ProductosPedido.objects.filter(pedido_id=order)
-    print(productos)
+    despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido)
+    data = {
+        'success': True,
+        'pedido': pedido,
+        'cliente': cliente,
+        'productos': productos,
+        'user': user,
+        'despachadoresActivos': despachadores_activos
+    }
+        
     if user.tipo_usuario_id == 2:
         if pedido.vendedor_id == user.id:
-            return render(request, HTMLORDERDETAIL, {
-                'success': True,
-                'pedido': pedido,
-                'user': user,
-                'cliente': cliente,
-                'productos': productos
-            })
+            return render(request, HTMLORDERDETAIL, {**data})
         else:
-            return render(request, HTMLORDERDETAIL, {
-                'success': False,
-                'msg': ERROR_13
-            })
+            return render(request, HTMLORDERDETAIL, { 'success': False, 'msg': ERROR_13 })
     elif user.tipo_usuario_id == 3: #Despachadores
-        despachadores_activos = None
         puede_ayudar = False
-        if pedido.estado_id == 1:
-            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+        if pedido.estado_id in [1, 2]:
             puede_ayudar = not despachadores_activos.filter(despachador_id=user.id).exists()
-        elif pedido.estado_id == 2:
-            despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-            print(despachadores_activos)
-            
-        return render(request, HTMLORDERDETAIL, {
-            'success': True,
-            'pedido': pedido,
-            'user': user,
-            'cliente': cliente,
-            'productos': productos,
-            'despachadoresActivos': despachadores_activos,
-            'puede_ayudar': puede_ayudar,
-            'issue3': issue
-        })
-    elif user.tipo_usuario_id == 4:
-        pedido = get_object_or_404(Pedido, pk=order)
-        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-        return render(request, HTMLORDERDETAIL, {
-                'success': True,
-                'pedido': pedido,
-                'cliente': cliente,
-                'productos': productos,
-                'user': user,
-                'despachadoresActivos': despachadores_activos,
-                'issue4': issue
-            })
-    elif user.tipo_usuario_id == 5: #Asignador
-        pedido = get_object_or_404(Pedido, pk=order)
-        despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
-        
-        return render(request,HTMLORDERDETAIL, {
-            'success': True,
-            'pedido': pedido,
-            'cliente': cliente,
-            'productos': productos,
-            'user': user,
-            'form': SeleccionarRepartidor(),
-            'despachadoresActivos': despachadores_activos,
-            'issue5': issue
-        })
-
-    return render(request, HTMLORDERDETAIL, {
-        'success': False,
-        'msg': ERROR_13
-    })
+        data['puede_ayudar'] = puede_ayudar
+        return render(request, HTMLORDERDETAIL, {**data, 'issue3':issue})
+    elif user.tipo_usuario_id in [4,5]: #Facturadores - asignadores
+        form = SeleccionarRepartidor() if user.tipo_usuario_id == 5 else None
+        issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
+        return render(request, HTMLORDERDETAIL, {**data, 'form': form, issue_key: issue})
 
 @login_required
 def Orders(request, filtered=None):
@@ -326,14 +285,16 @@ def Orders(request, filtered=None):
     pedidos = []
 
     if not filtered:
-        if user.tipo_usuario_id == 2:  # Vendedor
-            pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-id')
+        if user.tipo_usuario_id in adminIds:
+            pedidos = Pedido.objects.exclude(estado_id=5).order_by('-fecha')
+        elif user.tipo_usuario_id == 2:  # Vendedor
+            pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Despachador
-            pedidos = Pedido.objects.filter(estado_id__in=[0, 1]).order_by('-id')
+            pedidos = Pedido.objects.filter(estado_id__in=[0, 1]).order_by('-fecha')
         elif user.tipo_usuario_id == 4:
-            pedidos = Pedido.objects.filter(estado_id=2).order_by('-id')
+            pedidos = Pedido.objects.filter(estado_id=2).order_by('-fecha')
         elif user.tipo_usuario_id == 5:
-            pedidos = Pedido.objects.filter(estado_id=3).order_by('-id')
+            pedidos = Pedido.objects.filter(estado_id=3).order_by('-fecha')
 
 
     elif filtered == "historial": 

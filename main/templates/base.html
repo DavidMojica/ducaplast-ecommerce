@@ -22,8 +22,9 @@
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                       {% if user.tipo_usuario_id == 0 or user.tipo_usuario_id == 1 %}
                       <li class=""><a href="/catalogo" class="nav-link px-2 text-white">Catálogo</a></li>
-                      <li class=""><a href="" class="nav-link px-2 text-white">Facturas</a></li>
-                      <li class=""><a href="" class="nav-link px-2 text-white">Pedidos</a></li>
+                      <li class=""><a href="/cart" class="nav-link px-2 text-white">Carrito</a></li>
+                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos</a></li>
+                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Facturas</a></li>
                       <li class=""><a href="/registro" class="nav-link px-2 text-white">Registrar</a></li>
                       <li class=""><a href="" class="nav-link px-2 text-white">Estadísticas</a></li>
                       {% elif user.tipo_usuario_id == 2 %}
