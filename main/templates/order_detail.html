@@ -312,7 +312,24 @@
                         <br>
                         <span class="badge bg-danger">{{issue5}}</span>
                     {% else %}
-                    <p>Este pedido ya fue repartido</p>
+                    <h5>Este pedido fue repartido por:</h5>
+                    <p>{{pedido.repartido_por}}</p>
+                    {% endif %}
+                </article>
+            </section>
+            <!-- Completación -->
+            <section class="card mb-3">
+                <article class="card-header text-center">
+                    <h5 class="card-title">Completación</h5>
+                </article>
+                <article class="card-body">
+                    {% if pedido.estado.id < 5 %}
+                        <h5>Este pedido no aún no se ha completado</h5>
+                    {% elif pedido.estado.id == 5 %}
+                        <h5>Este pedido ya fue completado. <br>
+                        Marcado como completado por:</h5>
+                        <p class="card-text">{{pedido.completado_por}}</p>
+                        <p class="card-text">Hora de completación: <span class="badge bg-info">{{pedido.completado_hora}}</span></p>
                     {% endif %}
                 </article>
             </section>

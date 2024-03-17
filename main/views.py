@@ -331,14 +331,16 @@ def Orders(request, filtered=None):
 
     elif filtered == "historial": 
         history=True
-        if user.tipo_usuario_id == 3:  # Despachador
+        if user.tipo_usuario_id in adminIds:
+            pedidos = Pedido.objects.filter(estado_id=5).order_by('-fecha')
+        elif user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
             pedidos = [handler_despacho.pedido for handler_despacho in handler_despachos]
-            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
+            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True).order_by('-fecha')
         elif user.tipo_usuario_id == 4:
-            pedidos = Pedido.objects.filter(facturado_por=user.id)
+            pedidos = Pedido.objects.filter(facturado_por=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 5:
-            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id)
+            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id).order_by('-fecha')
    
 
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
