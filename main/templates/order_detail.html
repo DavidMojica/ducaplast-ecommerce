@@ -8,7 +8,6 @@
 <script src="{% static 'javascript/order_detail.js' %}" defer></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-
 <main class="container mt-4">
     {% if success %}
     <section class="row">
@@ -20,6 +19,7 @@
                 </section>
                 <section class="card-body">
                     <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
+                    <h5>Hora de completación: {% if pedido.completado_por %} <span class="badge bg-success">{{pedido.completado_hora}}</span>{% else %}Aún no se ha completado el pedido. {% endif %}</h5>
                     <p class="card-text">
                         Cliente: <strong>{{cliente}}</strong> <br>
                         Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
@@ -59,29 +59,29 @@
                 <section class="card-body">
                     {% if pedido.estado_id == 0 %}
                         <h5>Este pedido está a la espera de ser despachado.</h5>
-                        {% if user.tipo_usuario_id == 3 %}
+                        {% if user.tipo_usuario_id == 3 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
                             <!-- modal -->
                             <section class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
-                                <article class="modal-content">
-                                    <section class="modal-header">
-                                    <h5 class="modal-title">Confirmar despacho</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </section>
-                                    <section class="modal-body">
-                                    <p>¿Realmente quiere comenzar este despacho?</p>
-                                    </section>
-                                    <section class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                    <form action="" method="POST" id="confirmar_despacho">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="confirmar_despacho">
-                                        <button type="submit" class="btn btn-warning">Confirmar</button>
-                                    </form>
-                                    </section>
-                                </article>
+                                    <article class="modal-content">
+                                        <section class="modal-header">
+                                            <h5 class="modal-title">Confirmar despacho</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </section>
+                                        <section class="modal-body">
+                                            <p>¿Realmente quiere comenzar este despacho?</p>
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                            <form action="" method="POST" id="confirmar_despacho">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="confirmar_despacho">
+                                                <button type="submit" class="btn btn-warning">Confirmar</button>
+                                            </form>
+                                        </section>
+                                    </article>
                                 </article>
                             </section>
                         {% endif %}
@@ -101,23 +101,23 @@
                             <!-- modal -->
                             <section class="modal fade" id="modalC" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
-                                <article class="modal-content">
-                                    <section class="modal-header">
-                                    <h5 class="modal-title">Confirmar marcar como completo</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </section>
-                                    <section class="modal-body">
-                                    <p>¿Este despacho ya está listo para ser facturado?</p>
-                                    </section>
-                                    <section class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                    <form action="" method="POST">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="completarDespacho">
-                                        <button type="submit" class="btn btn-success">Sí, está listo</button>
-                                        </form>
-                                    </section>
-                                </article>
+                                    <article class="modal-content">
+                                        <section class="modal-header">
+                                            <h5 class="modal-title">Confirmar marcar como completo</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </section>
+                                        <section class="modal-body">
+                                            <p>¿Este despacho ya está listo para ser facturado?</p>
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                            <form action="" method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="completarDespacho">
+                                                <button type="submit" class="btn btn-success">Sí, está listo</button>
+                                            </form>
+                                        </section>
+                                    </article>
                                 </article>
                             </section>
                             {% endif %}
@@ -127,23 +127,23 @@
                             <!-- modal -->
                             <section class="modal fade" id="modalH" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
-                                <article class="modal-content">
-                                    <section class="modal-header">
-                                    <h5 class="modal-title">Confirmar ayudar en despacho</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </section>
-                                    <section class="modal-body">
-                                    <p>¿Realmente quiere ayudar en este despacho?</p>
-                                    </section>
-                                    <section class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                    <form action="" method="POST">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="ayudarDespacho">
-                                        <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
-                                    </form>
-                                    </section>
-                                </article>
+                                    <article class="modal-content">
+                                        <section class="modal-header">
+                                            <h5 class="modal-title">Confirmar ayudar en despacho</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </section>
+                                        <section class="modal-body">
+                                            <p>¿Realmente quiere ayudar en este despacho?</p>
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                            <form action="" method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="ayudarDespacho">
+                                                <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
+                                            </form>
+                                        </section>
+                                    </article>
                                 </article>
                             </section>
                         {% endif %}
@@ -177,26 +177,29 @@
                         <h5>Este pedido aún no puede ser facturado</h5>
                     {% elif pedido.estado.id == 2 %}
                         <h5>Este pedido está listo para ser facturado</h5>
-                        {% if user.tipo_usuario_id == 4 %}
+                        {% if user.tipo_usuario_id == 4 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Facturación lista</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalFacturacion" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
-                                <article class="modal-content">
-                                    <section class="modal-header">
-                                    <h5 class="modal-title">Confirmar facturacion y repartidor</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </section>
-                                    <section class="modal-body">
-                                    <p>Antes de continuar asegurese de haber facturado completamente el pedido.</p>
-                                    <form action="" method="POST">
-                                         {% csrf_token %}
-                                         <input type="hidden" name="confirmarFacturacion">   
-                                        <button type="submit" class="btn btn-warning mt-4">Confirmar facturacion</button>                             
-                                    </form>
-                                    </section>
-                                </article>
+                                    <article class="modal-content">
+                                        <section class="modal-header">
+                                            <h5 class="modal-title">Confirmar facturacion y repartidor</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </section>
+                                        <section class="modal-body">
+                                            <p>Antes de continuar asegurese de haber facturado completamente el pedido.</p>
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                            <form action="" method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="confirmarFacturacion">   
+                                                <button type="submit" class="btn btn-warning">Confirmar facturacion</button>                             
+                                            </form>
+                                        </section>
+                                    </article>
                                 </article>
                             </section>
                         {% endif %}
@@ -220,27 +223,30 @@
                         <h5>Este pedido aún no puede ser repartido</h5>
                     {% elif pedido.estado.id == 3 %}
                         <h5>Este pedido está listo para ser repartido</h5>
-                        {% if user.tipo_usuario_id == 5 %}
+                        {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Seleccionar repartidor</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalAsignador" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
-                                <article class="modal-content">
-                                    <section class="modal-header">
-                                    <h5 class="modal-title">Seleccionar repartidor</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </section>
-                                    <section class="modal-body">
-                                    <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
-                                    <form action="" method="POST" id="confirmarRepartidor">
-                                        {% csrf_token %}
-                                        {{form.repartidor}}
-                                        <input type="hidden" name="confirmarRepartidor">
-                                        <button type="submit" class="btn btn-warning mt-4">Confirmar repartidor</button>                             
-                                    </form> 
-                                    </section>
-                                </article>
+                                    <article class="modal-content">
+                                        <section class="modal-header">
+                                            <h5 class="modal-title">Seleccionar repartidor</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </section>
+                                        <section class="modal-body">
+                                            <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
+                                            <form action="" method="POST" id="confirmarRepartidor" class="text-end ">
+                                                {% csrf_token %}
+                                                {{form.repartidor}}
+                                                <input type="hidden" name="confirmarRepartidor">
+                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor</button>                             
+                                            </form> 
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                        </section>
+                                    </article>
                                 </article>
                             </section>
                         {% endif %}
@@ -249,33 +255,81 @@
                         <p>Asignó el repartidor: {{pedido.asignador_reparto}} <br>
                         Repartidor elegido: {{pedido.repartido_por}} <br>
                         Hora de asignacion: <span class="badge bg-info">{{pedido.asignacion_hora}}</span></p>
-                        {% if user.tipo_usuario_id == 5 %}
+                        {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalAsignadorModificar">Modificar repartidor</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalAsignadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
-                                <article class="modal-content">
-                                    <section class="modal-header">
-                                    <h5 class="modal-title">Modificar repartidor</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </section>
-                                    <section class="modal-body">
-                                    <p>Modificar al repartidor</p>
-                                    <form action="" method="POST" id="modificarRepartidor">
-                                        {% csrf_token %}
-                                        {{form.repartidor}}
-                                        <input type="hidden" name="modificarRepartidor">
-                                        <button type="submit" class="btn btn-warning mt-4">Guardar modificacion</button>                             
-                                    </form> 
-                                    </section>
-                                </article>
+                                    <article class="modal-content">
+                                        <section class="modal-header">
+                                            <h5 class="modal-title">Modificar repartidor</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </section>
+                                        <section class="modal-body">
+                                            <p>Modificar al repartidor</p>
+                                            <form action="" method="POST" id="modificarRepartidor" class="text-end">
+                                                {% csrf_token %}
+                                                {{form.repartidor}}
+                                                <input type="hidden" name="modificarRepartidor">
+                                                <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
+                                            </form> 
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                        </section>
+                                    </article>
                                 </article>
                             </section>
-                        {% endif %} <br>
+                        {% endif %} 
+                        {% if isAdmin %}
+                        <!-- trigger -->
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCompletarPedido">Completar pedido</button>
+                        <!-- modal -->
+                        <section class="modal fade" id="modalCompletarPedido" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                            <article class="modal-dialog modal-dialog-centered">
+                                <article class="modal-content">
+                                    <section class="modal-header">
+                                        <h5 class="modal-title">Completar pedido</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </section>
+                                    <section class="modal-body">
+                                        <p>Antes de marcar el pedido como completo, asegúrese de haber recogido el dinero en efectivo de este pedido.</p>
+                                    </section>
+                                    <section class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                        <form action="" method="POST" id="completarPedido">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="completarPedido">
+                                            <button type="submit" class="btn btn-success">Sí, lo recibí</button>                             
+                                        </form> 
+                                    </section>
+                                </article>
+                            </article>
+                        </section>
+                        
+                        {% endif %}
+                        <br>
                         <span class="badge bg-danger">{{issue5}}</span>
                     {% else %}
-                    <p>Este pedido ya fue repartido</p>
+                    <h5>Este pedido fue repartido por:</h5>
+                    <p>{{pedido.repartido_por}}</p>
+                    {% endif %}
+                </article>
+            </section>
+            <!-- Completación -->
+            <section class="card mb-3">
+                <article class="card-header text-center">
+                    <h5 class="card-title">Completación</h5>
+                </article>
+                <article class="card-body">
+                    {% if pedido.estado.id < 5 %}
+                        <h5>Este pedido no aún no se ha completado</h5>
+                    {% elif pedido.estado.id == 5 %}
+                        <h5>Este pedido ya fue completado. <br>
+                        Marcado como completado por:</h5>
+                        <p class="card-text">{{pedido.completado_por}}</p>
+                        <p class="card-text">Hora de completación: <span class="badge bg-info">{{pedido.completado_hora}}</span></p>
                     {% endif %}
                 </article>
             </section>
@@ -296,7 +350,7 @@
                             {% for p in productos %}
                                 <tr id="p-{{p.producto_id}}">
                                     <td>{{ p.producto.descripcion }}</td>
-                                    {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                    {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
                                         <td class="modificarCantidad">
                                             <input type="hidden" name="" value="{{p.producto_id}}">
                                             <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
@@ -318,7 +372,9 @@
                                                     <p>¿Está seguro de borrar {{p.producto.descripcion}} del pedido? Esta acción es irreversible</p>
                                                     <form action="" method="POST" id="modificarRepartidor">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger mt-4 delete-item" data-producto-id="{{p.producto_id}}">Borrar producto</button>                             
+                                                        <input type="hidden" name="borrarProducto">
+                                                        <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                        <button type="submit" class="btn btn-danger mt-4 delete-item">Borrar producto</button>                             
                                                     </form> 
                                                     </section>
                                                 </article>
@@ -336,7 +392,7 @@
                                 <td>
                                     <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
                                 </td>
-                                {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                                {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
                                 <td>
                                     <form action="" method="POST" id="modificarCantidad">
                                         {% csrf_token %}
@@ -346,14 +402,14 @@
                                     </td>
                                 {% endif %}
                             </tr>
-                            {% if user.tipo_usuario_id == 3 and pedido.estado_id == 1 %}
+                            {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
                             <tr>
                                 <td><p>Nota al pedido. No es obligatorio.</p></td>
                                 <td class="text-center">
                                     <form action="" method="post" id="notaDespacho">
                                         {% csrf_token %}
                                         <input type="hidden" name="notaDespacho" id="notaDespacho">
-                                        <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{{pedido.notaDespachador}}</textarea>
+                                        <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaDespachador and pedido.notaDespachador is not None %} {{pedido.notaDespachador}} {% endif %}</textarea>
                                         <button type="submit" class="btn btn-success">Guardar nota</button>
                                     </form>
                                 </td>

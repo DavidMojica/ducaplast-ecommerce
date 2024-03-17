@@ -53,16 +53,19 @@ class Pedido(models.Model):
     valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
     notaDespachador = models.CharField(max_length=500, null=True, blank=True)
-    despachado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="despachado_por")
     despachado_hora = models.DateTimeField(null=True, blank=True)
     facturado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="facturado_por")
     facturado_hora = models.DateTimeField(null=True, blank=True)
     asignador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
     asignacion_hora = models.DateTimeField(null=True, blank=True)
     repartido_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="repartido_por")
-    # repartido_hora = models.DateTimeField(null=True, blank=True)
+    completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="completado_por")
+    completado_hora = models.DateTimeField(null=True, blank=True)
     
     def get_status_tiempo(self):
+        if self.completado_por:
+            return 'bg-primary'
+        
         current_time = timezone.now()
         pedido_age = current_time - self.fecha
         if pedido_age < timedelta(hours=1):
@@ -71,7 +74,17 @@ class Pedido(models.Model):
             return 'bg-warning'
         else:
             return 'bg-danger'
-        
+    
+    def get_status_color(self):
+        if self.estado_id == 0:
+            return 'bg-danger'
+        elif self.estado_id in [1,2]:
+            return 'bg-warning'
+        elif self.estado_id in [3,4]:
+            return 'bg-primary'
+        else:
+            return 'bg-success'
+    
     def descontar_cantidad_producto(self):
         productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
         for producto_pedido in productos_pedido:
