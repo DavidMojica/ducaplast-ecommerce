@@ -176,7 +176,7 @@
                         <h5>Este pedido aún no puede ser facturado</h5>
                     {% elif pedido.estado.id == 2 %}
                         <h5>Este pedido está listo para ser facturado</h5>
-                        {% if user.tipo_usuario_id == 4 %}
+                        {% if user.tipo_usuario_id == 4 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Facturación lista</button>
                             <!-- modal -->
@@ -222,7 +222,7 @@
                         <h5>Este pedido aún no puede ser repartido</h5>
                     {% elif pedido.estado.id == 3 %}
                         <h5>Este pedido está listo para ser repartido</h5>
-                        {% if user.tipo_usuario_id == 5 %}
+                        {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Seleccionar repartidor</button>
                             <!-- modal -->
@@ -235,15 +235,15 @@
                                         </section>
                                         <section class="modal-body">
                                             <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
-                                        </section>
-                                        <section class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                            <form action="" method="POST" id="confirmarRepartidor">
+                                            <form action="" method="POST" id="confirmarRepartidor" class="text-end ">
                                                 {% csrf_token %}
                                                 {{form.repartidor}}
                                                 <input type="hidden" name="confirmarRepartidor">
-                                                <button type="submit" class="btn btn-warning ">Confirmar repartidor</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor</button>                             
                                             </form> 
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
                                         </section>
                                     </article>
                                 </article>

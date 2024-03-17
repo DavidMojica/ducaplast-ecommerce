@@ -95,7 +95,7 @@ def unloginRequired(view_func):
 #Obtener el precio de los articulos del carro y actualizar sus respectivos valores con puntos decimales.
 @login_required
 def getCartPrice(request):
-    carrito = request.session.get('carrito', {})
+    carrito = request.session.get('carritoVenta', {})
     total_productos = 0
     if carrito:
         for key, producto in carrito.items():
@@ -177,12 +177,12 @@ def OrderDetail(request, order):
     print(f"log1 {carrito}")
     #Post
     if request.method == 'POST':
-        if user.tipo_usuario_id == 3 or user.tipo_usuario_id in adminIds: #Despachadores
-            if pedido.estado_id == 0 and "confirmar_despacho" in request.POST:
+        #----------------TAREAS DE DESPACHO, ESTADO 0 PARA 1----------------#
+        if user.tipo_usuario_id == 3 or user.tipo_usuario_id in adminIds and pedido.estado_id in [0,1]: #Despachadores
+            if "confirmar_despacho" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
-                ayudarEnDespacho(request, user, pedido)
-                
+                ayudarEnDespacho(request, user, pedido)           
             elif 'ayudarDespacho' in request.POST:
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
                 if not despachadores_activos.filter(despachador_id=user.id).exists():
@@ -230,8 +230,8 @@ def OrderDetail(request, order):
                 notaPedido = request.POST.get('notaPedido')
                 pedido.notaDespachador = notaPedido.strip()
                 pedido.save()
-
-        elif user.tipo_usuario_id == 4 or user.tipo_usuario in adminIds: #Facturadores
+        #----------------TAREAS DE FACTURACIÓN, ESTADO 2----------------#
+        elif user.tipo_usuario_id == 4 or user.tipo_usuario_id in adminIds and pedido.estado_id == 2: #Facturadores
             if 'confirmarFacturacion' in request.POST:
                 if not pedido.estado_id >= 3:
                     pedido.estado_id = 3
@@ -241,8 +241,8 @@ def OrderDetail(request, order):
                     pedido.save()
                 else:
                     issue = ERROR_17
-      
-        elif user.tipo_usuario_id == 5 or user.tipo_usuario in adminIds: # Asignadores
+        #----------------TAREAS DE ASIGNACION, ESTADO 3----------------#
+        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id == 3: # Asignadores
             if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if not pedido.estado_id >= 4:
@@ -271,6 +271,7 @@ def OrderDetail(request, order):
                     'success':False,
                     'msg': ERROR_13
                 })
+        #----------------TAREAS DE COMPLETACIÓN, ESTADO 4 PARA 5----------------#
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
@@ -291,7 +292,8 @@ def OrderDetail(request, order):
         
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
-        return render(request, HTMLORDERDETAIL, {**data})
+        form = SeleccionarRepartidor() if pedido.estado_id == 3 else None
+        return render(request, HTMLORDERDETAIL, {**data, 'form':form})
     elif user.tipo_usuario_id == 2:
         return render(request, HTMLORDERDETAIL, {**data}) if pedido.vendedor_id == user.id else render(request, HTMLORDERDETAIL, {'success': False, 'msg': ERROR_13})
     elif user.tipo_usuario_id == 3: #Despachadores
@@ -300,9 +302,7 @@ def OrderDetail(request, order):
     elif user.tipo_usuario_id in [4,5]: #Facturadores - asignadores
         form = SeleccionarRepartidor() if user.tipo_usuario_id == 5 else None
         issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
-        return render(request, HTMLORDERDETAIL, {**data, 'form': form, issue_key: issue})
-
-
+        return render(request, HTMLORDERDETAIL, {**data, 'form': SeleccionarRepartidor(), issue_key: issue})
 
 @login_required
 def Orders(request, filtered=None):
@@ -502,7 +502,7 @@ def EditarCuenta(request):
 
 @login_required
 def CartHandler(request):
-    carrito = request.session.get('carrito', {})
+    carrito = request.session.get('carritoVenta', {})
     if request.method == "POST":
         event = ""
         action = request.POST.get('action')
@@ -522,7 +522,7 @@ def CartHandler(request):
                     'total_producto': total_producto,
                 }
                 event = "Producto añadido"
-                request.session['carrito'] = carrito
+                request.session['carritoVenta'] = carrito
                 return JsonResponse({'success': True, 'event': event,})
             except Producto.DoesNotExist:
                 event = "El producto no existe"
@@ -536,7 +536,7 @@ def CartHandler(request):
             total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
             iva_actualizado = total_productos_actualizado * 0.19
             total_actualizado = total_productos_actualizado + iva_actualizado
-            request.session['carrito'] = carrito
+            request.session['carritoVenta'] = carrito
             
             return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
                                 'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
@@ -544,7 +544,7 @@ def CartHandler(request):
         #borrar todo el carrito
         elif action == "3":
             carrito.clear()
-            request.session['carrito'] = carrito
+            request.session['carritoVenta'] = carrito
             return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
@@ -598,7 +598,7 @@ def Catalogo(request):
     
     return render(request, HTMLCATALOGO,{
         'productos': productos_paginados,
-        'carrito': request.session.get('carrito', {}),
+        'carrito': request.session.get('carritoVenta', {}),
         'form': form
     })
         
@@ -608,7 +608,7 @@ def Cart(request):
     #Valor total de los productos
     form = DetallesPedido(request.POST)
     # if request.method == "POST":
-    carrito = request.session.get('carrito', {})
+    carrito = request.session.get('carritoVenta', {})
     total_productos = 0
     iva = 0
     
@@ -679,7 +679,7 @@ def Cart(request):
             
             #Limpiar carrito despues de una operacion exitosa
             carrito.clear()
-            request.session['carrito'] = carrito
+            request.session['carritoVenta'] = carrito
             return JsonResponse({'success': True, 'msg': 'Venta completada'})
     
     elif "crear_cliente" in request.POST:
