@@ -191,7 +191,6 @@ def OrderDetail(request, order):
                     issue = ERROR_15
             elif 'completarDespacho' in request.POST:
                 request.session['carrito'] = carrito
-                print(f"log3 {carrito}")
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if despachadores_activos.filter(despachador_id=user.id).exists():
@@ -237,7 +236,6 @@ def OrderDetail(request, order):
                     pedido.estado_id = 3
                     pedido.facturado_por = user
                     pedido.facturado_hora = timezone.now()
-                    pedido.actualizar_dinero_generado_cliente()
                     pedido.save()
                 else:
                     issue = ERROR_17
@@ -272,6 +270,14 @@ def OrderDetail(request, order):
                     'msg': ERROR_13
                 })
         #----------------TAREAS DE COMPLETACIÓN, ESTADO 4 PARA 5----------------#
+        elif user.tipo_usuario_id in adminIds and pedido.estado_id == 4:
+            if 'completarPedido' in request.POST:
+                if not pedido.estado_id >= 5:
+                    pedido.estado_id = 5
+                    pedido.actualizar_dinero_generado_cliente()
+                    pedido.completado_por = user
+                    pedido.completado_hora = timezone.now()
+                    pedido.save()
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
@@ -279,7 +285,6 @@ def OrderDetail(request, order):
             })
          
     #GET   
-    
     data = {
         'success': True,
         'pedido': pedido,
@@ -292,7 +297,7 @@ def OrderDetail(request, order):
         
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
-        form = SeleccionarRepartidor() if pedido.estado_id == 3 else None
+        form = SeleccionarRepartidor() if pedido.estado_id == 3 or 4 else None
         return render(request, HTMLORDERDETAIL, {**data, 'form':form})
     elif user.tipo_usuario_id == 2:
         return render(request, HTMLORDERDETAIL, {**data}) if pedido.vendedor_id == user.id else render(request, HTMLORDERDETAIL, {'success': False, 'msg': ERROR_13})

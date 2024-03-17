@@ -60,9 +60,13 @@ class Pedido(models.Model):
     asignador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
     asignacion_hora = models.DateTimeField(null=True, blank=True)
     repartido_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="repartido_por")
-    # repartido_hora = models.DateTimeField(null=True, blank=True)
+    completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="completado_por")
+    completado_hora = models.DateTimeField(null=True, blank=True)
     
     def get_status_tiempo(self):
+        if self.completado_por:
+            return 'bg-primary'
+        
         current_time = timezone.now()
         pedido_age = current_time - self.fecha
         if pedido_age < timedelta(hours=1):

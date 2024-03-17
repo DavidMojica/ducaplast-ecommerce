@@ -19,6 +19,7 @@
                 </section>
                 <section class="card-body">
                     <h5 class="card-title">Hora de venta: <span class="badge {{pedido.get_status_tiempo}}">{{pedido.fecha}}</span></h5>
+                    <h5>Hora de completación: {% if pedido.completado_por %} <span class="badge bg-success">{{pedido.completado_hora}}</span>{% else %}Aún no se ha completado el pedido. {% endif %}</h5>
                     <p class="card-text">
                         Cliente: <strong>{{cliente}}</strong> <br>
                         Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
@@ -267,15 +268,15 @@
                                         </section>
                                         <section class="modal-body">
                                             <p>Modificar al repartidor</p>
-                                        </section>
-                                        <section class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                            <form action="" method="POST" id="modificarRepartidor">
+                                            <form action="" method="POST" id="modificarRepartidor" class="text-end">
                                                 {% csrf_token %}
                                                 {{form.repartidor}}
                                                 <input type="hidden" name="modificarRepartidor">
-                                                <button type="submit" class="btn btn-warning">Guardar modificacion</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
                                             </form> 
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
                                         </section>
                                     </article>
                                 </article>
@@ -299,7 +300,6 @@
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
                                         <form action="" method="POST" id="completarPedido">
                                             {% csrf_token %}
-                                            {{form.repartidor}}
                                             <input type="hidden" name="completarPedido">
                                             <button type="submit" class="btn btn-success">Sí, lo recibí</button>                             
                                         </form> 
