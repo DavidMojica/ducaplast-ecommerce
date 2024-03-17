@@ -35,6 +35,7 @@ HTMLCATALOGO = "catalogo.html"
 HTMLCARRITO = "cart.html"
 HTMLORDERS = "orders.html"
 HTMLORDERDETAIL = "order_detail.html"
+HTMLUSERS = "users.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -164,6 +165,10 @@ def updateCart(request, pedido, productos_modificados):
     return carrito
 
 #-------------Views-----------#
+@login_required
+def Users(request):
+    return render(request, HTMLUSERS)
+
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
