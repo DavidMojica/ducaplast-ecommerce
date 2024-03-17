@@ -74,7 +74,17 @@ class Pedido(models.Model):
             return 'bg-warning'
         else:
             return 'bg-danger'
-        
+    
+    def get_status_color(self):
+        if self.estado_id == 0:
+            return 'bg-danger'
+        elif self.estado_id in [1,2]:
+            return 'bg-warning'
+        elif self.estado_id in [3,4]:
+            return 'bg-primary'
+        else:
+            return 'bg-success'
+    
     def descontar_cantidad_producto(self):
         productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
         for producto_pedido in productos_pedido:
