@@ -258,14 +258,15 @@ def OrderDetail(request, order):
         'cliente': cliente,
         'productos': productos,
         'user': user,
-        'despachadoresActivos': despachadores_activos
+        'despachadoresActivos': despachadores_activos,
+        'isAdmin': False
     }
         
-    if user.tipo_usuario_id == 2:
-        if pedido.vendedor_id == user.id:
-            return render(request, HTMLORDERDETAIL, {**data})
-        else:
-            return render(request, HTMLORDERDETAIL, { 'success': False, 'msg': ERROR_13 })
+    if user.tipo_usuario_id in adminIds: #Gerente - administrador
+        data['isAdmin'] = True
+        return render(request, HTMLORDERDETAIL, {**data})
+    elif user.tipo_usuario_id == 2:
+        return render(request, HTMLORDERDETAIL, {**data}) if pedido.vendedor_id == user.id else render(request, HTMLORDERDETAIL, {'success': False, 'msg': ERROR_13})
     elif user.tipo_usuario_id == 3: #Despachadores
         puede_ayudar = False
         if pedido.estado_id in [1, 2]:
@@ -322,7 +323,6 @@ def Orders(request, filtered=None):
     return render(request, HTMLORDERS, {'pedidos': pedidos_paginados,
                                         'user': user,
                                         'history': history})
-
 
 @unloginRequired
 def Home(request):
