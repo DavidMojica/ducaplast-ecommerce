@@ -22,7 +22,46 @@
     </section>
     <section>
         <!-- Paginacion -->
-        <!-- Usuarios -->
+        <article class="pagination justify-content-center mt-2">
+            <ul class="pagination">
+                {% if users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Página {{ users.number }} de {{ users.paginator.num_pages }}</span>
+                </li>
+
+                {% for i in users.paginator.page_range %}
+                    {% if i >= users.number|add:"-3" and i <= users.number|add:"3" %}
+                        <li class="page-item {% if users.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </article>
         <!-- Usuarios -->
         <section class="mb-4">
             <article class="col-md-10 m-auto">
@@ -73,6 +112,47 @@
                 </ul>
             </article>
         </section>
+        <!-- Paginacion -->
+        <article class="pagination justify-content-center mt-2">
+            <ul class="pagination">
+                {% if users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Página {{ users.number }} de {{ users.paginator.num_pages }}</span>
+                </li>
+
+                {% for i in users.paginator.page_range %}
+                    {% if i >= users.number|add:"-3" and i <= users.number|add:"3" %}
+                        <li class="page-item {% if users.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </article>
     </section>
 </main>
 {% endblock %}

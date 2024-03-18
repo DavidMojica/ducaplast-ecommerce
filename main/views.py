@@ -168,7 +168,7 @@ def updateCart(request, pedido, productos_modificados):
 @login_required
 def Users(request):
     form = FiltrarUsuarios(request.GET)
-    USUARIOS_POR_PAGINA = 20
+    USUARIOS_POR_PAGINA = 2
     usuarios = Usuarios.objects.all().order_by('-id')
     data = {'form': form}
     #GET
@@ -186,7 +186,6 @@ def Users(request):
             
         if id:
             usuarios = usuarios.filter(id=id)
-        
         
         
     #Paginador
