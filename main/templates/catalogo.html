@@ -78,46 +78,46 @@
             <!-- Articulos -->
             <section class="row">
                 {% if productos %}
-                {% for p in productos %}
-                <article class="col-md-4 producto">
-                    <form action="" method="POST">
-                        <article class="card my-2 box-shadow">
-                            <article class="bg-dark p-1 text-center">
-                                <h3 class="text-white center-block">{{p.descripcion}}</h3>
-                            </article>
-                            <article class="card-body bg-dark text-light">
-                                <h3 class="text-bold">Referencia de fábrica:</h3>
-                                <caption class="card-text">{{p.referencia_fabrica}}</caption>
-                                <article class="d-flex justify-content-between align-items-start mt-2">
-                                    <section class="">
-                                        <form action="" class="product_inputs product-form">
-                                            {% csrf_token %}
-                                            <span class="badge mb-2 {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %}">{% if p.id|stringformat:'s' in carrito %} Producto ya añadido {% else %} Cantidad {% endif %}</span>
-                                            <input type="number" name="" id="" min="1" value="1" class="cantidad">
-                                            <button class="add btn btn-sm {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %} my-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="1">{% if p.id|stringformat:'s' in carrito %} Actualizar cantidad {% else %} Agregar al carrito {% endif %}</button>
-                                            {% if p.id|stringformat:'s' in carrito %}
-                                                <button type="button" class="eliminate btn btn-primary btn-sm  cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item" style="display: inline;">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            {% else %}
-                                                <button type="button" class="eliminate btn btn-primary btn-sm  cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item" style="display: none;">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            {% endif %}
+                    {% for p in productos %}
+                    <article class="col-md-4 producto">
+                        <form action="" method="POST">
+                            <article class="card my-2 box-shadow">
+                                <article class="bg-dark p-1 text-center">
+                                    <h3 class="text-white center-block">{{p.descripcion}}</h3>
+                                </article>
+                                <article class="card-body bg-dark text-light">
+                                    <h3 class="text-bold">Referencia de fábrica:</h3>
+                                    <caption class="card-text">{{p.referencia_fabrica}}</caption>
+                                    <article class="d-flex justify-content-between align-items-start mt-2">
+                                        <section class="">
+                                            <form action="" class="product_inputs product-form">
+                                                {% csrf_token %}
+                                                <span class="badge mb-2 {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %}">{% if p.id|stringformat:'s' in carrito %} Producto ya añadido {% else %} Cantidad {% endif %}</span>
+                                                <input type="number" name="" id="" min="1" value="1" class="cantidad">
+                                                <button class="add btn btn-sm {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %} my-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="1">{% if p.id|stringformat:'s' in carrito %} Actualizar cantidad {% else %} Agregar al carrito {% endif %}</button>
+                                                {% if p.id|stringformat:'s' in carrito %}
+                                                    <button type="button" class="eliminate btn btn-primary btn-sm  cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item" style="display: inline;">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="button" class="eliminate btn btn-primary btn-sm  cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item" style="display: none;">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                {% endif %}
 
-                                        </form>
-                                    </section>
-                                    <small>
-                                        ${{p.precio}} <br>
-                                        Cod. {{p.id}} <br>
-                                        <span class="badge {% if p.cantidad == 0 %} bg-danger {% elif p.cantidad >= 1 and p.cantidad <= 10 %} bg-warning {% elif p.cantidad > 10 %} bg-success {% else %} bg-secondary {% endif %}">Cantidad disponible: {{p.cantidad}}</span>
-                                    </small>
+                                            </form>
+                                        </section>
+                                        <small>
+                                            ${{p.precio}} <br>
+                                            Cod. {{p.id}} <br>
+                                            <span class="badge {% if p.cantidad == 0 %} bg-danger {% elif p.cantidad >= 1 and p.cantidad <= 10 %} bg-warning {% elif p.cantidad > 10 %} bg-success {% else %} bg-secondary {% endif %}">Cantidad disponible: {{p.cantidad}}</span>
+                                        </small>
+                                    </article>
                                 </article>
                             </article>
-                        </article>
-                    </form>
-                </article>
-                {% endfor %}
+                        </form>
+                    </article>
+                    {% endfor %}
                 {% else %}
                 <p class="text-center fw-bold">No hay productos disponibles</p>
                 {% endif %}

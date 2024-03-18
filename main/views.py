@@ -8,7 +8,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
+from .forms import FiltrarUsuarios, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -167,7 +167,37 @@ def updateCart(request, pedido, productos_modificados):
 #-------------Views-----------#
 @login_required
 def Users(request):
-    return render(request, HTMLUSERS)
+    form = FiltrarUsuarios(request.GET)
+    USUARIOS_POR_PAGINA = 2
+    usuarios = Usuarios.objects.all().order_by('-id')
+    data = {'form': form}
+    #GET
+    #Filtro?
+    if form.is_valid():
+        nombre = form.cleaned_data.get('nombre').lower()
+        id = form.cleaned_data.get('id')
+        tipo_usuario = form.cleaned_data.get('tipo_usuario')
+        
+        if nombre:
+            usuarios = form.buscar_usuarios_por_nombre()
+        if id:
+            usuarios = Usuarios.filter(id=id)
+        
+        if tipo_usuario:
+            usuarios = Usuarios.filter(tipo_usuario=tipo_usuario)
+        
+    #Paginador
+    paginator = Paginator(usuarios, USUARIOS_POR_PAGINA)
+    page_number = request.GET.get('page')
+    
+    try:
+        usuarios_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        usuarios_paginados = paginator.page(1)
+    except EmptyPage:
+        usuarios_paginados = paginator.page(paginator.num_pages)
+        
+    return render(request, HTMLUSERS, {**data, 'users': usuarios_paginados})
 
 @login_required
 def OrderDetail(request, order):
