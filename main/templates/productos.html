@@ -23,9 +23,139 @@
             <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-arrow-right"></i></button>
         </form>
     </section>
+    <!-- Paginacion -->
+    <article class="pagination justify-content-center mt-2">
+        <ul class="pagination">
+            {% if productos.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
+            </li>
 
+            {% for i in productos.paginator.page_range %}
+                {% if i >= productos.number|add:"-3" and i <= productos.number|add:"3" %}
+                    <li class="page-item {% if productos.number == i %}active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
 
-    
+            {% if productos.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </article>
+    <!-- Productos -->
+    <section class="mb-4">   
+        <article class="col-md-10 m-auto">
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-action text-center bg-primary text-white">
+                    <header class="row">
+                        <article class="col-md-2">
+                            <span class="badge bg-primary">ID</span>
+                        </article>
+                        <article class="col-md-2">
+                            <span class="badge bg-primary">Descripcion</span>
+                        </article>
+                        <article class="col-md-2">
+                            <span class="badge bg-primary">Ref. Fabrica</span>
+                        </article>
+                        <article class="col-md-2">
+                            <span class="badge bg-primary">Precio unitario</span>
+                        </article>
+                        <article class="col-md-2">
+                            <span class="badge bg-primary">Existencias</span>
+                        </article>
+                        <article class="col-md-2">
+                            <span class="badge bg-primary">Opciones</span>
+                        </article>
+                    </header>
+                </li>
+                {% if productos %}
+                    {% for p in productos %}
+                        <li class="list-group-item text-center">
+                            <section class="row">
+                                <article class="col-md-2">
+                                    <h4><span class="badge bg-secondary">#{{p.id}}</span></h4>
+                                </article>
+                                <article class="col-md-2"><p>{{p.descripcion}}</p></article>
+                                <article class="col-md-2"><p>{{p.referencia_fabrica}}</p></article>
+                                <article class="col-md-2"><p>{{p.precio}}</p></article>
+                                <article class="col-md-2"><p>{{p.cantidad}}</p></article>
+                                <article class="col-md-2">
+                                    <button class="btn btn-warning">Modificar</button>
+                                    <button class="btn btn-danger">Borrar</button>
+                                </article>
+                            </section>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+
+            </ul>
+        </article>
+
+    </section>
+    <!-- Paginacion -->
+    <article class="pagination justify-content-center mt-2">
+        <ul class="pagination">
+            {% if productos.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
+            </li>
+
+            {% for i in productos.paginator.page_range %}
+                {% if i >= productos.number|add:"-3" and i <= productos.number|add:"3" %}
+                    <li class="page-item {% if productos.number == i %}active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if productos.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </article>
+
 
 </main>
 {% endblock %}
