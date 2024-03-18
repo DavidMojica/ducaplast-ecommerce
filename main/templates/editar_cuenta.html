@@ -8,6 +8,8 @@
 <main class="d-flex justify-content-center align-items-center">
     <section class="card p-4">
         <h5 class="card-title text-center">Su id es: <span class="badge bg-primary">{{user.id}}</span></h5>
+        <p class="text-center">Creado en: <br><span class="badge bg-info">{{user.date_joined}}</span></p>
+        <p class="text-center">Último acceso a la plataforma: <br><span class="badge bg-info">{{user.last_login}}</span></p>
         <form action="" method="POST" id="formAccount" class="card p-4">
             {% csrf_token %}
             <h2 class="text-primary text-bold text-center">Editar perfil</h2>

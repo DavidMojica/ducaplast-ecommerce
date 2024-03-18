@@ -1,4 +1,5 @@
 from datetime import timedelta
+import random
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -171,14 +172,36 @@ def UserDetail(request, userid):
     data = {'user': user,
             'request_user': request.user,
             'tipos_usuario':tipos_usuario}
+    
+    #POST
+    if request.method == 'POST':
+        if 'reestablecer' in request.POST:  
+            nuevaContrasena = str(random.randint(10000000, 99999999))
+            user.set_password(nuevaContrasena)
+            user.save()
+            data['password_changed'] = nuevaContrasena
+        elif 'acc_data' in request.POST:
+            nombre = request.POST.get('nombre').strip()
+            apellidos = request.POST.get('apellidos').strip()
+            email = request.POST.get('email').strip()
+            tipo_usuario = request.POST.get('tipo_usuario')
+            
+            tipo_instance = get_object_or_404(TipoUsuario, pk=tipo_usuario)
+            user.first_name = nombre
+            user.last_name = apellidos
+            user.email = email
+            user.tipo_usuario = tipo_instance
+            user.save()
+            
+            
     return render(request, HTMLUSERDETAIL, {**data})
 
 @login_required
 def Users(request):
     msg = ""
     form = FiltrarUsuarios(request.GET)
-    USUARIOS_POR_PAGINA = 2
-    usuarios = Usuarios.objects.all().order_by('-id')
+    USUARIOS_POR_PAGINA = 20
+    usuarios = Usuarios.objects.all().order_by('id')
     data = {'form': form}
     
     #POST
