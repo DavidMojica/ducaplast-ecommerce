@@ -31,6 +31,6 @@ urlpatterns = [
     path('orders/<str:filtered>',views.Orders, name="filtered_orders"),
     path('order_detail/<int:order>/', views.OrderDetail, name="order_detail"),
     path('users/', views.Users, name="users"),
-    path('user_detail/<int:userid>/', views.UserDetail, "user_detail")
+    path('user_detail/<int:userid>/', views.UserDetail, name="user_detail")
     
 ]

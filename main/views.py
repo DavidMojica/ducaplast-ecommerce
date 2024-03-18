@@ -8,7 +8,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
+from .forms import FiltrarUsuarios, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -167,7 +167,10 @@ def updateCart(request, pedido, productos_modificados):
 @login_required
 def UserDetail(request, userid):
     user = get_object_or_404(Usuarios, pk=userid)
-    data = {'user': user}
+    tipos_usuario = TipoUsuario.objects.all()
+    data = {'user': user,
+            'request_user': request.user,
+            'tipos_usuario':tipos_usuario}
     return render(request, HTMLUSERDETAIL, {**data})
 
 @login_required

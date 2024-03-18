@@ -1,7 +1,56 @@
 {% extends 'base.html' %}
 {% block content %}
-<main>
-    
-
+<main class="d-flex justify-content-center align-items-center">
+    <section class="card p-4">
+        <h5 class="card-title text-center">ID de este usuario: <span class="badge bg-primary">{{user.id}}</span></h5>
+        <form action="" method="POST" id="formAccount" class="card p-4">
+            {% csrf_token %}
+            <h2 class="text-primary text-bold text-center">Editar perfil</h2>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="nombre">Nombre</label>
+                    </span>
+                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ingrese su nombre" value="{{user.first_name}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="apellidos">Apellidos</label>
+                    </span>
+                    <input type="text" name="apellidos" id="apellidos" class="form-control" placeholder="Ingrese sus apellidos" value="{{user.last_name}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="email">Correo electrónico</label>
+                    </span>
+                    <input type="text" name="email" id="email" class="form-control" placeholder="Ingrese su email" value="{{user.email}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="tipo_usuario">Tipo de usuario</label>
+                    </span>
+                    <select name="tipo_usuario" id="" class="form-select">
+                        {% for tipo in tipos_usuario %}
+                        <option value="{{tipo.id}}" {% if user.tipo_usuario_id == tipo.id %} selected {% endif %}>{{tipo.description}}</option>
+                        {% endfor %}
+                    </select>
+                </li>
+            </ul>
+            <input type="hidden" name="acc_data">
+            <input type="submit" value="Guardar cambios" class="btn btn-secondary mt-3">
+            <span class="badge bg-danger mt-2" id="account_event">{{account_data_event}}</span>
+        </form>
+        <form action="" method="POST" id="formPass" class="card p-4 bg-danger">
+            {% csrf_token %}
+            <h2 class="text-center text-white">Zona de cuidado</h2>
+            <h5 class="text-center text-white">Reestablecer contraseña</h5>
+            <span class="badge bg-danger d-block text-wrap w-100" style="max-width: 300px;">
+                Opción recomendada para cuando a un usuario se le pierda la contraseña.
+                Después de Reestablecer la contraseña, anótela y otórguesela lo más pronto posible
+                al dueño de la cuenta, pues despues de reestablecer la contraseña sólo se mostrará 1 vez.
+            </span>    
+            <button class="btn btn-warning mt-3">Reestablecer contraseña</button>
+        </form>
+    </section>
 </main>
 {% endblock %}
