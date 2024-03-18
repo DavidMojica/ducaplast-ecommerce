@@ -167,10 +167,38 @@ def updateCart(request, pedido, productos_modificados):
 #-------------Views-----------#
 @login_required
 def Users(request):
+    msg = ""
     form = FiltrarUsuarios(request.GET)
     USUARIOS_POR_PAGINA = 2
     usuarios = Usuarios.objects.all().order_by('-id')
     data = {'form': form}
+    
+    #POST
+    if request.method == 'POST':
+        userid = request.POST.get('userid')
+        user = get_object_or_404(Usuarios, pk=userid)
+        if 'suspender_usuario' in request.POST:
+            user.is_active = False
+            msg = "Se ha suspendido al usuario correctamente"
+            altype = 'info'
+            user.save()
+        elif 'readmitir_usuario' in request.POST:
+            if not user.tipo_usuario_id == 6:
+                user.is_active = True
+                msg = "Se ha removido la suspensión correctamente"
+                altype = 'info'
+                user.save()
+            else:
+                msg = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
+                altype = 'danger'
+        elif 'borrar_usuario' in request.POST:
+            user.delete()
+            msg = "Se ha borrado un usuario correctamente"
+            altype = 'danger'
+        
+        data['msg'] = msg
+        data['type'] = altype
+            
     #GET
     #Filtro?
     if form.is_valid():
@@ -180,13 +208,10 @@ def Users(request):
         
         if nombre:
             usuarios = form.buscar_usuarios_por_nombre()
-            
         if tipo_usuario:
             usuarios = usuarios.filter(tipo_usuario=tipo_usuario)
-            
         if id:
             usuarios = usuarios.filter(id=id)
-        
         
     #Paginador
     paginator = Paginator(usuarios, USUARIOS_POR_PAGINA)
@@ -260,7 +285,6 @@ def OrderDetail(request, order):
                 producto_id = int(request.POST.get('producto_id'))
                 ProductosPedido.objects.filter(pedido=pedido, producto_id=producto_id).delete()
                 carrito = loadCart(request, pedido, False)
-                print(f"log4 {carrito}")
                 total_actualizado = calcular_total_actualizado(request)  
             elif 'notaDespacho' in request.POST:
                 notaPedido = request.POST.get('notaPedido')

@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 <main>
-    
+    {% if msg %}
+        <section class="alert alert-{{type}}" role="alert">{{msg}}</section>
+    {% endif %}
+
     <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
         <form action="" class="text-center filter-form" method="GET">
             <h2 class="text-primary font-weight-bold">Filtrar usuarios</h2>
@@ -117,6 +120,7 @@
                                                             <form action="" method="POST" id="suspender_usuario">
                                                                 {% csrf_token %}
                                                                 <input type="hidden" name="suspender_usuario">
+                                                                <input type="hidden" name="userid" value="{{u.id}}">
                                                                 <button type="submit" class="btn btn-warning">Suspender</button>
                                                             </form>
                                                         </section>
@@ -125,7 +129,7 @@
                                             </section>
                                         {% else %}
                                             <!-- trigger -->
-                                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalUnban-{{u.id}}" data-backdrop="false">Readmitir</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalUnban-{{u.id}}" data-backdrop="false">Readmitir</button>
                                             <!-- modal -->
                                             <section class="modal fade" id="modalUnban-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
                                                 <article class="modal-dialog modal-dialog-centered">
@@ -142,6 +146,7 @@
                                                             <form action="" method="POST" id="readmitir_usuario">
                                                                 {% csrf_token %}
                                                                 <input type="hidden" name="readmitir_usuario">
+                                                                <input type="hidden" name="userid" value="{{u.id}}">
                                                                 <button type="submit" class="btn btn-warning">Quitar suspensión</button>
                                                             </form>
                                                         </section>
@@ -164,9 +169,10 @@
                                                         </section>
                                                         <section class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                                            <form action="" method="POST" id="readmitir_usuario">
+                                                            <form action="" method="POST" id="borrar_usuario">
                                                                 {% csrf_token %}
-                                                                <input type="hidden" name="readmitir_usuario">
+                                                                <input type="hidden" name="borrar_usuario">
+                                                                <input type="hidden" name="userid" value="{{u.id}}">
                                                                 <button type="submit" class="btn btn-danger">Borrar usuario</button>
                                                             </form>
                                                         </section>
