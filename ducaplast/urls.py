@@ -34,6 +34,7 @@ urlpatterns = [
     path('user_detail/<int:userid>/', views.UserDetail, name="user_detail"),
     path('productos/', views.Productos, name ="productos"),
     path('product_detail/<int:productid>',views.ProductDetails, name="product_detail"),
-    path('product_add', views.ProductAdd, name="product_add")
+    path('product_add/', views.ProductAdd, name="product_add"),
+    path('charts/', views.Charts, name="charts"),
     
 ]

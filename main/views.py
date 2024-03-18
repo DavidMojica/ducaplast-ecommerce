@@ -41,6 +41,7 @@ HTMLUSERDETAIL = "user_detail.html"
 HTMLPRODUCTOS = "productos.html"
 HTMLPRODUCTODETAIL = "product_detail.html"
 HTMLPRODUCTOADD = "product_add.html"
+HTMLCHARTS = "charts.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -205,6 +206,12 @@ def filtrar_productos(request):
     
     return productos
 #-------------Views-----------#
+#super
+@login_required
+def Charts(request):
+    return render(request, HTMLCHARTS)
+
+
 #super
 @login_required
 def ProductDetails(request, productid=None):
