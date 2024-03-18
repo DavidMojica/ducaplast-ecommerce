@@ -21,6 +21,9 @@
                 {{form.disponibles}}
             </article>
             <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-search"></i></button>
+            <h3 class="text-center">- O -</h3>
+            <a href="{% url 'product_add' %}" class="btn btn-success col-md-5">Crear nuevo producto <i class="fa fa-plus"></i></a>
+
         </form>
     </section>
     <!-- Paginacion -->
@@ -102,7 +105,7 @@
                                 <article class="col-md-2"><p>{{p.precio}}</p></article>
                                 <article class="col-md-2"><p>{{p.cantidad}}</p></article>
                                 <article class="col-md-2">
-                                    <button class="btn btn-warning">Modificar</button>
+                                    <a href="{% url 'product_detail' productid=p.id %}" class="btn btn-warning">Modificar</a>
                                     <!-- trigger -->
                                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalBorrarProducto-{{p.id}}" data-backdrop="false">Borrar</button>
                                     <!-- modal -->

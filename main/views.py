@@ -40,6 +40,7 @@ HTMLUSERS = "users.html"
 HTMLUSERDETAIL = "user_detail.html"
 HTMLPRODUCTOS = "productos.html"
 HTMLPRODUCTODETAIL = "product_detail.html"
+HTMLPRODUCTOADD = "product_add.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -206,22 +207,30 @@ def filtrar_productos(request):
 #-------------Views-----------#
 #super
 @login_required
-def ProductDetails(request, producto_id=None):
-    if producto_id:
-        producto = Producto.objects.get(pk=producto_id)
-    else:
-        producto = None
-
+def ProductDetails(request, productid=None):
+    producto = Producto.objects.get(pk=productid)
     if request.method == 'POST':
         form = ProductoForm(request.POST, instance=producto)
         if form.is_valid():
             form.save()
-            return redirect('vista_productos')  # Redirecciona a la vista de productos
+            return redirect('productos') # Redirecciona a la vista de productos
     else:
         form = ProductoForm(instance=producto)
 
     return render(request, HTMLPRODUCTODETAIL, {'form': form})
 
+#super
+@login_required
+def ProductAdd(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('productos') # Redirecciona a la vista de productos
+    else:
+        form = ProductoForm()
+
+    return render(request, HTMLPRODUCTOADD, {'form':form})
 #Super
 @login_required
 def Productos(request):
@@ -237,8 +246,7 @@ def Productos(request):
             id = request.POST.get('productoid')
             producto = get_object_or_404(Producto, pk=id)
             producto.delete()
-            
-    
+
     try:
         productos_paginados = paginator.page(page_number)
     except PageNotAnInteger:
