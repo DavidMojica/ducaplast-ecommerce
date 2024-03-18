@@ -99,7 +99,7 @@
                                         <span class="badge bg-secondary">{{u.tipo_usuario}}</span>
                                     </article>
                                     <article class="col-md-3">
-                                        <a href="" class="btn btn-warning" name="action">Modificar</a>
+                                        <a href="{% url 'user_detail' user=u.id %}" class="btn btn-warning">Modificar</a>
     
                                         {% if u.is_active %}
                                             <!-- trigger -->

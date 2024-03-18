@@ -36,6 +36,7 @@ HTMLCARRITO = "cart.html"
 HTMLORDERS = "orders.html"
 HTMLORDERDETAIL = "order_detail.html"
 HTMLUSERS = "users.html"
+HTMLUSERDETAIL = "user_detail.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -114,12 +115,10 @@ def calcular_total_actualizado(request):
     total_actualizado = round(total_productos_actualizado + iva_actualizado)
     return total_actualizado
 
-
 @login_required
 def ayudarEnDespacho(request, user, pedido):
     handler = HandlerDespacho(despachador = user, pedido = pedido)
     handler.save()
-  
   
 def getPuedeAyudar(pedido, despachadores_activos, user):
     if pedido.estado_id in [1, 2]:
@@ -165,6 +164,12 @@ def updateCart(request, pedido, productos_modificados):
     return carrito
 
 #-------------Views-----------#
+@login_required
+def UserDetail(request, userid):
+    user = get_object_or_404(Usuarios, pk=userid)
+    data = {'user': user}
+    return render(request, HTMLUSERDETAIL, {**data})
+
 @login_required
 def Users(request):
     msg = ""
