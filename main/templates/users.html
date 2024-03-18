@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-{% load static %}
 <main>
+    
     <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
         <form action="" class="text-center filter-form" method="GET">
             <h2 class="text-primary font-weight-bold">Filtrar usuarios</h2>
@@ -84,7 +84,7 @@
                     </li>
                     {% if users %}
                         {% for u in users %}
-                            <li class="list-group-item list-group-item-action text-center">
+                            <li class="list-group-item text-center">
                                 <section class="row">
                                     <article class="col-md-3">
                                         <h4><span class="badge bg-secondary">#{{u.id}}</span></h4>
@@ -96,14 +96,83 @@
                                         <span class="badge bg-secondary">{{u.tipo_usuario}}</span>
                                     </article>
                                     <article class="col-md-3">
-                                        <a href="" class="btn btn-warning mb-2" name="action">Modificar</a>
+                                        <a href="" class="btn btn-warning" name="action">Modificar</a>
     
                                         {% if u.is_active %}
-                                            <a href="" class="btn btn-dark mb-2">Suspender</a>
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalBan-{{u.id}}" data-backdrop="false">Suspender</button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalBan-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                    <article class="modal-content">
+                                                        <section class="modal-header">
+                                                            <h5 class="modal-title">Suspender usuario</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </section>
+                                                        <section class="modal-body">
+                                                            <p>Al suspender un usuario, se le prohibirá la entrada a la plataforma pero sus datos seguirán guardados. Puede quitarle la suspensión en cualquier momento.</p>
+                                                        </section>
+                                                        <section class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                            <form action="" method="POST" id="suspender_usuario">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="suspender_usuario">
+                                                                <button type="submit" class="btn btn-warning">Suspender</button>
+                                                            </form>
+                                                        </section>
+                                                    </article>
+                                                </article>
+                                            </section>
                                         {% else %}
-                                            <a href="" class="btn btn-secondary mb-2">Readmitir</a>
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalUnban-{{u.id}}" data-backdrop="false">Readmitir</button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalUnban-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                    <article class="modal-content">
+                                                        <section class="modal-header">
+                                                            <h5 class="modal-title">Readmitir usuario</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </section>
+                                                        <section class="modal-body">
+                                                            <p>Al readmitir un usuario, este podrá volver a ingresar a la plataforma. Puede suspenderlo en cualquier momento.</p>
+                                                        </section>
+                                                        <section class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                            <form action="" method="POST" id="readmitir_usuario">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="readmitir_usuario">
+                                                                <button type="submit" class="btn btn-warning">Quitar suspensión</button>
+                                                            </form>
+                                                        </section>
+                                                    </article>
+                                                </article>
+                                            </section>
                                         {% endif %}
-                                        <a href="" class="btn btn-danger mb-2">Borrar</a>
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete-{{u.id}}" data-backdrop="false">Borrar</button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalDelete-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                    <article class="modal-content">
+                                                        <section class="modal-header">
+                                                            <h5 class="modal-title">Borrar usuario</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </section>
+                                                        <section class="modal-body">
+                                                            <p>Al borrar un usuario se perderán todos sus datos. Si después lo vuelve a crear, se creará con un ID distinto. Esta acción es irreversible.</p>
+                                                        </section>
+                                                        <section class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                            <form action="" method="POST" id="readmitir_usuario">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="readmitir_usuario">
+                                                                <button type="submit" class="btn btn-danger">Borrar usuario</button>
+                                                            </form>
+                                                        </section>
+                                                    </article>
+                                                </article>
+                                            </section>
                                     </article>
                                 </section>
                             </li>
