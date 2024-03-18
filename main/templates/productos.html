@@ -20,7 +20,7 @@
                 <span class="badge bg-info mr-2">{{form.disponibles.label_tag}}</span>
                 {{form.disponibles}}
             </article>
-            <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-arrow-right"></i></button>
+            <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-search"></i></button>
         </form>
     </section>
     <!-- Paginacion -->
@@ -103,7 +103,31 @@
                                 <article class="col-md-2"><p>{{p.cantidad}}</p></article>
                                 <article class="col-md-2">
                                     <button class="btn btn-warning">Modificar</button>
-                                    <button class="btn btn-danger">Borrar</button>
+                                    <!-- trigger -->
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalBorrarProducto-{{p.id}}" data-backdrop="false">Borrar</button>
+                                    <!-- modal -->
+                                    <section class="modal fade" id="modalBorrarProducto-{{p.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                        <article class="modal-dialog modal-dialog-centered">
+                                            <article class="modal-content">
+                                                <section class="modal-header">
+                                                    <h5 class="modal-title">Borrar producto</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </section>
+                                                <section class="modal-body">
+                                                    <p>Al borrar el producto se perderán todos sus datos y la información relacionada a este en las facturas y ventas. Si después lo vuelve a crear, se creará con un ID distinto, pero sus datos anteriores no volverán. Esta acción es irreversible.</p>
+                                                </section>
+                                                <section class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                    <form action="" method="POST" id="borrar_producto">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="borrar_producto">
+                                                        <input type="hidden" name="productoid" value="{{p.id}}">
+                                                        <button type="submit" class="btn btn-danger">Borrar producto</button>
+                                                    </form>
+                                                </section>
+                                            </article>
+                                        </article>
+                                    </section>
                                 </article>
                             </section>
                         </li>

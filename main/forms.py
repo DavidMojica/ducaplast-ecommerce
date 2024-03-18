@@ -1,7 +1,20 @@
 from django import forms
-from .models import TipoUsuario, Usuarios, Clientes
+from .models import TipoUsuario, Usuarios, Clientes, Producto
 from django.db import models
 
+#Crear o modificar un producto
+class ProductoForm(forms.ModelForm):
+    class Meta:
+        model = Producto
+        fields = ['descripcion', 'referencia_fabrica', 'precio', 'cantidad']
+        labels = {
+            'descripcion': 'Descripción',
+            'referencia_fabrica': 'Referencia de fábrica',
+            'precio': 'Precio',
+            'cantidad': 'Cantidad',
+        }
+        
+        
 class SeleccionarRepartidor(forms.Form):
     repartidor = forms.ModelChoiceField(
         label="Repartidor",

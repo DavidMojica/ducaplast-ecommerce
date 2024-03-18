@@ -9,7 +9,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
+from .forms import FiltrarUsuarios, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -39,6 +39,7 @@ HTMLORDERDETAIL = "order_detail.html"
 HTMLUSERS = "users.html"
 HTMLUSERDETAIL = "user_detail.html"
 HTMLPRODUCTOS = "productos.html"
+HTMLPRODUCTODETAIL = "product_detail.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -203,6 +204,24 @@ def filtrar_productos(request):
     
     return productos
 #-------------Views-----------#
+#super
+@login_required
+def ProductDetails(request, producto_id=None):
+    if producto_id:
+        producto = Producto.objects.get(pk=producto_id)
+    else:
+        producto = None
+
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            form.save()
+            return redirect('vista_productos')  # Redirecciona a la vista de productos
+    else:
+        form = ProductoForm(instance=producto)
+
+    return render(request, HTMLPRODUCTODETAIL, {'form': form})
+
 #Super
 @login_required
 def Productos(request):
@@ -211,6 +230,14 @@ def Productos(request):
     PRODUCTOS_POR_PAGINA = 18
     paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
     page_number = request.GET.get('page')
+    
+    #Post
+    if request.method == 'POST':
+        if 'borrar_producto' in request.POST:
+            id = request.POST.get('productoid')
+            producto = get_object_or_404(Producto, pk=id)
+            producto.delete()
+            
     
     try:
         productos_paginados = paginator.page(page_number)
