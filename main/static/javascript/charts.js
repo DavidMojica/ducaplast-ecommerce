@@ -1,38 +1,42 @@
+let option;
 let chart1;
+// let chart2;
 
 const getOptionChart1 = () =>{
     return {
+        title: {
+            text: 'Clientes más frecuentes',
+            subtext: "Top 8",
+            x: 'center',
+        },
         legend: {
-          top: 'bottom'
+            top: 'bottom'
         },
         toolbox: {
-          show: true,
-          feature: {
-            mark: { show: true },
-            dataView: { show: true, readOnly: false },
-            restore: { show: true },
-            saveAsImage: { show: true }
-          }
+            show: true,
+            feature: {
+                mark: { show: true },
+            }
         },
         series: [
           {
-            name: 'Nightingale Chart',
-            type: 'pie',
-            radius: [50, 200],
-            center: ['50%', '50%'],
-            roseType: 'area',
-            itemStyle: {
-              borderRadius: 8
+            name: 'Clientes más frecuentes',
+                type: 'pie',
+                radius: [40, 160],
+                center: ['50%', '50%'],
+                roseType: 'area',
+                itemStyle: {
+                borderRadius: 8
             },
             data: [
-              { value: 40, name: 'rose 1' },
-              { value: 38, name: 'rose 2' },
-              { value: 32, name: 'rose 3' },
-              { value: 30, name: 'rose 4' },
-              { value: 28, name: 'rose 5' },
-              { value: 26, name: 'rose 6' },
-              { value: 22, name: 'rose 7' },
-              { value: 18, name: 'rose 8' }
+              { value: 40, name: 'DUMMI SAS' },
+              { value: 38, name: 'Panaderia la 80' },
+              { value: 32, name: 'Viajes SAS' },
+              { value: 30, name: 'Trans Gavirias SAS' },
+              { value: 28, name: 'Bolivariano' },
+              { value: 26, name: 'Trans Medellin' },
+              { value: 22, name: 'Emtelco' },
+              { value: 18, name: 'UNE' }
             ]
           }
         ]
@@ -41,8 +45,12 @@ const getOptionChart1 = () =>{
 
 const initCharts =()=>{
     chart1 = echarts.init(document.getElementById("chart1"));
-    const option = getOptionChart1(); // Llama directamente a getOptionChart1()
-    chart1.setOption(option); // Establece la opción del gráfico
+    option = getOptionChart1(); 
+    chart1.setOption(option); 
+
+    // chart2 = echarts.init(document.getElementById("chart2"));
+    // option = getOptionChart2();
+    // chart2.setOption(option); 
 }
 document.addEventListener('DOMContentLoaded', function () {
     initCharts();
@@ -50,4 +58,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
 window.addEventListener('resize', function () {
     chart1.resize();
+    // chart2.resize();
 })
