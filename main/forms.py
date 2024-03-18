@@ -40,7 +40,8 @@ class FiltrarUsuarios(forms.Form):
         label="Tipo de usuario",
         queryset=TipoUsuario.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
-        empty_label="Tipo de usuario"
+        empty_label="Todos",
+        required=False
     )
     
     def buscar_usuarios_por_nombre(self):

@@ -1,8 +1,78 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <main>
+    <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
+        <form action="" class="text-center filter-form" method="GET">
+            <h2 class="text-primary font-weight-bold">Filtrar usuarios</h2>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                {{form.nombre}}
+            </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                {{form.id}}
+            </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.tipo_usuario.label_tag}}</span>
+                {{form.tipo_usuario}}
+            </article>
+            <button type="submit" class="btn btn-primary col-md-5">Buscar <i class="fa fa-search"></i></button>
+        </form>
+    </section>
+    <section>
+        <!-- Paginacion -->
+        <!-- Usuarios -->
+        <!-- Usuarios -->
+        <section class="mb-4">
+            <article class="col-md-10 m-auto">
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-action text-center bg-primary text-white">
+                        <header class="row">
+                            <article class="col-md-3">
+                                <span class="badge bg-primary">ID</span>
+                            </article>
+                            <article class="col-md-4">
+                                <span class="badge bg-primary">Nombre</span>
+                            </article>
+                            <article class="col-md-2">
+                                <span class="badge bg-primary">Tipo de usuario</span>
+                            </article>
+                            <article class="col-md-3">
+                                <span class="badge bg-primary">Opciones</span>
+                            </article>
+                        </header>
+                    </li>
+                    {% if users %}
+                        {% for u in users %}
+                            <li class="list-group-item list-group-item-action text-center">
+                                <section class="row">
+                                    <article class="col-md-3">
+                                        <h4><span class="badge bg-secondary">#{{u.id}}</span></h4>
+                                    </article>
+                                    <article class="col-md-4">
+                                        <p>{{u.first_name}} {{u.last_name}}</p>
+                                    </article>
+                                    <article class="col-md-2">
+                                        <span class="badge bg-secondary">{{u.tipo_usuario}}</span>
+                                    </article>
+                                    <article class="col-md-3">
+                                        <a href="" class="btn btn-warning mb-2" name="action">Modificar</a>
     
+                                        {% if u.is_active %}
+                                            <a href="" class="btn btn-dark mb-2">Suspender</a>
+                                        {% else %}
+                                            <a href="" class="btn btn-secondary mb-2">Readmitir</a>
+                                        {% endif %}
+                                        <a href="" class="btn btn-danger mb-2">Borrar</a>
+                                    </article>
+                                </section>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </article>
+        </section>
+    </section>
 </main>
 {% endblock %}
