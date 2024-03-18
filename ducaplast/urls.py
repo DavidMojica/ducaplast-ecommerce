@@ -30,6 +30,11 @@ urlpatterns = [
     path('orders/',views.Orders, name="orders"),
     path('orders/<str:filtered>',views.Orders, name="filtered_orders"),
     path('order_detail/<int:order>/', views.OrderDetail, name="order_detail"),
-    path('users/', views.Users, name="users")
+    path('users/', views.Users, name="users"),
+    path('user_detail/<int:userid>/', views.UserDetail, name="user_detail"),
+    path('productos/', views.Productos, name ="productos"),
+    path('product_detail/<int:productid>',views.ProductDetails, name="product_detail"),
+    path('product_add/', views.ProductAdd, name="product_add"),
+    path('charts/', views.Charts, name="charts"),
     
 ]

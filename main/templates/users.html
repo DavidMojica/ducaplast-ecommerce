@@ -1,8 +1,237 @@
 {% extends 'base.html' %}
 {% block content %}
-{% load static %}
-<link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <main>
+    {% if msg %}
+        <section class="alert alert-{{type}}" role="alert">{{msg}}</section>
+    {% endif %}
+
+    <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
+        <form action="" class="text-center filter-form" method="GET">
+            <h2 class="text-primary font-weight-bold">Filtrar usuarios</h2>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                {{form.nombre}}
+            </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                {{form.id}}
+            </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.tipo_usuario.label_tag}}</span>
+                {{form.tipo_usuario}}
+            </article>
+            <button type="submit" class="btn btn-primary col-md-5">Buscar <i class="fa fa-search"></i></button>
+        </form>
+    </section>
+    <section>
+        <!-- Paginacion -->
+        <article class="pagination justify-content-center mt-2">
+            <ul class="pagination">
+                {% if users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Página {{ users.number }} de {{ users.paginator.num_pages }}</span>
+                </li>
+
+                {% for i in users.paginator.page_range %}
+                    {% if i >= users.number|add:"-3" and i <= users.number|add:"3" %}
+                        <li class="page-item {% if users.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </article>
+        <!-- Usuarios -->
+        <section class="mb-4">
+            <article class="col-md-10 m-auto">
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-action text-center bg-primary text-white">
+                        <header class="row">
+                            <article class="col-md-3">
+                                <span class="badge bg-primary">ID</span>
+                            </article>
+                            <article class="col-md-4">
+                                <span class="badge bg-primary">Nombre</span>
+                            </article>
+                            <article class="col-md-2">
+                                <span class="badge bg-primary">Tipo de usuario</span>
+                            </article>
+                            <article class="col-md-3">
+                                <span class="badge bg-primary">Opciones</span>
+                            </article>
+                        </header>
+                    </li>
+                    {% if users %}
+                        {% for u in users %}
+                            <li class="list-group-item text-center">
+                                <section class="row">
+                                    <article class="col-md-3">
+                                        <h4><span class="badge bg-secondary">#{{u.id}}</span></h4>
+                                    </article>
+                                    <article class="col-md-4">
+                                        <p>{{u.first_name}} {{u.last_name}}</p>
+                                    </article>
+                                    <article class="col-md-2">
+                                        <span class="badge bg-secondary">{{u.tipo_usuario}}</span>
+                                    </article>
+                                    <article class="col-md-3">
+                                        <a href="{% url 'user_detail' userid=u.id %}" class="btn btn-warning">Modificar</a>
     
+                                        {% if u.is_active %}
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalBan-{{u.id}}" data-backdrop="false">Suspender</button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalBan-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                    <article class="modal-content">
+                                                        <section class="modal-header">
+                                                            <h5 class="modal-title">Suspender usuario</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </section>
+                                                        <section class="modal-body">
+                                                            <p>Al suspender un usuario, se le prohibirá la entrada a la plataforma pero sus datos seguirán guardados. Puede quitarle la suspensión en cualquier momento.</p>
+                                                        </section>
+                                                        <section class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                            <form action="" method="POST" id="suspender_usuario">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="suspender_usuario">
+                                                                <input type="hidden" name="userid" value="{{u.id}}">
+                                                                <button type="submit" class="btn btn-warning">Suspender</button>
+                                                            </form>
+                                                        </section>
+                                                    </article>
+                                                </article>
+                                            </section>
+                                        {% else %}
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalUnban-{{u.id}}" data-backdrop="false">Readmitir</button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalUnban-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                    <article class="modal-content">
+                                                        <section class="modal-header">
+                                                            <h5 class="modal-title">Readmitir usuario</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </section>
+                                                        <section class="modal-body">
+                                                            <p>Al readmitir un usuario, este podrá volver a ingresar a la plataforma. Puede suspenderlo en cualquier momento.</p>
+                                                        </section>
+                                                        <section class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                            <form action="" method="POST" id="readmitir_usuario">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="readmitir_usuario">
+                                                                <input type="hidden" name="userid" value="{{u.id}}">
+                                                                <button type="submit" class="btn btn-warning">Quitar suspensión</button>
+                                                            </form>
+                                                        </section>
+                                                    </article>
+                                                </article>
+                                            </section>
+                                        {% endif %}
+                                            <!-- trigger -->
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete-{{u.id}}" data-backdrop="false">Borrar</button>
+                                            <!-- modal -->
+                                            <section class="modal fade" id="modalDelete-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                                <article class="modal-dialog modal-dialog-centered">
+                                                    <article class="modal-content">
+                                                        <section class="modal-header">
+                                                            <h5 class="modal-title">Borrar usuario</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </section>
+                                                        <section class="modal-body">
+                                                            <p>Al borrar un usuario se perderán todos sus datos. Si después lo vuelve a crear, se creará con un ID distinto. Esta acción es irreversible.</p>
+                                                        </section>
+                                                        <section class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                            <form action="" method="POST" id="borrar_usuario">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="borrar_usuario">
+                                                                <input type="hidden" name="userid" value="{{u.id}}">
+                                                                <button type="submit" class="btn btn-danger">Borrar usuario</button>
+                                                            </form>
+                                                        </section>
+                                                    </article>
+                                                </article>
+                                            </section>
+                                    </article>
+                                </section>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                    <li class="list-group-item text-center">
+                        <p>No hay usuarios disponibles</p>
+                    </li>
+                    {% endif %}
+                </ul>
+            </article>
+        </section>
+        <!-- Paginacion -->
+        <article class="pagination justify-content-center mt-2">
+            <ul class="pagination">
+                {% if users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Página {{ users.number }} de {{ users.paginator.num_pages }}</span>
+                </li>
+
+                {% for i in users.paginator.page_range %}
+                    {% if i >= users.number|add:"-3" and i <= users.number|add:"3" %}
+                        <li class="page-item {% if users.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.tipo_usuario %}&tipo_usuario={{ request.GET.tipo_usuario }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </article>
+    </section>
 </main>
 {% endblock %}

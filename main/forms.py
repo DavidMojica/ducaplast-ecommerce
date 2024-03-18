@@ -1,6 +1,26 @@
 from django import forms
-from .models import TipoUsuario, Usuarios, Clientes
+from .models import TipoUsuario, Usuarios, Clientes, Producto
+from django.db import models
 
+#Crear o modificar un producto
+class ProductoForm(forms.ModelForm):
+    class Meta:
+        model = Producto
+        fields = ['descripcion', 'referencia_fabrica', 'precio', 'cantidad']
+        labels = {
+            'descripcion': 'Descripción',
+            'referencia_fabrica': 'Referencia de fábrica',
+            'precio': 'Precio',
+            'cantidad': 'Cantidad',
+        }
+        widgets = {
+            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
+            'referencia_fabrica': forms.TextInput(attrs={'class': 'form-control'}),
+            'precio': forms.TextInput(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+        
+        
 class SeleccionarRepartidor(forms.Form):
     repartidor = forms.ModelChoiceField(
         label="Repartidor",
@@ -9,7 +29,6 @@ class SeleccionarRepartidor(forms.Form):
         empty_label="Seleccione repartidor",
         required=True
     )
-
 
 class DetallesPedido(forms.Form):
     cliente = forms.ModelChoiceField(
@@ -24,6 +43,45 @@ class DetallesPedido(forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control','id':'nota', 'placeholder': 'Escribe detalles del pedido, de la dirección de entrega o lo que necesites. (500 carácteres máximo).', 'maxlength': '500'})
     )
 
+class FiltrarUsuarios(forms.Form):
+    nombre = forms.CharField(
+        label="Nombre del usuario",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    id = forms.IntegerField(
+        label="Codigo del usuario",
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    tipo_usuario = forms.ModelChoiceField(
+        label="Tipo de usuario",
+        queryset=TipoUsuario.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
+        empty_label="Todos",
+        required=False
+    )
+    
+    def buscar_usuarios_por_nombre(self):
+        nombre = self.cleaned_data.get('nombre')
+        if nombre:
+            nombres = nombre.split()
+            if len(nombres) == 1:
+                return Usuarios.objects.filter(
+                    models.Q(first_name__icontains=nombres[0]) |
+                    models.Q(last_name__icontains=nombres[0])
+                )
+            elif len(nombres) >= 2:
+                first_name = nombres[0]
+                last_name = ' '.join(nombres[1:])
+                return Usuarios.objects.filter(
+                    first_name__icontains=first_name,
+                    last_name__icontains=last_name
+                )
+        else:
+            return Usuarios.objects.none()
+
 class FiltrarProductos(forms.Form):
     nombre = forms.CharField(
         label="Nombre del producto",
@@ -33,6 +91,7 @@ class FiltrarProductos(forms.Form):
     id = forms.IntegerField(
         label="Codigo de producto",
         required=False,
+        min_value=0,
         widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
     disponibles = forms.BooleanField(

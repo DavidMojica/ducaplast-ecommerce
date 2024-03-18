@@ -1,4 +1,5 @@
 from datetime import timedelta
+import random
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -8,7 +9,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor
+from .forms import FiltrarUsuarios, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -36,6 +37,11 @@ HTMLCARRITO = "cart.html"
 HTMLORDERS = "orders.html"
 HTMLORDERDETAIL = "order_detail.html"
 HTMLUSERS = "users.html"
+HTMLUSERDETAIL = "user_detail.html"
+HTMLPRODUCTOS = "productos.html"
+HTMLPRODUCTODETAIL = "product_detail.html"
+HTMLPRODUCTOADD = "product_add.html"
+HTMLCHARTS = "charts.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -114,12 +120,10 @@ def calcular_total_actualizado(request):
     total_actualizado = round(total_productos_actualizado + iva_actualizado)
     return total_actualizado
 
-
 @login_required
 def ayudarEnDespacho(request, user, pedido):
     handler = HandlerDespacho(despachador = user, pedido = pedido)
     handler.save()
-  
   
 def getPuedeAyudar(pedido, despachadores_activos, user):
     if pedido.estado_id in [1, 2]:
@@ -164,10 +168,196 @@ def updateCart(request, pedido, productos_modificados):
     pedido.save()
     return carrito
 
+def filtrar_productos(request):
+    form = FiltrarProductos(request.GET)
+    productos = Producto.objects.order_by('-id')
+    
+    if form.is_valid():
+        id_producto = form.cleaned_data.get('id')
+        nombre = form.cleaned_data.get('nombre')
+        ordenar = form.cleaned_data.get('ordenar')
+        disponibles = form.cleaned_data.get('disponibles')
+        
+        # Extraer los datos
+        if ordenar:
+            if ordenar == '1':
+                productos = Producto.objects.order_by('-id')
+            elif ordenar == '2':
+                productos = Producto.objects.order_by('descripcion')
+            elif ordenar == '3':
+                productos = Producto.objects.order_by('-descripcion')
+            elif ordenar == '4':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
+            elif ordenar == '5':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
+            else: 
+                pass
+        
+        # Filtrar los datos
+        if id_producto:
+            productos = productos.filter(id=id_producto)
+           
+        if nombre:
+            productos = productos.filter(descripcion__icontains=nombre)
+        
+        # Filtrar por disponibilidad
+        if disponibles:
+            productos = productos.filter(cantidad__gt=0)
+    
+    return productos
 #-------------Views-----------#
+#super
+@login_required
+def Charts(request):
+    return render(request, HTMLCHARTS)
+
+
+#super
+@login_required
+def ProductDetails(request, productid=None):
+    producto = Producto.objects.get(pk=productid)
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            form.save()
+            return redirect('productos') # Redirecciona a la vista de productos
+    else:
+        form = ProductoForm(instance=producto)
+
+    return render(request, HTMLPRODUCTODETAIL, {'form': form})
+
+#super
+@login_required
+def ProductAdd(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('productos') # Redirecciona a la vista de productos
+    else:
+        form = ProductoForm()
+
+    return render(request, HTMLPRODUCTOADD, {'form':form})
+#Super
+@login_required
+def Productos(request):
+    form = FiltrarProductos(request.GET)
+    productos = filtrar_productos(request)
+    PRODUCTOS_POR_PAGINA = 18
+    paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
+    page_number = request.GET.get('page')
+    
+    #Post
+    if request.method == 'POST':
+        if 'borrar_producto' in request.POST:
+            id = request.POST.get('productoid')
+            producto = get_object_or_404(Producto, pk=id)
+            producto.delete()
+
+    try:
+        productos_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        productos_paginados = paginator.page(1)
+    except EmptyPage:
+        productos_paginados = paginator.page(paginator.num_pages)
+    
+    data = {'form': form, 'productos': productos_paginados}
+    
+    return render(request, HTMLPRODUCTOS, {**data})
+
+#Super
+@login_required
+def UserDetail(request, userid):
+    user = get_object_or_404(Usuarios, pk=userid)
+    tipos_usuario = TipoUsuario.objects.all()
+    data = {'user': user,
+            'request_user': request.user,
+            'tipos_usuario':tipos_usuario}
+    
+    #POST
+    if request.method == 'POST':
+        if 'reestablecer' in request.POST:  
+            nuevaContrasena = str(random.randint(10000000, 99999999))
+            user.set_password(nuevaContrasena)
+            user.save()
+            data['password_changed'] = nuevaContrasena
+        elif 'acc_data' in request.POST:
+            nombre = request.POST.get('nombre').strip()
+            apellidos = request.POST.get('apellidos').strip()
+            email = request.POST.get('email').strip()
+            tipo_usuario = request.POST.get('tipo_usuario')
+            
+            tipo_instance = get_object_or_404(TipoUsuario, pk=tipo_usuario)
+            user.first_name = nombre
+            user.last_name = apellidos
+            user.email = email
+            user.tipo_usuario = tipo_instance
+            user.save()
+            
+            
+    return render(request, HTMLUSERDETAIL, {**data})
+
+#super
 @login_required
 def Users(request):
-    return render(request, HTMLUSERS)
+    msg = ""
+    form = FiltrarUsuarios(request.GET)
+    USUARIOS_POR_PAGINA = 20
+    usuarios = Usuarios.objects.all().order_by('id')
+    data = {'form': form}
+    
+    #POST
+    if request.method == 'POST':
+        userid = request.POST.get('userid')
+        user = get_object_or_404(Usuarios, pk=userid)
+        if 'suspender_usuario' in request.POST:
+            user.is_active = False
+            msg = "Se ha suspendido al usuario correctamente"
+            altype = 'info'
+            user.save()
+        elif 'readmitir_usuario' in request.POST:
+            if not user.tipo_usuario_id == 6:
+                user.is_active = True
+                msg = "Se ha removido la suspensión correctamente"
+                altype = 'info'
+                user.save()
+            else:
+                msg = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
+                altype = 'danger'
+        elif 'borrar_usuario' in request.POST:
+            user.delete()
+            msg = "Se ha borrado un usuario correctamente"
+            altype = 'danger'
+        
+        data['msg'] = msg
+        data['type'] = altype
+            
+    #GET
+    #Filtro?
+    if form.is_valid():
+        nombre = form.cleaned_data.get('nombre').lower()
+        id = form.cleaned_data.get('id')
+        tipo_usuario = form.cleaned_data.get('tipo_usuario')
+        
+        if nombre:
+            usuarios = form.buscar_usuarios_por_nombre()
+        if tipo_usuario:
+            usuarios = usuarios.filter(tipo_usuario=tipo_usuario)
+        if id:
+            usuarios = usuarios.filter(id=id)
+        
+    #Paginador
+    paginator = Paginator(usuarios, USUARIOS_POR_PAGINA)
+    page_number = request.GET.get('page')
+    
+    try:
+        usuarios_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        usuarios_paginados = paginator.page(1)
+    except EmptyPage:
+        usuarios_paginados = paginator.page(paginator.num_pages)
+        
+    return render(request, HTMLUSERS, {**data, 'users': usuarios_paginados})
 
 @login_required
 def OrderDetail(request, order):
@@ -228,7 +418,6 @@ def OrderDetail(request, order):
                 producto_id = int(request.POST.get('producto_id'))
                 ProductosPedido.objects.filter(pedido=pedido, producto_id=producto_id).delete()
                 carrito = loadCart(request, pedido, False)
-                print(f"log4 {carrito}")
                 total_actualizado = calcular_total_actualizado(request)  
             elif 'notaDespacho' in request.POST:
                 notaPedido = request.POST.get('notaPedido')

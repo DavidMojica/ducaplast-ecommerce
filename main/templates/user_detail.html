@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="d-flex justify-content-center align-items-center">
+    <section class="card p-4">
+        <h5 class="card-title text-center">ID de este usuario: <span class="badge bg-primary">{{user.id}}</span></h5>
+        <p class="text-center">Creado en: <br><span class="badge bg-info">{{user.date_joined}}</span></p>
+        <p class="text-center">Último acceso a la plataforma: <br><span class="badge bg-info">{{user.last_login}}</span></p>
+        
+        <form action="" method="POST" id="formAccount" class="card p-4">
+            {% csrf_token %}
+            <h2 class="text-primary text-bold text-center">Editar perfil</h2>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="nombre">Nombre</label>
+                    </span>
+                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ingrese su nombre" value="{{user.first_name}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="apellidos">Apellidos</label>
+                    </span>
+                    <input type="text" name="apellidos" id="apellidos" class="form-control" placeholder="Ingrese sus apellidos" value="{{user.last_name}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="email">Correo electrónico</label>
+                    </span>
+                    <input type="text" name="email" id="email" class="form-control" placeholder="Ingrese su email" value="{{user.email}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
+                        <label for="tipo_usuario">Tipo de usuario</label>
+                    </span>
+                    <select name="tipo_usuario" id="" class="form-select">
+                        {% for tipo in tipos_usuario %}
+                        <option value="{{tipo.id}}" {% if user.tipo_usuario_id == tipo.id %} selected {% endif %}>{{tipo.description}}</option>
+                        {% endfor %}
+                    </select>
+                </li>
+            </ul>
+            <input type="hidden" name="acc_data">
+            <input type="submit" value="Guardar cambios" class="btn btn-secondary mt-3">
+            <span class="badge bg-danger mt-2" id="account_event">{{account_data_event}}</span>
+        </form>
+        <span class="badge bg-danger d-block text-wrap w-100 m-auto" style="max-width: 300px;">
+            <h2 class="text-center text-white">Zona de cuidado</h2>
+            <h5 class="text-center text-white">Reestablecer contraseña</h5>
+            Opción recomendada para cuando a un usuario se le pierda la contraseña.
+            Después de Reestablecer la contraseña, anótela y otórguesela lo más pronto posible
+            al dueño de la cuenta, pues despues de reestablecer la contraseña sólo se mostrará 1 vez.
+            <section class="p-4">
+                <!-- trigger -->
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReestablecer" data-backdrop="false">Reestablecer contraseña</button>
+                <!-- modal -->
+                <section class="modal fade text-dark" id="modalReestablecer" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                    <article class="modal-dialog modal-dialog-centered">
+                        <article class="modal-content">
+                            <section class="modal-header">
+                                <h5 class="modal-title">Reestablecer contraseña</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </section>
+                            <section class="modal-body">
+                                <p>Al reestablecer la contraseña, se le mostrará la nueva contraseña por una única vez y se le cerrará la sesión si este usuario está en línea.</p>
+                            </section>
+                            <section class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                <form action="" method="POST" id="readmitir_usuario">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reestablecer">
+                                    <button type="submit" class="btn btn-warning">Reestablecer contraseña</button>
+                                </form>
+                            </section>
+                        </article>
+                    </article>
+                </section>
+            </section>
+            {% if password_changed %}
+                <h4 class="text-center">Contraseña nueva <span class="badge bg-warning mt-2" id="pass_event">{{password_changed}}</span></h4>
+            {% endif %}
+        </span>    
+    </section>
+</main>
+{% endblock %}
