@@ -13,6 +13,12 @@ class ProductoForm(forms.ModelForm):
             'precio': 'Precio',
             'cantidad': 'Cantidad',
         }
+        widgets = {
+            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
+            'referencia_fabrica': forms.TextInput(attrs={'class': 'form-control'}),
+            'precio': forms.TextInput(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
         
         
 class SeleccionarRepartidor(forms.Form):

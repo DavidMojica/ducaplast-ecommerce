@@ -169,7 +169,7 @@ def updateCart(request, pedido, productos_modificados):
 
 def filtrar_productos(request):
     form = FiltrarProductos(request.GET)
-    productos = Producto.objects.order_by('id')
+    productos = Producto.objects.order_by('-id')
     
     if form.is_valid():
         id_producto = form.cleaned_data.get('id')
