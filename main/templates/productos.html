@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+    <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
+        <form action="" method="GET" class="text-center filter-form">
+            <h2 class="text-primary font-weight-bold">Filtrar productos</h2>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                {{form.nombre}}
+            </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                {{form.id}}
+            </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.ordenar.label_tag}}</span>
+                {{form.ordenar}}
+            </article>
+            <article class=" mb-3">
+                <span class="badge bg-info mr-2">{{form.disponibles.label_tag}}</span>
+                {{form.disponibles}}
+            </article>
+            <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-arrow-right"></i></button>
+        </form>
+    </section>
+
+
+    
+
+</main>
+{% endblock %}

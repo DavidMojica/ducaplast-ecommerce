@@ -38,6 +38,7 @@ HTMLORDERS = "orders.html"
 HTMLORDERDETAIL = "order_detail.html"
 HTMLUSERS = "users.html"
 HTMLUSERDETAIL = "user_detail.html"
+HTMLPRODUCTOS = "productos.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -164,7 +165,65 @@ def updateCart(request, pedido, productos_modificados):
     pedido.save()
     return carrito
 
+def filtrar_productos(request):
+    form = FiltrarProductos(request.GET)
+    productos = Producto.objects.order_by('id')
+    
+    if form.is_valid():
+        id_producto = form.cleaned_data.get('id')
+        nombre = form.cleaned_data.get('nombre')
+        ordenar = form.cleaned_data.get('ordenar')
+        disponibles = form.cleaned_data.get('disponibles')
+        
+        # Extraer los datos
+        if ordenar:
+            if ordenar == '1':
+                productos = Producto.objects.order_by('-id')
+            elif ordenar == '2':
+                productos = Producto.objects.order_by('descripcion')
+            elif ordenar == '3':
+                productos = Producto.objects.order_by('-descripcion')
+            elif ordenar == '4':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
+            elif ordenar == '5':
+                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
+            else: 
+                pass
+        
+        # Filtrar los datos
+        if id_producto:
+            productos = productos.filter(id=id_producto)
+           
+        if nombre:
+            productos = productos.filter(descripcion__icontains=nombre)
+        
+        # Filtrar por disponibilidad
+        if disponibles:
+            productos = productos.filter(cantidad__gt=0)
+    
+    return productos
 #-------------Views-----------#
+#Super
+@login_required
+def Productos(request):
+    form = FiltrarProductos(request.GET)
+    productos = filtrar_productos(request)
+    PRODUCTOS_POR_PAGINA = 18
+    paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
+    page_number = request.GET.get('page')
+    
+    try:
+        productos_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        productos_paginados = paginator.page(1)
+    except EmptyPage:
+        productos_paginados = paginator.page(paginator.num_pages)
+    
+    data = {'form': form, 'productos': productos_paginados}
+    
+    return render(request, HTMLPRODUCTOS, {**data})
+
+#Super
 @login_required
 def UserDetail(request, userid):
     user = get_object_or_404(Usuarios, pk=userid)
@@ -196,6 +255,7 @@ def UserDetail(request, userid):
             
     return render(request, HTMLUSERDETAIL, {**data})
 
+#super
 @login_required
 def Users(request):
     msg = ""
