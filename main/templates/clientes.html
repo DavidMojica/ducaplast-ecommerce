@@ -61,7 +61,7 @@
                 {% endif %}
             </ul>
         </article>
-        <!-- Usuarios -->
+        <!-- clientes -->
         <section class="mb-4">
             <article class="col-md-10 m-auto">
                 <ul class="list-group">
@@ -80,7 +80,7 @@
                     </li>
                     {% if clientes %}
                         {% for c in clientes %}
-                            <li class="list-grocp-item text-center">
+                            <li class="list-group-item text-center">
                                 <section class="row">
                                     <article class="col-md-4">
                                         <h4><span class="badge bg-secondary">#{{c.id}}</span></h4>
@@ -90,11 +90,11 @@
                                     </article>
 
                                     <article class="col-md-4">
-                                        <a href="{% url 'client_detail' clientid=u.id %}" class="btn btn-warning">Modificar</a>
+                                        <a href="{% url 'client_detail' clientid=c.id %}" class="btn btn-warning">Modificar</a>
                                         <!-- trigger -->
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete-{{u.id}}" data-backdrop="false">Borrar</button>
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete-{{c.id}}" data-backdrop="false">Borrar</button>
                                         <!-- modal -->
-                                        <section class="modal fade" id="modalDelete-{{u.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                        <section class="modal fade" id="modalDelete-{{c.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
                                             <article class="modal-dialog modal-dialog-centered">
                                                 <article class="modal-content">
                                                     <section class="modal-header">
@@ -109,7 +109,7 @@
                                                         <form action="" method="POST" id="borrar_cliente">
                                                             {% csrf_token %}
                                                             <input type="hidden" name="borrar_cliente">
-                                                            <input type="hidden" name="userid" value="{{u.id}}">
+                                                            <input type="hidden" name="clientid" value="{{c.id}}">
                                                             <button type="submit" class="btn btn-danger">Borrar cliente</button>
                                                         </form>
                                                     </section>
