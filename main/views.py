@@ -367,8 +367,7 @@ def OrderDetail(request, order):
     productos = ProductosPedido.objects.filter(pedido_id=order)
     despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
-
-    print(f"log1 {carrito}")
+    
     #Post
     if request.method == 'POST':
         #----------------TAREAS DE DESPACHO, ESTADO 0 PARA 1----------------#
@@ -407,11 +406,8 @@ def OrderDetail(request, order):
                 if not productosModificados:
                     return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
                 
-                print(f"logmod{productosModificados}")
                 carrito = updateCart(request,pedido,productosModificados)
                 total_actualizado = calcular_total_actualizado(request)
-                print(f"log2 {carrito}")
-                print(f"{total_actualizado}")
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
             elif 'borrarProducto' in request.POST:
                 producto_id = int(request.POST.get('producto_id'))
@@ -490,6 +486,7 @@ def OrderDetail(request, order):
         
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
+        data['puede_ayudar'] = getPuedeAyudar(pedido, despachadores_activos, user)
         form = SeleccionarRepartidor() if pedido.estado_id == 3 or 4 else None
         return render(request, HTMLORDERDETAIL, {**data, 'form':form})
     elif user.tipo_usuario_id == 2:
@@ -588,7 +585,7 @@ def Home(request):
             login(request, logedUser)
             userType = logedUser.tipo_usuario_id
             if userType in [0,1,2,3,4,5]:
-                return redirect(reverse('registro')) 
+                return redirect(reverse('orders')) 
             else:
                 logout(request)
                 return render(request, HTMLHOME, {'form': newForm,'error': ERROR_5})
