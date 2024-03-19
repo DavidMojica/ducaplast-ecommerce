@@ -7,10 +7,10 @@ class FiltrarRecibos(forms.ModelForm):
         label="Codigo del pedido",
         required=False,
         min_value=0,
-        widget=forms.NumberInput(attrs={'class': 'form-control'})
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'ID del pedido'}),
     )
     
-    completado_hora = forms.DateTimeField(
+    completado_fecha = forms.DateTimeField(
         label='Fecha de completación',
         widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'date'}),
         required=False,
@@ -26,11 +26,11 @@ class FiltrarRecibos(forms.ModelForm):
 
     class Meta:
         model = Pedido
-        fields = ['id', 'vendedor', 'cliente', 'completado_hora']
+        fields = ['id', 'vendedor', 'cliente', 'completado_fecha']
         labels = {
             'vendedor': 'Vendedor',
             'cliente': 'Cliente',
-            'completado_hora': 'Fecha de completación',
+            'completado_fecha': 'Fecha de completación',
         }
         widgets = {
             'vendedor': forms.Select(attrs={'class': 'form-select'}),

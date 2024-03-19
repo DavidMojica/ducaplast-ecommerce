@@ -531,7 +531,7 @@ def Orders(request, filtered=None):
                 vendedor = form.cleaned_data.get('vendedor')
                 cliente = form.cleaned_data.get('cliente')
                 fecha = form.cleaned_data.get('fecha')
-                completado_hora = form.cleaned_data.get('completado_hora')
+                completado_fecha = form.cleaned_data.get('completado_fecha')
                 if id:
                     pedidos = pedidos.filter(id=id)
                 if vendedor:
@@ -540,8 +540,8 @@ def Orders(request, filtered=None):
                     pedidos = pedidos.filter(cliente=cliente)
                 if fecha:
                     pedidos = pedidos.filter(fecha__date=fecha)
-                if completado_hora:
-                    pedidos = pedidos.filter(completado_hora__date=completado_hora)
+                if completado_fecha:
+                    pedidos = pedidos.filter(completado_hora__date=completado_fecha)
 
         elif user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
