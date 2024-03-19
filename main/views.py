@@ -9,7 +9,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
+from .forms import FiltrarUsuarios, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -42,6 +42,7 @@ HTMLPRODUCTOS = "productos.html"
 HTMLPRODUCTODETAIL = "product_detail.html"
 HTMLPRODUCTOADD = "product_add.html"
 HTMLCHARTS = "charts.html"
+HTMLCLIENTES = "clientes.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -206,6 +207,24 @@ def filtrar_productos(request):
     
     return productos
 #-------------Views-----------#
+#super
+@login_required
+def ClientesView(request):
+    form = FiltrarCliente(request.GET)
+    data = {'form':form}
+    clientes = Clientes.objects.all()
+    
+    if form.is_valid():
+        id = form.cleaned_data.get('id')
+        nombre = form.cleaned_data.get('nombre')
+        
+        if id:
+            clientes = clientes.filter(id=id)
+        if nombre:
+            clientes = clientes.filter(nombre__icontains=nombre)
+            
+    return render(request, HTMLCLIENTES, {**data, 'clientes':clientes})
+
 #super
 @login_required
 def Charts(request):
