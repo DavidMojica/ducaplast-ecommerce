@@ -233,6 +233,7 @@ def ClientDetail(request, clientid=None):
 @login_required
 def ClientesView(request):
     form = FiltrarCliente(request.GET)
+    CLIENTES_POR_PAGINA = 15
     data = {'form':form}
     clientes = Clientes.objects.all()
     
@@ -245,7 +246,17 @@ def ClientesView(request):
         if nombre:
             clientes = clientes.filter(nombre__icontains=nombre)
             
-    return render(request, HTMLCLIENTES, {**data, 'clientes':clientes})
+            
+    paginator = Paginator(clientes, CLIENTES_POR_PAGINA)
+    page_number = request.GET.get('page')
+    try:
+        clientes_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        clientes_paginados = paginator.page(1)
+    except EmptyPage:
+        clientes_paginados = paginator.page(paginator.num_pages)
+        
+    return render(request, HTMLCLIENTES, {**data, 'clientes':clientes_paginados})
 
 #super
 @login_required
