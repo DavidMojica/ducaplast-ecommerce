@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+    {% if msg %}
+        <section class="alert alert-{{type}}" role="alert">{{msg}}</section>
+    {% endif %}
+
+    <section class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
+        <form action="" class="text-center filter-form" method="GET">
+            <h2 class="text-primary font-weight-bold">Filtrar usuarios</h2>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                {{form.nombre}}
+            </article>
+            <article class="input-group mb-3">
+                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                {{form.id}}
+            </article>
+            <button type="submit" class="btn btn-primary col-md-5">Buscar <i class="fa fa-search"></i></button>
+        </form>
+    </section>
+    <section>
+        <!-- Paginacion -->
+        <article class="pagination justify-content-center mt-2">
+            <ul class="pagination">
+                {% if clientes.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clientes.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Página {{ clientes.number }} de {{ clientes.paginator.num_pages }}</span>
+                </li>
+
+                {% for i in clientes.paginator.page_range %}
+                    {% if i >= clientes.number|add:"-3" and i <= clientes.number|add:"3" %}
+                        <li class="page-item {% if clientes.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if clientes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clientes.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clientes.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </article>
+        <!-- clientes -->
+        <section class="mb-4">
+            <article class="col-md-10 m-auto">
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-action text-center bg-primary text-white">
+                        <header class="row">
+                            <article class="col-md-4">
+                                <span class="badge bg-primary">ID</span>
+                            </article>
+                            <article class="col-md-4">
+                                <span class="badge bg-primary">Nombre</span>
+                            </article>
+                            <article class="col-md-4">
+                                <span class="badge bg-primary">Opciones</span>
+                            </article>
+                        </header>
+                    </li>
+                    {% if clientes %}
+                        {% for c in clientes %}
+                            <li class="list-group-item text-center">
+                                <section class="row">
+                                    <article class="col-md-4">
+                                        <h4><span class="badge bg-secondary">#{{c.id}}</span></h4>
+                                    </article>
+                                    <article class="col-md-4">
+                                        <p>{{c.nombre}}</p>
+                                    </article>
+
+                                    <article class="col-md-4">
+                                        <a href="{% url 'client_detail' clientid=c.id %}" class="btn btn-warning">Modificar</a>
+                                        <!-- trigger -->
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete-{{c.id}}" data-backdrop="false">Borrar</button>
+                                        <!-- modal -->
+                                        <section class="modal fade" id="modalDelete-{{c.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" >
+                                            <article class="modal-dialog modal-dialog-centered">
+                                                <article class="modal-content">
+                                                    <section class="modal-header">
+                                                        <h5 class="modal-title">Borrar clienteo</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </section>
+                                                    <section class="modal-body">
+                                                        <p>Al borrar un cliente se perderán todos sus datos. Si después lo vuelve a crear, se creará con un ID distinto. Esta acción es irreversible.</p>
+                                                    </section>
+                                                    <section class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                        <form action="" method="POST" id="borrar_cliente">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="borrar_cliente">
+                                                            <input type="hidden" name="clientid" value="{{c.id}}">
+                                                            <button type="submit" class="btn btn-danger">Borrar cliente</button>
+                                                        </form>
+                                                    </section>
+                                                </article>
+                                            </article>
+                                        </section>
+                                    </article>
+                                </section>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                    <li class="list-group-item text-center">
+                        <p>No hay usuarios disponibles</p>
+                    </li>
+                    {% endif %}
+                </ul>
+            </article>
+        </section>
+        <!-- Paginacion -->
+        <article class="pagination justify-content-center mt-2">
+            <ul class="pagination">
+                {% if clientes.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clientes.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Página {{ clientes.number }} de {{ clientes.paginator.num_pages }}</span>
+                </li>
+
+                {% for i in clientes.paginator.page_range %}
+                    {% if i >= clientes.number|add:"-3" and i <= clientes.number|add:"3" %}
+                        <li class="page-item {% if clientes.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if clientes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clientes.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clientes.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </article>
+    </section>
+</main>
+{% endblock %}

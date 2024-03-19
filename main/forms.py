@@ -1,6 +1,51 @@
 from django import forms
-from .models import TipoUsuario, Usuarios, Clientes, Producto
+from .models import TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
+
+class FiltrarRecibos(forms.ModelForm):
+    id = forms.IntegerField(
+        label="Codigo del pedido",
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'ID del pedido'}),
+    )
+    
+    completado_fecha = forms.DateTimeField(
+        label='Fecha de completación',
+        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=False,
+        input_formats=['%Y-%m-%d'],
+    )
+
+    fecha = forms.DateField(
+        label='Fecha de venta',
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        required=False,
+        input_formats=['%Y-%m-%d'],
+    )
+
+    class Meta:
+        model = Pedido
+        fields = ['id', 'vendedor', 'cliente', 'completado_fecha']
+        labels = {
+            'vendedor': 'Vendedor',
+            'cliente': 'Cliente',
+            'completado_fecha': 'Fecha de completación',
+        }
+        widgets = {
+            'vendedor': forms.Select(attrs={'class': 'form-select'}),
+            'cliente': forms.Select(attrs={'class':'form-select'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['vendedor'].empty_label = 'Cualquiera'
+        self.fields['vendedor'].required = False
+        self.fields['vendedor'].queryset = Usuarios.objects.filter(tipo_usuario_id__in=[0, 1, 2])
+
+        self.fields['cliente'].empty_label = 'Cualquiera'
+        self.fields['cliente'].required = False
+        self.fields['cliente'].queryset = Clientes.objects.all()
 
 #Crear o modificar un producto
 class ProductoForm(forms.ModelForm):
@@ -19,7 +64,6 @@ class ProductoForm(forms.ModelForm):
             'precio': forms.TextInput(attrs={'class': 'form-control'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
         }
-        
         
 class SeleccionarRepartidor(forms.Form):
     repartidor = forms.ModelChoiceField(
@@ -41,6 +85,31 @@ class DetallesPedido(forms.Form):
     nota = forms.CharField(
         label="Nota",
         widget=forms.Textarea(attrs={'class': 'form-control','id':'nota', 'placeholder': 'Escribe detalles del pedido, de la dirección de entrega o lo que necesites. (500 carácteres máximo).', 'maxlength': '500'})
+    )
+
+class ModificarCliente(forms.Form):
+    nombre = forms.CharField(
+        label="Nombre del cliente",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    direccion = forms.CharField(
+        label="Direccion del cliente",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+class FiltrarCliente(forms.Form):
+    nombre = forms.CharField(
+        label="Nombre del usuario",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    id = forms.IntegerField(
+        label="Codigo del usuario",
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
 
 class FiltrarUsuarios(forms.Form):

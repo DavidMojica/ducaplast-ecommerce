@@ -3,34 +3,116 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
+<main class="gradient-custom">
+    {% if history %}
+    <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base" >
+        <form action="" method="GET" class="text-center filter-form row">
+            <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
+            
+            <fieldset class="mb-3 col-md-10 m-auto">
+                <legend class="badge bg-info text-white p-1">{{form.id.label_tag}}</legend>
+                {{form.id}}
+            </fieldset>
+            
+            <fieldset class="mb-3 col-md-6">
+                <legend class="badge bg-info text-white p-1">{{form.vendedor.label_tag}}</legend>
+                {{form.vendedor}}
+            </fieldset>
+            
+            <fieldset class="mb-3 col-md-6">
+                <legend class="badge bg-info text-white p-1">{{form.cliente.label_tag}}</legend>
+                {{form.cliente}}
+            </fieldset>
+            
+            <fieldset class="mb-3 col-md-6">
+                <legend class="badge bg-info text-white p-1">{{form.fecha.label_tag}}</legend>
+                {{form.fecha}}
+            </fieldset>
 
-
-<main class=" gradient-custom">
+            <fieldset class="mb-3 col-md-6">
+                <legend class="badge bg-info text-white p-1">{{form.completado_fecha.label_tag}}</legend>
+                {{form.completado_fecha}}
+            </fieldset>
+            <button type="submit" class="btn btn-primary col-md-5 m-auto">Filtrar <i class="fa fa-search"></i></button>
+        </form>
+    </section>
+    {% endif %}
     <section class="container py-5">
         <article class="row d-flex justify-content-center my-4">
             <article class="card mb-4 bg-gray text-light col-md-8">
                 <header class="card-header">
-                    <h5 class="mb-0" id="productos_cantidad">
-                        {% if user.tipo_usuario_id == 2 %}
-                        Mi historial de ventas
+                    <h5 class="text-center" id="productos_cantidad">
+                        {% if user.tipo_usuario_id == 0 or user.tipo_usuario_id == 1 %}
+                            {% if not history %}
+                                Pedidos en proceso
+                            {% else %}
+                                Pedidos completados
+                            {% endif %}
+                        {% elif user.tipo_usuario_id == 2 %}
+                            Mi historial de ventas
                         {% elif user.tipo_usuario_id == 3 %}
                             {% if not history %}
-                            Pedidos para despachar
+                                Pedidos para despachar
                             {% else %}
-                            Pedidos despachados por mí
+                                Pedidos despachados por mí
                             {% endif %}
                         {% elif user.tipo_usuario_id == 4 %}
                             {% if not history %}
-                            Pedidos listos para facturación
+                                Pedidos listos para facturación
                             {% else %}
-                            Pedidos facturados por mí
+                                Pedidos facturados por mí
                             {% endif %}
                         {% elif user.tipo_usuario_id == 5 %}
-                        Mi historial de entregas
+                            {% if not history %}
+                                Pedidos pendientes de asignación
+                            {% else %}
+                            Mi historial de entregas
+                            {% endif %}
                         {% endif %}
                     </h5>
                 </header>
                 <section class="card-body">
+                    <!-- Paginacion -->
+                    <article class="pagination justify-content-center mt-2">
+                        <ul class="pagination">
+                            {% if pedidos.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ pedidos.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Página {{ pedidos.number }} de {{ pedidos.paginator.num_pages }}</span>
+                            </li>
+        
+                            {% for i in pedidos.paginator.page_range %}
+                                {% if i >= pedidos.number|add:"-3" and i <= pedidos.number|add:"3" %}
+                                    <li class="page-item {% if pedidos.number == i %}active{% endif %}">
+                                        <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+        
+                            {% if pedidos.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ pedidos.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ pedidos.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </article>
                     {% for p in pedidos %}
                     <!-- Pedido -->
                     <a href="{% url 'order_detail' order=p.id %}" class="text-decoration-none text-white">
@@ -47,17 +129,20 @@
                                         </p>
                                     </article>
                                     <aside class="col text-center">
-                                        <span class="badge {{p.get_status_tiempo}}">{{p.fecha}}</span>
+                                        <span class="badge {{p.get_status_tiempo}}">Venta {{p.fecha}}</span>
+                                        {% if p.completado_hora %}
+                                            <span class="badge {{p.get_status_tiempo}}">Completado {{p.completado_hora}}</span>
+                                        {% endif %}
                                     </aside>
                                 </section>
                                 
                                 <section class="row">
                                     <article class="col">
-                                        <p>Vendido por: {{p.vendedor.first_name}} {{p.vendedor.last_name}} <br> (Cod. Empleado: {{p.vendedor_id}})</p>
+                                        <p>Vendido por: {{p.vendedor}}</p>
                                     </article>
                                     <aside class="col text-center">
                                         <p>
-                                            <strong>Cod. cliente:</strong> {{p.cliente_id}} <br>
+                                            <strong>Cliente:</strong> {{p.cliente}} <br>
                                             <strong>Valor pedido:</strong> ${{p.valor}}
                                         </p>
                                     </aside>
@@ -67,18 +152,17 @@
                     </a>
                     <!-- End pedido -->                
                     {% endfor %}
-
                     <!-- Paginacion -->
                     <article class="pagination justify-content-center mt-2">
                         <ul class="pagination">
                             {% if pedidos.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="First">
+                                    <a class="page-link" href="?page=1{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="First">
                                         <span aria-hidden="true">&laquo;&laquo;</span>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ pedidos.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Previous">
+                                    <a class="page-link" href="?page={{ pedidos.previous_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
@@ -90,19 +174,19 @@
                             {% for i in pedidos.paginator.page_range %}
                                 {% if i >= pedidos.number|add:"-3" and i <= pedidos.number|add:"3" %}
                                     <li class="page-item {% if pedidos.number == i %}active{% endif %}">
-                                        <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}">{{ i }}</a>
+                                        <a class="page-link" href="?page={{ i }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}">{{ i }}</a>
                                     </li>
                                 {% endif %}
                             {% endfor %}
         
                             {% if pedidos.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ pedidos.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Next">
+                                    <a class="page-link" href="?page={{ pedidos.next_page_number }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ pedidos.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.nombre %}&nombre={{ request.GET.nombre }}{% endif %}{% if request.GET.ordenar %}&ordenar={{ request.GET.ordenar }}{% endif %}{% if request.GET.disponibles %}&disponibles={{ request.GET.disponibles }}{% endif %}" aria-label="Last">
+                                    <a class="page-link" href="?page={{ pedidos.paginator.num_pages }}{% if request.GET.id %}&id={{ request.GET.id }}{% endif %}{% if request.GET.vendedor %}&vendedor={{ request.GET.vendedor }}{% endif %}{% if request.GET.cliente %}&cliente={{ request.GET.cliente }}{% endif %}{% if request.GET.completado_fecha %}&completado_fecha={{ request.GET.completado_fecha }}{% endif %}{% if request.GET.fecha %}&fecha={{ request.GET.fecha }}{% endif %}" aria-label="Last">
                                         <span aria-hidden="true">&raquo;&raquo;</span>
                                     </a>
                                 </li>
@@ -110,13 +194,8 @@
                         </ul>
                     </article>
                 </section>
-                
-
             </article>
         </article>
-
-
     </section>
 </main>
-
 {% endblock %}

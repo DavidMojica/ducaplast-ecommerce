@@ -26,7 +26,7 @@ class Clientes(models.Model):
     dinero_generado = models.BigIntegerField(default=0)
     
     def __str__(self):
-            return self.nombre
+            return f"{self.nombre} ID: {self.id}"
         
 # Login model
 class Usuarios(AbstractUser):

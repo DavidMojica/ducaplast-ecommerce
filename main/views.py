@@ -9,7 +9,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
+from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -42,6 +42,8 @@ HTMLPRODUCTOS = "productos.html"
 HTMLPRODUCTODETAIL = "product_detail.html"
 HTMLPRODUCTOADD = "product_add.html"
 HTMLCHARTS = "charts.html"
+HTMLCLIENTES = "clientes.html"
+HTMLCLIENTEDETAIL = "client_detail.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -170,7 +172,7 @@ def updateCart(request, pedido, productos_modificados):
 
 def filtrar_productos(request):
     form = FiltrarProductos(request.GET)
-    productos = Producto.objects.order_by('-id')
+    productos = Producto.objects.order_by('id')
     
     if form.is_valid():
         id_producto = form.cleaned_data.get('id')
@@ -200,17 +202,66 @@ def filtrar_productos(request):
         if nombre:
             productos = productos.filter(descripcion__icontains=nombre)
         
-        # Filtrar por disponibilidad
+        # Modulo disponibles
         if disponibles:
             productos = productos.filter(cantidad__gt=0)
     
     return productos
 #-------------Views-----------#
+#Super
+@login_required
+def ClientDetail(request, clientid=None):
+    cliente = get_object_or_404(Clientes, pk=clientid)
+    if request.method == 'POST':
+        form = ModificarCliente(request.POST)
+        if form.is_valid():
+            nombre = form.cleaned_data.get('nombre')
+            direccion = form.cleaned_data.get('direccion')
+            cliente.nombre = nombre
+            cliente.direccion = direccion
+            cliente.save()
+            return redirect('clientes')
+    else:
+        form = ModificarCliente(initial={'nombre': cliente.nombre, 'direccion': cliente.direccion})
+
+    return render(request, 'client_detail.html', {'form': form, 'cliente': cliente})
+    
+            
+    
+
+#super
+@login_required
+def ClientesView(request):
+    form = FiltrarCliente(request.GET)
+    CLIENTES_POR_PAGINA = 15
+    data = {'form':form}
+    clientes = Clientes.objects.all()
+    
+    if form.is_valid():
+        id = form.cleaned_data.get('id')
+        nombre = form.cleaned_data.get('nombre')
+        
+        if id:
+            clientes = clientes.filter(id=id)
+        if nombre:
+            clientes = clientes.filter(nombre__icontains=nombre)
+            
+            
+    paginator = Paginator(clientes, CLIENTES_POR_PAGINA)
+    page_number = request.GET.get('page')
+    try:
+        clientes_paginados = paginator.page(page_number)
+    except PageNotAnInteger:
+        clientes_paginados = paginator.page(1)
+    except EmptyPage:
+        clientes_paginados = paginator.page(paginator.num_pages)
+        
+    return render(request, HTMLCLIENTES, {**data, 'clientes':clientes_paginados})
+
 #super
 @login_required
 def Charts(request):
     return render(request, HTMLCHARTS)
-
 
 #super
 @login_required
@@ -368,8 +419,7 @@ def OrderDetail(request, order):
     productos = ProductosPedido.objects.filter(pedido_id=order)
     despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
-
-    print(f"log1 {carrito}")
+    
     #Post
     if request.method == 'POST':
         #----------------TAREAS DE DESPACHO, ESTADO 0 PARA 1----------------#
@@ -408,11 +458,8 @@ def OrderDetail(request, order):
                 if not productosModificados:
                     return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
                 
-                print(f"logmod{productosModificados}")
                 carrito = updateCart(request,pedido,productosModificados)
                 total_actualizado = calcular_total_actualizado(request)
-                print(f"log2 {carrito}")
-                print(f"{total_actualizado}")
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
             elif 'borrarProducto' in request.POST:
                 producto_id = int(request.POST.get('producto_id'))
@@ -491,6 +538,7 @@ def OrderDetail(request, order):
         
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
+        data['puede_ayudar'] = getPuedeAyudar(pedido, despachadores_activos, user)
         form = SeleccionarRepartidor() if pedido.estado_id == 3 or 4 else None
         return render(request, HTMLORDERDETAIL, {**data, 'form':form})
     elif user.tipo_usuario_id == 2:
@@ -506,9 +554,10 @@ def OrderDetail(request, order):
 @login_required
 def Orders(request, filtered=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
+    form = FiltrarRecibos(request.GET)
     PEDIDOS_POR_PAGINA = 10
-    history=False
     pedidos = []
+    data= {'user': user, 'history': False, 'form':form}
 
     if not filtered:
         if user.tipo_usuario_id in adminIds:
@@ -522,21 +571,36 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 5:
             pedidos = Pedido.objects.filter(estado_id=3).order_by('-fecha')
 
-
     elif filtered == "historial": 
-        history=True
+        data['history'] = True
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.filter(estado_id=5).order_by('-fecha')
+            if form.is_valid():
+                id = form.cleaned_data.get('id')
+                vendedor = form.cleaned_data.get('vendedor')
+                cliente = form.cleaned_data.get('cliente')
+                fecha = form.cleaned_data.get('fecha')
+                completado_fecha = form.cleaned_data.get('completado_fecha')
+                if id:
+                    pedidos = pedidos.filter(id=id)
+                if vendedor:
+                    pedidos = pedidos.filter(vendedor=vendedor)
+                if cliente:
+                    pedidos = pedidos.filter(cliente=cliente)
+                if fecha:
+                    pedidos = pedidos.filter(fecha__date=fecha)
+                if completado_fecha:
+                    pedidos = pedidos.filter(completado_hora__date=completado_fecha)
+
         elif user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
             pedidos = [handler_despacho.pedido for handler_despacho in handler_despachos]
-            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True).order_by('-fecha')
+            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
         elif user.tipo_usuario_id == 4:
-            pedidos = Pedido.objects.filter(facturado_por=user.id).order_by('-fecha')
+            pedidos = Pedido.objects.filter(facturado_por=user.id)
         elif user.tipo_usuario_id == 5:
-            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id).order_by('-fecha')
+            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id)
    
-
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
 
@@ -546,10 +610,7 @@ def Orders(request, filtered=None):
         pedidos_paginados = paginator.page(1)
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
-
-    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados,
-                                        'user': user,
-                                        'history': history})
+    return render(request, HTMLORDERS, {**data, 'pedidos': pedidos_paginados})
 
 @unloginRequired
 def Home(request):
@@ -576,7 +637,7 @@ def Home(request):
             login(request, logedUser)
             userType = logedUser.tipo_usuario_id
             if userType in [0,1,2,3,4,5]:
-                return redirect(reverse('registro')) 
+                return redirect(reverse('orders')) 
             else:
                 logout(request)
                 return render(request, HTMLHOME, {'form': newForm,'error': ERROR_5})
@@ -752,40 +813,9 @@ def CartHandler(request):
  
 @login_required
 def Catalogo(request):
-    productos = Producto.objects.order_by('id')
     form = FiltrarProductos(request.GET)
+    productos = filtrar_productos(request)
     PRODUCTOS_POR_PAGINA = 18
-    
-    if form.is_valid():
-        id_producto = form.cleaned_data.get('id')
-        nombre = form.cleaned_data.get('nombre')
-        ordenar = form.cleaned_data.get('ordenar')
-        disponibles = form.cleaned_data.get('disponibles')
-        
-        #--------------Extraer los datos-------------#
-        if ordenar:
-            if ordenar == '1':
-                productos = Producto.objects.order_by('-id')
-            elif ordenar == '2':
-                productos = Producto.objects.order_by('descripcion')
-            elif ordenar == '3':
-                productos = Producto.objects.order_by('-descripcion')
-            elif ordenar == '4':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
-            elif ordenar == '5':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
-            else: 
-                pass
-        #----------Filtrar los datos----------#
-        if id_producto:
-            productos = productos.filter(id=id_producto)
-           
-        if nombre:
-            productos = productos.filter(descripcion__icontains=nombre)
-        #Modulo disponibles 
-        if disponibles:
-            productos = productos.filter(cantidad__gt=0)
-        
     
     paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
     page_number = request.GET.get('page')
@@ -802,8 +832,7 @@ def Catalogo(request):
         'carrito': request.session.get('carritoVenta', {}),
         'form': form
     })
-        
-           
+                 
 @login_required
 def Cart(request):
     #Valor total de los productos
