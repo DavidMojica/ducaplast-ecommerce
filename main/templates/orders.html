@@ -63,7 +63,11 @@
                                 Pedidos facturados por mí
                             {% endif %}
                         {% elif user.tipo_usuario_id == 5 %}
+                            {% if not history %}
+                                Pedidos pendientes de asignación
+                            {% else %}
                             Mi historial de entregas
+                            {% endif %}
                         {% endif %}
                     </h5>
                 </header>

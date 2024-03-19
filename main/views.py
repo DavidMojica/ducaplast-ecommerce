@@ -595,11 +595,11 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
             pedidos = [handler_despacho.pedido for handler_despacho in handler_despachos]
-            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True).order_by('-fecha')
+            pedidos = sorted(pedidos, key=lambda x: x.id, reverse=True)
         elif user.tipo_usuario_id == 4:
-            pedidos = Pedido.objects.filter(facturado_por=user.id).order_by('-fecha')
+            pedidos = Pedido.objects.filter(facturado_por=user.id)
         elif user.tipo_usuario_id == 5:
-            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id).order_by('-fecha')
+            pedidos = Pedido.objects.filter(asignador_reparto_id=user.id)
    
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)

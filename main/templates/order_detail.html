@@ -350,37 +350,41 @@
                             {% for p in productos %}
                                 <tr id="p-{{p.producto_id}}">
                                     <td>{{ p.producto.descripcion }}</td>
-                                    {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
-                                        <td class="modificarCantidad">
-                                            <input type="hidden" name="" value="{{p.producto_id}}">
-                                            <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
-                                        </td>
-                                        <td>
-                                            <!-- trigger -->
-                                            <button type="button" class="btn btn-primary btn-sm me-1 mb-2 cart-handler" title="Eliminar item" data-bs-toggle="modal" data-bs-target="#modalBorrarProducto-{{p.producto_id}}">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                            <!-- modal -->
-                                            <section class="modal fade" id="modalBorrarProducto-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                                                <article class="modal-dialog modal-dialog-centered">
-                                                <article class="modal-content">
-                                                    <section class="modal-header">
-                                                    <h5 class="modal-title">Borrar producto</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </section>
-                                                    <section class="modal-body">
-                                                    <p>¿Está seguro de borrar {{p.producto.descripcion}} del pedido? Esta acción es irreversible</p>
-                                                    <form action="" method="POST" id="modificarRepartidor">
-                                                        {% csrf_token %}
-                                                        <input type="hidden" name="borrarProducto">
-                                                        <input type="hidden" name="producto_id" value="{{p.producto_id}}">
-                                                        <button type="submit" class="btn btn-danger mt-4 delete-item">Borrar producto</button>                             
-                                                    </form> 
-                                                    </section>
-                                                </article>
-                                                </article>
-                                            </section>
-                                        </td>
+                                    {% if user.tipo_usuario_id == 3 or isAdmin  %}
+                                        {% if pedido.estado_id == 1 %}
+                                            <td class="modificarCantidad">
+                                                <input type="hidden" name="" value="{{p.producto_id}}">
+                                                <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
+                                            </td>
+                                            <td>
+                                                <!-- trigger -->
+                                                <button type="button" class="btn btn-primary btn-sm me-1 mb-2 cart-handler" title="Eliminar item" data-bs-toggle="modal" data-bs-target="#modalBorrarProducto-{{p.producto_id}}">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                                <!-- modal -->
+                                                <section class="modal fade" id="modalBorrarProducto-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                    <article class="modal-dialog modal-dialog-centered">
+                                                    <article class="modal-content">
+                                                        <section class="modal-header">
+                                                        <h5 class="modal-title">Borrar producto</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </section>
+                                                        <section class="modal-body">
+                                                        <p>¿Está seguro de borrar {{p.producto.descripcion}} del pedido? Esta acción es irreversible</p>
+                                                        <form action="" method="POST" id="modificarRepartidor">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="borrarProducto">
+                                                            <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                            <button type="submit" class="btn btn-danger mt-4 delete-item">Borrar producto</button>                             
+                                                        </form> 
+                                                        </section>
+                                                    </article>
+                                                    </article>
+                                                </section>
+                                            </td>
+                                        {% else %}
+                                            <td>{{ p.cantidad }}</td>
+                                        {% endif %}
                                     {% else %}
                                         <td>{{ p.cantidad }}</td>
                                     {% endif %}
@@ -392,28 +396,32 @@
                                 <td>
                                     <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
                                 </td>
-                                {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
-                                <td>
-                                    <form action="" method="POST" id="modificarCantidad">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="modificarCantidad">
-                                        <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
-                                      </form>
-                                    </td>
+                                {% if user.tipo_usuario_id == 3 or isAdmin %}
+                                    {% if pedido.estado_id == 1 %}
+                                        <td>
+                                            <form action="" method="POST" id="modificarCantidad">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="modificarCantidad">
+                                                <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
+                                            </form>
+                                        </td>
+                                    {% endif %}
                                 {% endif %}
                             </tr>
-                            {% if user.tipo_usuario_id == 3 or isAdmin and pedido.estado_id == 1 %}
-                            <tr>
-                                <td><p>Nota al pedido. No es obligatorio.</p></td>
-                                <td class="text-center">
-                                    <form action="" method="post" id="notaDespacho">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="notaDespacho" id="notaDespacho">
-                                        <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaDespachador and pedido.notaDespachador is not None %} {{pedido.notaDespachador}} {% endif %}</textarea>
-                                        <button type="submit" class="btn btn-success">Guardar nota</button>
-                                    </form>
-                                </td>
-                            </tr>
+                            {% if user.tipo_usuario_id == 3 or isAdmin %}
+                                {% if pedido.estado_id == 1  %} 
+                                    <tr>
+                                        <td><p>Nota al pedido. No es obligatorio.</p></td>
+                                        <td class="text-center">
+                                            <form action="" method="post" id="notaDespacho">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="notaDespacho" id="notaDespacho">
+                                                <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaDespachador and pedido.notaDespachador is not None %} {{pedido.notaDespachador}} {% endif %}</textarea>
+                                                <button type="submit" class="btn btn-success">Guardar nota</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endif %}
                             {% endif %}
                         </tfoot>
                     </table>
