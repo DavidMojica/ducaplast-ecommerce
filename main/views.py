@@ -9,7 +9,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
+from .forms import FiltrarUsuarios,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -505,9 +505,10 @@ def OrderDetail(request, order):
 @login_required
 def Orders(request, filtered=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
+    form = FiltrarRecibos(request.GET)
     PEDIDOS_POR_PAGINA = 10
-    history=False
     pedidos = []
+    data= {'user': user, 'history': False, 'form':form}
 
     if not filtered:
         if user.tipo_usuario_id in adminIds:
@@ -521,11 +522,27 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 5:
             pedidos = Pedido.objects.filter(estado_id=3).order_by('-fecha')
 
-
     elif filtered == "historial": 
-        history=True
+        data['history'] = True
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.filter(estado_id=5).order_by('-fecha')
+            if form.is_valid():
+                id = form.cleaned_data.get('id')
+                vendedor = form.cleaned_data.get('vendedor')
+                cliente = form.cleaned_data.get('cliente')
+                fecha = form.cleaned_data.get('fecha')
+                completado_hora = form.cleaned_data.get('completado_hora')
+                if id:
+                    pedidos = pedidos.filter(id=id)
+                if vendedor:
+                    pedidos = pedidos.filter(vendedor=vendedor)
+                if cliente:
+                    pedidos = pedidos.filter(cliente=cliente)
+                if fecha:
+                    pedidos = pedidos.filter(fecha__date=fecha)
+                if completado_hora:
+                    pedidos = pedidos.filter(completado_hora__date=completado_hora)
+
         elif user.tipo_usuario_id == 3:  # Despachador
             handler_despachos = HandlerDespacho.objects.filter(despachador=user)
             pedidos = [handler_despacho.pedido for handler_despacho in handler_despachos]
@@ -535,7 +552,6 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 5:
             pedidos = Pedido.objects.filter(asignador_reparto_id=user.id).order_by('-fecha')
    
-
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
 
@@ -545,10 +561,7 @@ def Orders(request, filtered=None):
         pedidos_paginados = paginator.page(1)
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
-
-    return render(request, HTMLORDERS, {'pedidos': pedidos_paginados,
-                                        'user': user,
-                                        'history': history})
+    return render(request, HTMLORDERS, {**data, 'pedidos': pedidos_paginados})
 
 @unloginRequired
 def Home(request):

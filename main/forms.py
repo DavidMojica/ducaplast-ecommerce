@@ -3,11 +3,18 @@ from .models import TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
 
 class FiltrarRecibos(forms.ModelForm):
+    id = forms.IntegerField(
+        label="Codigo del pedido",
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    
     completado_hora = forms.DateTimeField(
         label='Fecha de completación',
-        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'date'}),
         required=False,
-        input_formats=['%Y-%m-%dT%H:%M'],
+        input_formats=['%Y-%m-%d'],
     )
 
     fecha = forms.DateField(
@@ -21,13 +28,11 @@ class FiltrarRecibos(forms.ModelForm):
         model = Pedido
         fields = ['id', 'vendedor', 'cliente', 'completado_hora']
         labels = {
-            'id': 'ID del pedido',
             'vendedor': 'Vendedor',
             'cliente': 'Cliente',
             'completado_hora': 'Fecha de completación',
         }
         widgets = {
-            'id': forms.NumberInput(attrs={'class': 'form-control'}),
             'vendedor': forms.Select(attrs={'class': 'form-select'}),
             'cliente': forms.Select(attrs={'class':'form-select'}),
         }
@@ -36,7 +41,7 @@ class FiltrarRecibos(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['vendedor'].empty_label = 'Cualquiera'
         self.fields['vendedor'].required = False
-        self.fields['vendedor'].queryset = Usuarios.objects.filter(tipo_usuario_id=2)
+        self.fields['vendedor'].queryset = Usuarios.objects.filter(tipo_usuario_id__in=[0, 1, 2])
 
         self.fields['cliente'].empty_label = 'Cualquiera'
         self.fields['cliente'].required = False
