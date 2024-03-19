@@ -65,7 +65,6 @@ class Pedido(models.Model):
     def get_status_tiempo(self):
         if self.completado_por:
             return 'bg-primary'
-        
         current_time = timezone.now()
         pedido_age = current_time - self.fecha
         if pedido_age < timedelta(hours=1):
@@ -85,14 +84,15 @@ class Pedido(models.Model):
         else:
             return 'bg-success'
     
-    def descontar_cantidad_producto(self):
-        productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
-        for producto_pedido in productos_pedido:
-            producto = producto_pedido.id_producto
-            if producto.cantidad < producto_pedido.cantidad:
-                raise ValidationError(f"No hay suficiente cantidad disponible para el producto {producto.nombre}.")
-            producto.cantidad -= producto_pedido.cantidad
-            producto.save()
+    #Modulo cantidad
+    # def descontar_cantidad_producto(self):
+    #     productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
+    #     for producto_pedido in productos_pedido:
+    #         producto = producto_pedido.id_producto
+    #         if producto.cantidad < producto_pedido.cantidad:
+    #             raise ValidationError(f"No hay suficiente cantidad disponible para el producto {producto.nombre}.")
+    #         producto.cantidad -= producto_pedido.cantidad
+    #         producto.save()
             
     def actualizar_dinero_generado_cliente(self):
         self.cliente.dinero_generado += self.valor

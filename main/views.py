@@ -208,207 +208,231 @@ def filtrar_productos(request):
     
     return productos
 #-------------Views-----------#
-#Super
+#Super -- TEST
 @login_required
 def ClientDetail(request, clientid=None):
-    cliente = get_object_or_404(Clientes, pk=clientid)
-    if request.method == 'POST':
-        form = ModificarCliente(request.POST)
-        if form.is_valid():
-            nombre = form.cleaned_data.get('nombre')
-            direccion = form.cleaned_data.get('direccion')
-            cliente.nombre = nombre
-            cliente.direccion = direccion
-            cliente.save()
-            return redirect('clientes')
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id in adminIds:
+        cliente = get_object_or_404(Clientes, pk=clientid)
+        if request.method == 'POST':
+            form = ModificarCliente(request.POST)
+            if form.is_valid():
+                nombre = form.cleaned_data.get('nombre')
+                direccion = form.cleaned_data.get('direccion')
+                cliente.nombre = nombre
+                cliente.direccion = direccion
+                cliente.save()
+                return redirect('clientes')
+        else:
+            form = ModificarCliente(initial={'nombre': cliente.nombre, 'direccion': cliente.direccion})
+
+        return render(request, 'client_detail.html', {'form': form, 'cliente': cliente})
     else:
-        form = ModificarCliente(initial={'nombre': cliente.nombre, 'direccion': cliente.direccion})
-
-    return render(request, 'client_detail.html', {'form': form, 'cliente': cliente})
+        return redirect('orders')
     
-            
-    
-
-#super
+#super -- TEST
 @login_required
 def ClientesView(request):
-    form = FiltrarCliente(request.GET)
-    CLIENTES_POR_PAGINA = 15
-    data = {'form':form}
-    clientes = Clientes.objects.all()
-    
-    if form.is_valid():
-        id = form.cleaned_data.get('id')
-        nombre = form.cleaned_data.get('nombre')
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id in adminIds:
+        form = FiltrarCliente(request.GET)
+        CLIENTES_POR_PAGINA = 15
+        data = {'form':form}
+        clientes = Clientes.objects.all()
         
-        if id:
-            clientes = clientes.filter(id=id)
-        if nombre:
-            clientes = clientes.filter(nombre__icontains=nombre)
+        if form.is_valid():
+            id = form.cleaned_data.get('id')
+            nombre = form.cleaned_data.get('nombre')
             
+            if id:
+                clientes = clientes.filter(id=id)
+            if nombre:
+                clientes = clientes.filter(nombre__icontains=nombre)
+                
+        paginator = Paginator(clientes, CLIENTES_POR_PAGINA)
+        page_number = request.GET.get('page')
+        try:
+            clientes_paginados = paginator.page(page_number)
+        except PageNotAnInteger:
+            clientes_paginados = paginator.page(1)
+        except EmptyPage:
+            clientes_paginados = paginator.page(paginator.num_pages)
             
-    paginator = Paginator(clientes, CLIENTES_POR_PAGINA)
-    page_number = request.GET.get('page')
-    try:
-        clientes_paginados = paginator.page(page_number)
-    except PageNotAnInteger:
-        clientes_paginados = paginator.page(1)
-    except EmptyPage:
-        clientes_paginados = paginator.page(paginator.num_pages)
-        
-    return render(request, HTMLCLIENTES, {**data, 'clientes':clientes_paginados})
+        return render(request, HTMLCLIENTES, {**data, 'clientes':clientes_paginados})
+    else:
+        return redirect('orders')
 
-#super
+#super -- TEST
 @login_required
 def Charts(request):
-    return render(request, HTMLCHARTS)
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id in adminIds:
+        return render(request, HTMLCHARTS)
+    else:
+        return redirect('orders')
 
-#super
+#super -- TEST
 @login_required
 def ProductDetails(request, productid=None):
-    producto = Producto.objects.get(pk=productid)
-    if request.method == 'POST':
-        form = ProductoForm(request.POST, instance=producto)
-        if form.is_valid():
-            form.save()
-            return redirect('productos') # Redirecciona a la vista de productos
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id in adminIds:
+        producto = Producto.objects.get(pk=productid)
+        if request.method == 'POST':
+            form = ProductoForm(request.POST, instance=producto)
+            if form.is_valid():
+                form.save()
+                return redirect('productos') # Redirecciona a la vista de productos
+        else:
+            form = ProductoForm(instance=producto)
+        return render(request, HTMLPRODUCTODETAIL, {'form': form})
     else:
-        form = ProductoForm(instance=producto)
+        return redirect('orders')
 
-    return render(request, HTMLPRODUCTODETAIL, {'form': form})
-
-#super
+#super -TEST
 @login_required
 def ProductAdd(request):
-    if request.method == 'POST':
-        form = ProductoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('productos') # Redirecciona a la vista de productos
-    else:
-        form = ProductoForm()
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id in adminIds:
+        if request.method == 'POST':
+            form = ProductoForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('productos') # Redirecciona a la vista de productos
+        else:
+            form = ProductoForm()
 
-    return render(request, HTMLPRODUCTOADD, {'form':form})
+        return render(request, HTMLPRODUCTOADD, {'form':form})
+    else:
+        return redirect('orders')
+
 #Super
 @login_required
 def Productos(request):
-    form = FiltrarProductos(request.GET)
-    productos = filtrar_productos(request)
-    PRODUCTOS_POR_PAGINA = 18
-    paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
-    page_number = request.GET.get('page')
-    
-    #Post
-    if request.method == 'POST':
-        if 'borrar_producto' in request.POST:
-            id = request.POST.get('productoid')
-            producto = get_object_or_404(Producto, pk=id)
-            producto.delete()
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id in adminIds:
+        PRODUCTOS_POR_PAGINA = 18
+        form = FiltrarProductos(request.GET)
+        productos = filtrar_productos(request)
+        paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
+        page_number = request.GET.get('page')
+        
+        #Post
+        if request.method == 'POST':
+            if 'borrar_producto' in request.POST:
+                id = request.POST.get('productoid')
+                producto = get_object_or_404(Producto, pk=id)
+                producto.delete()
 
-    try:
-        productos_paginados = paginator.page(page_number)
-    except PageNotAnInteger:
-        productos_paginados = paginator.page(1)
-    except EmptyPage:
-        productos_paginados = paginator.page(paginator.num_pages)
-    
-    data = {'form': form, 'productos': productos_paginados}
-    
-    return render(request, HTMLPRODUCTOS, {**data})
+        try:
+            productos_paginados = paginator.page(page_number)
+        except PageNotAnInteger:
+            productos_paginados = paginator.page(1)
+        except EmptyPage:
+            productos_paginados = paginator.page(paginator.num_pages)
+        data = {'form': form, 'productos': productos_paginados}
+        return render(request, HTMLPRODUCTOS, {**data})
+    else:
+        return redirect('orders')
 
 #Super
 @login_required
 def UserDetail(request, userid):
     user = get_object_or_404(Usuarios, pk=userid)
-    tipos_usuario = TipoUsuario.objects.all()
-    data = {'user': user,
-            'request_user': request.user,
-            'tipos_usuario':tipos_usuario}
-    
-    #POST
-    if request.method == 'POST':
-        if 'reestablecer' in request.POST:  
-            nuevaContrasena = str(random.randint(10000000, 99999999))
-            user.set_password(nuevaContrasena)
-            user.save()
-            data['password_changed'] = nuevaContrasena
-        elif 'acc_data' in request.POST:
-            nombre = request.POST.get('nombre').strip()
-            apellidos = request.POST.get('apellidos').strip()
-            email = request.POST.get('email').strip()
-            tipo_usuario = request.POST.get('tipo_usuario')
-            
-            tipo_instance = get_object_or_404(TipoUsuario, pk=tipo_usuario)
-            user.first_name = nombre
-            user.last_name = apellidos
-            user.email = email
-            user.tipo_usuario = tipo_instance
-            user.save()
-            
-            
-    return render(request, HTMLUSERDETAIL, {**data})
+    if user.tipo_usuario_id in adminIds:
+        tipos_usuario = TipoUsuario.objects.all()
+        data = {'user': user,
+                'request_user': request.user,
+                'tipos_usuario':tipos_usuario}
+        
+        #POST
+        if request.method == 'POST':
+            if 'reestablecer' in request.POST:  
+                nuevaContrasena = str(random.randint(10000000, 99999999))
+                user.set_password(nuevaContrasena)
+                user.save()
+                data['password_changed'] = nuevaContrasena
+            elif 'acc_data' in request.POST:
+                nombre = request.POST.get('nombre').strip()
+                apellidos = request.POST.get('apellidos').strip()
+                email = request.POST.get('email').strip()
+                tipo_usuario = request.POST.get('tipo_usuario')
+                
+                tipo_instance = get_object_or_404(TipoUsuario, pk=tipo_usuario)
+                user.first_name = nombre
+                user.last_name = apellidos
+                user.email = email
+                user.tipo_usuario = tipo_instance
+                user.save()
+                
+        return render(request, HTMLUSERDETAIL, {**data})
+    else:
+        return redirect('orders')
 
 #super
 @login_required
 def Users(request):
-    msg = ""
-    form = FiltrarUsuarios(request.GET)
-    USUARIOS_POR_PAGINA = 20
-    usuarios = Usuarios.objects.all().order_by('id')
-    data = {'form': form}
-    
-    #POST
-    if request.method == 'POST':
-        userid = request.POST.get('userid')
-        user = get_object_or_404(Usuarios, pk=userid)
-        if 'suspender_usuario' in request.POST:
-            user.is_active = False
-            msg = "Se ha suspendido al usuario correctamente"
-            altype = 'info'
-            user.save()
-        elif 'readmitir_usuario' in request.POST:
-            if not user.tipo_usuario_id == 6:
-                user.is_active = True
-                msg = "Se ha removido la suspensión correctamente"
+    user = get_object_or_404(Usuarios, pk=request.user.id)
+    if user.tipo_usuario_id in adminIds:
+        msg = ""
+        form = FiltrarUsuarios(request.GET)
+        USUARIOS_POR_PAGINA = 20
+        usuarios = Usuarios.objects.all().order_by('id')
+        data = {'form': form}
+        
+        #POST
+        if request.method == 'POST':
+            userid = request.POST.get('userid')
+            user = get_object_or_404(Usuarios, pk=userid)
+            if 'suspender_usuario' in request.POST:
+                user.is_active = False
+                msg = "Se ha suspendido al usuario correctamente"
                 altype = 'info'
                 user.save()
-            else:
-                msg = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
+            elif 'readmitir_usuario' in request.POST:
+                if not user.tipo_usuario_id == 6:
+                    user.is_active = True
+                    msg = "Se ha removido la suspensión correctamente"
+                    altype = 'info'
+                    user.save()
+                else:
+                    msg = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
+                    altype = 'danger'
+            elif 'borrar_usuario' in request.POST:
+                user.delete()
+                msg = "Se ha borrado un usuario correctamente"
                 altype = 'danger'
-        elif 'borrar_usuario' in request.POST:
-            user.delete()
-            msg = "Se ha borrado un usuario correctamente"
-            altype = 'danger'
-        
-        data['msg'] = msg
-        data['type'] = altype
             
-    #GET
-    #Filtro?
-    if form.is_valid():
-        nombre = form.cleaned_data.get('nombre').lower()
-        id = form.cleaned_data.get('id')
-        tipo_usuario = form.cleaned_data.get('tipo_usuario')
+            data['msg'] = msg
+            data['type'] = altype
+                
+        #GET
+        #Filtro?
+        if form.is_valid():
+            nombre = form.cleaned_data.get('nombre').lower()
+            id = form.cleaned_data.get('id')
+            tipo_usuario = form.cleaned_data.get('tipo_usuario')
+            
+            if nombre:
+                usuarios = form.buscar_usuarios_por_nombre()
+            if tipo_usuario:
+                usuarios = usuarios.filter(tipo_usuario=tipo_usuario)
+            if id:
+                usuarios = usuarios.filter(id=id)
+            
+        #Paginador
+        paginator = Paginator(usuarios, USUARIOS_POR_PAGINA)
+        page_number = request.GET.get('page')
         
-        if nombre:
-            usuarios = form.buscar_usuarios_por_nombre()
-        if tipo_usuario:
-            usuarios = usuarios.filter(tipo_usuario=tipo_usuario)
-        if id:
-            usuarios = usuarios.filter(id=id)
-        
-    #Paginador
-    paginator = Paginator(usuarios, USUARIOS_POR_PAGINA)
-    page_number = request.GET.get('page')
-    
-    try:
-        usuarios_paginados = paginator.page(page_number)
-    except PageNotAnInteger:
-        usuarios_paginados = paginator.page(1)
-    except EmptyPage:
-        usuarios_paginados = paginator.page(paginator.num_pages)
-        
-    return render(request, HTMLUSERS, {**data, 'users': usuarios_paginados})
+        try:
+            usuarios_paginados = paginator.page(page_number)
+        except PageNotAnInteger:
+            usuarios_paginados = paginator.page(1)
+        except EmptyPage:
+            usuarios_paginados = paginator.page(paginator.num_pages)
+            
+        return render(request, HTMLUSERS, {**data, 'users': usuarios_paginados})
+    else:
+        return redirect('orders')
 
 @login_required
 def OrderDetail(request, order):
@@ -650,6 +674,7 @@ def Logout(request):
     logout(request)
     return redirect(reverse('home'))
 
+@login_required
 def Registro(request):
     newForm = RegistroUsuariosForm()
     #Post
@@ -925,4 +950,3 @@ def Cart(request):
             return render(request, HTMLCARRITO, data)
     
     return render(request, HTMLCARRITO, data)
-    
