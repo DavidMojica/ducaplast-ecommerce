@@ -170,7 +170,7 @@ def updateCart(request, pedido, productos_modificados):
 
 def filtrar_productos(request):
     form = FiltrarProductos(request.GET)
-    productos = Producto.objects.order_by('-id')
+    productos = Producto.objects.order_by('id')
     
     if form.is_valid():
         id_producto = form.cleaned_data.get('id')
@@ -200,7 +200,7 @@ def filtrar_productos(request):
         if nombre:
             productos = productos.filter(descripcion__icontains=nombre)
         
-        # Filtrar por disponibilidad
+        # Modulo disponibles
         if disponibles:
             productos = productos.filter(cantidad__gt=0)
     
@@ -210,7 +210,6 @@ def filtrar_productos(request):
 @login_required
 def Charts(request):
     return render(request, HTMLCHARTS)
-
 
 #super
 @login_required
@@ -752,40 +751,9 @@ def CartHandler(request):
  
 @login_required
 def Catalogo(request):
-    productos = Producto.objects.order_by('id')
     form = FiltrarProductos(request.GET)
+    productos = filtrar_productos(request)
     PRODUCTOS_POR_PAGINA = 18
-    
-    if form.is_valid():
-        id_producto = form.cleaned_data.get('id')
-        nombre = form.cleaned_data.get('nombre')
-        ordenar = form.cleaned_data.get('ordenar')
-        disponibles = form.cleaned_data.get('disponibles')
-        
-        #--------------Extraer los datos-------------#
-        if ordenar:
-            if ordenar == '1':
-                productos = Producto.objects.order_by('-id')
-            elif ordenar == '2':
-                productos = Producto.objects.order_by('descripcion')
-            elif ordenar == '3':
-                productos = Producto.objects.order_by('-descripcion')
-            elif ordenar == '4':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
-            elif ordenar == '5':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
-            else: 
-                pass
-        #----------Filtrar los datos----------#
-        if id_producto:
-            productos = productos.filter(id=id_producto)
-           
-        if nombre:
-            productos = productos.filter(descripcion__icontains=nombre)
-        #Modulo disponibles 
-        if disponibles:
-            productos = productos.filter(cantidad__gt=0)
-        
     
     paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
     page_number = request.GET.get('page')
@@ -802,8 +770,7 @@ def Catalogo(request):
         'carrito': request.session.get('carritoVenta', {}),
         'form': form
     })
-        
-           
+                 
 @login_required
 def Cart(request):
     #Valor total de los productos
