@@ -87,6 +87,18 @@ class DetallesPedido(forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control','id':'nota', 'placeholder': 'Escribe detalles del pedido, de la dirección de entrega o lo que necesites. (500 carácteres máximo).', 'maxlength': '500'})
     )
 
+class ModificarCliente(forms.Form):
+    nombre = forms.CharField(
+        label="Nombre del cliente",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    direccion = forms.CharField(
+        label="Direccion del cliente",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
 class FiltrarCliente(forms.Form):
     nombre = forms.CharField(
         label="Nombre del usuario",

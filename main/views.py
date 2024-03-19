@@ -9,7 +9,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
+from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -43,6 +43,7 @@ HTMLPRODUCTODETAIL = "product_detail.html"
 HTMLPRODUCTOADD = "product_add.html"
 HTMLCHARTS = "charts.html"
 HTMLCLIENTES = "clientes.html"
+HTMLCLIENTEDETAIL = "client_detail.html"
 
 #Notificaciones
 EXITO_1 = "El usuario ha sido creado correctamente."
@@ -207,6 +208,27 @@ def filtrar_productos(request):
     
     return productos
 #-------------Views-----------#
+#Super
+@login_required
+def ClientDetail(request, clientid=None):
+    cliente = get_object_or_404(Clientes, pk=clientid)
+    if request.method == 'POST':
+        form = ModificarCliente(request.POST)
+        if form.is_valid():
+            nombre = form.cleaned_data.get('nombre')
+            direccion = form.cleaned_data.get('direccion')
+            cliente.nombre = nombre
+            cliente.direccion = direccion
+            cliente.save()
+            return redirect('clientes')
+    else:
+        form = ModificarCliente(initial={'nombre': cliente.nombre, 'direccion': cliente.direccion})
+
+    return render(request, 'client_detail.html', {'form': form, 'cliente': cliente})
+    
+            
+    
+
 #super
 @login_required
 def ClientesView(request):

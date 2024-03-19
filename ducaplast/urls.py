@@ -37,5 +37,5 @@ urlpatterns = [
     path('product_add/', views.ProductAdd, name="product_add"),
     path('charts/', views.Charts, name="charts"),
     path('clientes/', views.ClientesView, name="clientes"),
-    
+    path('client_detail/<int:clientid>', views.ClientDetail, name='client_detail')
 ]
