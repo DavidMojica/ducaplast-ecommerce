@@ -46,11 +46,15 @@ HTMLCLIENTES = "clientes.html"
 HTMLCLIENTEDETAIL = "client_detail.html"
 
 #Notificaciones
-EXITO_1 = "El usuario ha sido creado correctamente."
-EXITO_2 = "Sus datos fueron actualizados correctamente"
-EXITO_3 = "Contraseña actualizada correctamente"
-EXITO_4 = "El usuario se ha creado correctamente, pero como es repartidor no tiene acceso al sistema todavía."
-EXITO_5 = "El repartidor se actualizó correctamente"
+SUCCESS_1 = "El usuario ha sido creado correctamente."
+SUCCESS_2 = "Sus datos fueron actualizados correctamente"
+SUCCESS_3 = "Contraseña actualizada correctamente"
+SUCCESS_4 = "El usuario se ha creado correctamente, pero como es repartidor no tiene acceso al sistema todavía."
+SUCCESS_5 = "El repartidor se actualizó correctamente"
+SUCCESS_6 = "Se ha suspendido al usuario correctamente"
+SUCCESS_7 = "Se ha removido la suspensión correctamente"
+SUCCESS_8 = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
+SUCCESS_9 = "Se ha borrado un usuario correctamente"
 ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
@@ -70,6 +74,9 @@ ERROR_16 = "Su cuenta está desactivada. Contacte con el administrador."
 ERROR_17 = "Este pedido ya fue facturado por alguien más"
 ERROR_18 = "Este pedido ya fue marcado como despachado por alguien más"
 ERROR_19 = "El repartidor de este pedido ya fue elegido por alguien más"
+ERROR_20 = "JSON no válido"
+ERROR_21 = "No hay productos en el pedido."
+
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
 def stripForm(form):
@@ -207,8 +214,10 @@ def filtrar_productos(request):
             productos = productos.filter(cantidad__gt=0)
     
     return productos
-#-------------Views-----------#
-#Super -- TEST
+#-----------------------------------------------------------------------#
+#-----------------------------------Views-------------------------------#
+#-----------------------------------------------------------------------#
+#Super -- TEST -N/N
 @login_required
 def ClientDetail(request, clientid=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -230,7 +239,7 @@ def ClientDetail(request, clientid=None):
     else:
         return redirect('orders')
     
-#super -- TEST
+#super -- TEST N/N
 @login_required
 def ClientesView(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -262,7 +271,7 @@ def ClientesView(request):
     else:
         return redirect('orders')
 
-#super -- TEST
+#super -- TEST N/N
 @login_required
 def Charts(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -271,7 +280,7 @@ def Charts(request):
     else:
         return redirect('orders')
 
-#super -- TEST
+#super -- TEST N/N
 @login_required
 def ProductDetails(request, productid=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -288,7 +297,7 @@ def ProductDetails(request, productid=None):
     else:
         return redirect('orders')
 
-#super -TEST
+#super -TEST N/N
 @login_required
 def ProductAdd(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -300,12 +309,11 @@ def ProductAdd(request):
                 return redirect('productos') # Redirecciona a la vista de productos
         else:
             form = ProductoForm()
-
         return render(request, HTMLPRODUCTOADD, {'form':form})
     else:
         return redirect('orders')
 
-#Super
+#Super -TEST N/N
 @login_required
 def Productos(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -334,7 +342,7 @@ def Productos(request):
     else:
         return redirect('orders')
 
-#Super
+#Super -TEST N/N
 @login_required
 def UserDetail(request, userid):
     user = get_object_or_404(Usuarios, pk=userid)
@@ -343,7 +351,6 @@ def UserDetail(request, userid):
         data = {'user': user,
                 'request_user': request.user,
                 'tipos_usuario':tipos_usuario}
-        
         #POST
         if request.method == 'POST':
             if 'reestablecer' in request.POST:  
@@ -368,7 +375,7 @@ def UserDetail(request, userid):
     else:
         return redirect('orders')
 
-#super
+#super - TEST N/N
 @login_required
 def Users(request):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -385,21 +392,22 @@ def Users(request):
             user = get_object_or_404(Usuarios, pk=userid)
             if 'suspender_usuario' in request.POST:
                 user.is_active = False
-                msg = "Se ha suspendido al usuario correctamente"
+                msg = SUCCESS_6
                 altype = 'info'
                 user.save()
             elif 'readmitir_usuario' in request.POST:
                 if not user.tipo_usuario_id == 6:
                     user.is_active = True
-                    msg = "Se ha removido la suspensión correctamente"
+                    msg = SUCCESS_7
                     altype = 'info'
                     user.save()
                 else:
-                    msg = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
+                    msg = SUCCESS_8
+
                     altype = 'danger'
             elif 'borrar_usuario' in request.POST:
                 user.delete()
-                msg = "Se ha borrado un usuario correctamente"
+                msg = SUCCESS_9
                 altype = 'danger'
             
             data['msg'] = msg
@@ -434,6 +442,7 @@ def Users(request):
     else:
         return redirect('orders')
 
+# N/N
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -477,10 +486,10 @@ def OrderDetail(request, order):
                 try:
                     productosModificados = json.loads(productosModificados)
                 except json.JSONDecodeError:
-                    return JsonResponse({'success': False, 'msg': "JSON no válido"})
+                    return JsonResponse({'success': False, 'msg': ERROR_20})
                 
                 if not productosModificados:
-                    return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
+                    return JsonResponse({'success': False, 'msg': ERROR_21})
                 
                 carrito = updateCart(request,pedido,productosModificados)
                 total_actualizado = calcular_total_actualizado(request)
@@ -494,6 +503,7 @@ def OrderDetail(request, order):
                 notaPedido = request.POST.get('notaPedido')
                 pedido.notaDespachador = notaPedido.strip()
                 pedido.save()
+                
         #----------------TAREAS DE FACTURACIÓN, ESTADO 2----------------#
         elif user.tipo_usuario_id == 4 or user.tipo_usuario_id in adminIds and pedido.estado_id == 2: #Facturadores
             if 'confirmarFacturacion' in request.POST:
@@ -504,6 +514,7 @@ def OrderDetail(request, order):
                     pedido.save()
                 else:
                     issue = ERROR_17
+
         #----------------TAREAS DE ASIGNACION, ESTADO 3----------------#
         elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id == 3: # Asignadores
             if 'confirmarRepartidor' in request.POST:
@@ -528,7 +539,6 @@ def OrderDetail(request, order):
                     pedido.asignacion_hora = timezone.now()
                     pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
                     pedido.save()
-                    
             else:
                 return render(request,HTMLORDERDETAIL,{
                     'success':False,
@@ -575,7 +585,8 @@ def OrderDetail(request, order):
         issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
         return render(request, HTMLORDERDETAIL, {**data, 'form': SeleccionarRepartidor(), issue_key: issue})
 
-@login_required
+#N/N
+@login_required 
 def Orders(request, filtered=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
     form = FiltrarRecibos(request.GET)
@@ -590,9 +601,9 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Despachador
             pedidos = Pedido.objects.filter(estado_id__in=[0, 1]).order_by('-fecha')
-        elif user.tipo_usuario_id == 4:
+        elif user.tipo_usuario_id == 4: #Facturador
             pedidos = Pedido.objects.filter(estado_id=2).order_by('-fecha')
-        elif user.tipo_usuario_id == 5:
+        elif user.tipo_usuario_id == 5: #Asignador
             pedidos = Pedido.objects.filter(estado_id=3).order_by('-fecha')
 
     elif filtered == "historial": 
@@ -635,7 +646,7 @@ def Orders(request, filtered=None):
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
     return render(request, HTMLORDERS, {**data, 'pedidos': pedidos_paginados})
-
+#N/N
 @unloginRequired
 def Home(request):
     newForm = InicioSesionForm()
@@ -668,31 +679,28 @@ def Home(request):
         else:
             return render(request, HTMLHOME,{'form':newForm, 'error': ERROR_2})
     return render(request, HTMLHOME, {'form': newForm})
-
+#N/A
 @login_required
 def Logout(request):
     logout(request)
     return redirect(reverse('home'))
-
+#N/A - 
 @login_required
 def Registro(request):
     newForm = RegistroUsuariosForm()
+    data = {'form': newForm, 'exito': False}
     #Post
     if request.method == "POST":
         form = RegistroUsuariosForm(request.POST)
+        data['form'] = form
         #Verificar que el documento no se haya registrado antes.
         if form.has_error("username", code="unique"):
-            return render(request, HTMLREGISTRO, {
-                    "form": form,
-                    "evento": ERROR_1,
-                    "exito": False,
-                })
+            data['evento'] = ERROR_1
+            return render(request, HTMLREGISTRO, {**data})
         
         #Verificar la validez del formulario (campos en blanco, tipos de datos correctos)
         if form.is_valid():
-            #Quitar espacios al principio y al final de los campos de texto
             form = stripForm(form)
-            #Guardar el usuario nuevo
             try:
                 event = None
                 documento = form.cleaned_data['username']
@@ -700,11 +708,8 @@ def Registro(request):
                 tipo_usuario = form.cleaned_data['tipo_usuario']
                 
                 if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
-                    return render(request, HTMLREGISTRO, {
-                      "form": form,
-                      "evento": ERROR_6,
-                      "exito": False  
-                    })
+                    data['evento'] = ERROR_1
+                    return render(request, HTMLREGISTRO, {**data})
                 
                 user = form.save(commit=False)
                 user.username = documento
@@ -712,38 +717,28 @@ def Registro(request):
                 user.email = form.cleaned_data['email']
                 #Desactivar el acceso si el usuario es tipo repartidor
                 user.is_active = tipo_usuario.id != TIPOREPARTIDOR
-                event = EXITO_4 if not user.is_active else EXITO_1
+                event = SUCCESS_4 if not user.is_active else SUCCESS_1
                 user.save()
                 
-                return render(request, HTMLREGISTRO, {
-                    "form": newForm,
-                    "evento": event,
-                    "exito": True,
-                    "documento": f"Usuario login: {documento}",
-                    "password": f"Contraseña: {form.cleaned_data['password']}"
-                })
+                data['documento'] = f"Usuario login: {documento}",
+                data['password']  = f"Contraseña: {form.cleaned_data['password']}"
+                data['evento']    = event
+                data['exito']     = True
+                data['form']      = newForm
+                return render(request, HTMLREGISTRO, {**data})
             except Exception as e:
-                return render(request, HTMLREGISTRO, {
-                    "form": form,
-                    "evento": ERROR_3,
-                    "exito": False,
-                })
+                data['evento'] = ERROR_3
+                return render(request, HTMLREGISTRO, {**data})
         else:
-            return render(request, HTMLREGISTRO, {
-                    "form": form,
-                    "evento": ERROR_2,
-                    "exito": False,
-                })
+            data['evento'] = ERROR_2
+            return render(request, HTMLREGISTRO, {**data})
     #GET
-    return render(request, HTMLREGISTRO, {'form': newForm })
-
+    return render(request, HTMLREGISTRO, {**data})
+#N/N
 @login_required
 def EditarCuenta(request):
     user = get_object_or_404(Usuarios, pk=str(request.user.id))
     if request.method == "POST":
-        print(request.POST)
-        print("nombre" in request.POST)
-        print("pass_data" in request.POST)
         if "acc_data" in request.POST:
             nombre = request.POST.get("nombre", "").strip()
             apellidos = request.POST.get("apellidos", "").strip()
@@ -762,11 +757,8 @@ def EditarCuenta(request):
             user.last_name = apellidos
             user.email = email
             user.save()
-            
-            return render(request, HTMLEDITARCUENTA, {"account_data_event": EXITO_2})
-            
+            return render(request, HTMLEDITARCUENTA, {"account_data_event": SUCCESS_2})
         elif "pass_data" in request.POST:
-            
             oldPassword = request.POST.get('oldPassword')
             newPassword = request.POST.get('password')
             newPassword1 = request.POST.get('password1')
@@ -783,10 +775,8 @@ def EditarCuenta(request):
                     return render(request, HTMLEDITARCUENTA,{ "password_change_event": ERROR_9 })
             else:
                 return render(request, HTMLEDITARCUENTA, { "password_change_event": ERROR_8 })
-    
-    
     return render(request, HTMLEDITARCUENTA)
-
+#N/N
 @login_required
 def CartHandler(request):
     carrito = request.session.get('carritoVenta', {})
@@ -824,7 +814,6 @@ def CartHandler(request):
             iva_actualizado = total_productos_actualizado * 0.19
             total_actualizado = total_productos_actualizado + iva_actualizado
             request.session['carritoVenta'] = carrito
-            
             return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
                                 'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
                                 'productos_cantidad': len(request.session['carrito'])})
@@ -835,13 +824,12 @@ def CartHandler(request):
             return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
- 
+ #N/A
 @login_required
 def Catalogo(request):
     form = FiltrarProductos(request.GET)
     productos = filtrar_productos(request)
     PRODUCTOS_POR_PAGINA = 18
-    
     paginator = Paginator(productos, PRODUCTOS_POR_PAGINA)
     page_number = request.GET.get('page')
     
@@ -852,17 +840,15 @@ def Catalogo(request):
     except EmptyPage:
         productos_paginados = paginator.page(paginator.num_pages)
     
-    return render(request, HTMLCATALOGO,{
-        'productos': productos_paginados,
-        'carrito': request.session.get('carritoVenta', {}),
-        'form': form
-    })
-                 
+    data = {'productos': productos_paginados,
+            'carrito': request.session.get('carritoVenta', {}),
+            'form': form }
+    return render(request, HTMLCATALOGO,{**data})
+              
 @login_required
 def Cart(request):
     #Valor total de los productos
     form = DetallesPedido(request.POST)
-    # if request.method == "POST":
     carrito = request.session.get('carritoVenta', {})
     total_productos = 0
     iva = 0
@@ -889,12 +875,12 @@ def Cart(request):
         try:
             productos_dict = json.loads(productos_dict)
         except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'msg': "JSON no válido"})
+            return JsonResponse({'success': False, 'msg': ERROR_20})
         
         if not cliente:
             return JsonResponse({'success': False, 'msg': "Por favor escoja un cliente."})
         elif not productos_dict:
-            return JsonResponse({'success': False, 'msg': "No hay productos en el pedido."})
+            return JsonResponse({'success': False, 'msg': ERROR_21})
         else:
             cliente = get_object_or_404(Clientes, pk=cliente)   
             estado = get_object_or_404(Estados, pk=0)
@@ -948,5 +934,4 @@ def Cart(request):
         else:
             data['event'] = "Nombre o direccion inválida"
             return render(request, HTMLCARRITO, data)
-    
     return render(request, HTMLCARRITO, data)
