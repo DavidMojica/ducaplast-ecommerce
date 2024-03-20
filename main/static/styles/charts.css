@@ -1,0 +1,15 @@
+.small-chart{
+    height: 40vh;
+    min-height: 400px;
+}
+
+.medium-chart{
+    height: 45vh;
+    min-height: 450px;
+}
+
+.big-chart{
+    height: 45vh;
+    min-height: 500px;
+    border-radius: 3em;
+}
