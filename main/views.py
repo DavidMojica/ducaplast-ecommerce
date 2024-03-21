@@ -686,56 +686,62 @@ def Home(request):
 def Logout(request):
     logout(request)
     return redirect(reverse('home'))
+
 #N/S - 
 @login_required
 def Registro(request):
-    newForm = RegistroUsuariosForm()
-    data = {'form': newForm, 'exito': False}
-    #Post
-    if request.method == "POST":
-        form = RegistroUsuariosForm(request.POST)
-        data['form'] = form
-        #Verificar que el documento no se haya registrado antes.
-        if form.has_error("username", code="unique"):
-            data['evento'] = ERROR_1
-            return render(request, HTMLREGISTRO, {**data})
-        
-        #Verificar la validez del formulario (campos en blanco, tipos de datos correctos)
-        if form.is_valid():
-            form = stripForm(form)
-            try:
-                event = None
-                documento = form.cleaned_data['username']
-                password = form.cleaned_data['password']
-                tipo_usuario = form.cleaned_data['tipo_usuario']
-                
-                if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
-                    data['evento'] = ERROR_1
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
+    
+        newForm = RegistroUsuariosForm()
+        data = {'form': newForm, 'exito': False}
+        #Post
+        if request.method == "POST":
+            form = RegistroUsuariosForm(request.POST)
+            data['form'] = form
+            #Verificar que el documento no se haya registrado antes.
+            if form.has_error("username", code="unique"):
+                data['evento'] = ERROR_1
+                return render(request, HTMLREGISTRO, {**data})
+            
+            #Verificar la validez del formulario (campos en blanco, tipos de datos correctos)
+            if form.is_valid():
+                form = stripForm(form)
+                try:
+                    event = None
+                    documento = form.cleaned_data['username']
+                    password = form.cleaned_data['password']
+                    tipo_usuario = form.cleaned_data['tipo_usuario']
+                    
+                    if len(documento) < DOCLENGTHMIN or len(password) < PASSLENGTHMIN:
+                        data['evento'] = ERROR_1
+                        return render(request, HTMLREGISTRO, {**data})
+                    
+                    user = form.save(commit=False)
+                    user.username = documento
+                    user.set_password(password)
+                    user.email = form.cleaned_data['email']
+                    #Desactivar el acceso si el usuario es tipo repartidor
+                    user.is_active = tipo_usuario.id != TIPOREPARTIDOR
+                    event = SUCCESS_4 if not user.is_active else SUCCESS_1
+                    user.save()
+                    
+                    data['documento'] = f"Usuario login: {documento}"
+                    data['password']  = f"Contraseña: {form.cleaned_data['password']}"
+                    data['evento']    = event
+                    data['exito']     = True
+                    data['form']      = newForm
                     return render(request, HTMLREGISTRO, {**data})
-                
-                user = form.save(commit=False)
-                user.username = documento
-                user.set_password(password)
-                user.email = form.cleaned_data['email']
-                #Desactivar el acceso si el usuario es tipo repartidor
-                user.is_active = tipo_usuario.id != TIPOREPARTIDOR
-                event = SUCCESS_4 if not user.is_active else SUCCESS_1
-                user.save()
-                
-                data['documento'] = f"Usuario login: {documento}"
-                data['password']  = f"Contraseña: {form.cleaned_data['password']}"
-                data['evento']    = event
-                data['exito']     = True
-                data['form']      = newForm
+                except Exception as e:
+                    data['evento'] = ERROR_3
+                    return render(request, HTMLREGISTRO, {**data})
+            else:
+                data['evento'] = ERROR_2
                 return render(request, HTMLREGISTRO, {**data})
-            except Exception as e:
-                data['evento'] = ERROR_3
-                return render(request, HTMLREGISTRO, {**data})
-        else:
-            data['evento'] = ERROR_2
-            return render(request, HTMLREGISTRO, {**data})
-    #GET
-    return render(request, HTMLREGISTRO, {**data})
+        #GET
+        return render(request, HTMLREGISTRO, {**data})
+    else:
+        return redirect('orders')
 #N/S
 @login_required
 def EditarCuenta(request):
