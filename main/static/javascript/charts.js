@@ -47,6 +47,11 @@ const getOptionChart1 = () =>{
 
 const getOptionChart2 = () => {
     return {
+      title: {
+        text: 'Días más concurridos',
+        subtext: "Ventas promedio en los días de la semana",
+        x: 'center',
+      },
         xAxis: {
           type: 'category',
           data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
