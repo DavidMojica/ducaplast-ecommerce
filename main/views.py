@@ -103,7 +103,7 @@ def numberWithPoints(numero):
 def unloginRequired(view_func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('registro')
+            return redirect('orders')
         else:
             return view_func(request, *args, **kwargs)
     return wrapper
@@ -218,14 +218,11 @@ def filtrar_productos(request):
 #-----------------------------------Views-------------------------------#
 #-----------------------------------------------------------------------#
 #superUser
-
-
-
-#Super -- TEST -N/N
+#Super -- TEST -N/S
 @login_required
 def ClientDetail(request, clientid=None):
-    user = get_object_or_404(Usuarios, pk=request.user.id)
-    if user.tipo_usuario_id in adminIds:
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         cliente = get_object_or_404(Clientes, pk=clientid)
         if request.method == 'POST':
             form = ModificarCliente(request.POST)
@@ -243,11 +240,11 @@ def ClientDetail(request, clientid=None):
     else:
         return redirect('orders')
     
-#super -- TEST N/N
+#super -- TEST N/S
 @login_required
 def ClientesView(request):
-    user = get_object_or_404(Usuarios, pk=request.user.id)
-    if user.tipo_usuario_id in adminIds:
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         form = FiltrarCliente(request.GET)
         CLIENTES_POR_PAGINA = 15
         data = {'form':form}
@@ -275,20 +272,20 @@ def ClientesView(request):
     else:
         return redirect('orders')
 
-#super -- TEST N/N
+#super -- TEST N/S
 @login_required
 def Charts(request):
-    user = get_object_or_404(Usuarios, pk=request.user.id)
-    if user.tipo_usuario_id in adminIds:
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         return render(request, HTMLCHARTS)
     else:
         return redirect('orders')
 
-#super -- TEST N/N
+#super -- TEST N/S
 @login_required
 def ProductDetails(request, productid=None):
-    user = get_object_or_404(Usuarios, pk=request.user.id)
-    if user.tipo_usuario_id in adminIds:
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         producto = Producto.objects.get(pk=productid)
         if request.method == 'POST':
             form = ProductoForm(request.POST, instance=producto)
@@ -301,11 +298,11 @@ def ProductDetails(request, productid=None):
     else:
         return redirect('orders')
 
-#super -TEST N/N
+#super -TEST N/S
 @login_required
 def ProductAdd(request):
-    user = get_object_or_404(Usuarios, pk=request.user.id)
-    if user.tipo_usuario_id in adminIds:
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         if request.method == 'POST':
             form = ProductoForm(request.POST)
             if form.is_valid():
@@ -317,11 +314,11 @@ def ProductAdd(request):
     else:
         return redirect('orders')
 
-#Super -TEST N/N
+#Super -TEST N/S
 @login_required
 def Productos(request):
-    user = get_object_or_404(Usuarios, pk=request.user.id)
-    if user.tipo_usuario_id in adminIds:
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         PRODUCTOS_POR_PAGINA = 18
         form = FiltrarProductos(request.GET)
         productos = filtrar_productos(request)
@@ -346,21 +343,22 @@ def Productos(request):
     else:
         return redirect('orders')
 
-#Super -TEST N/N
+#Super -TEST N/S
 @login_required
 def UserDetail(request, userid):
-    user = get_object_or_404(Usuarios, pk=userid)
-    if user.tipo_usuario_id in adminIds:
+    user_to_modify = get_object_or_404(Usuarios, pk=userid)
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         tipos_usuario = TipoUsuario.objects.all()
-        data = {'user': user,
+        data = {'user_modify': user_to_modify,
                 'request_user': request.user,
                 'tipos_usuario':tipos_usuario}
         #POST
         if request.method == 'POST':
             if 'reestablecer' in request.POST:  
                 nuevaContrasena = str(random.randint(10000000, 99999999))
-                user.set_password(nuevaContrasena)
-                user.save()
+                user_to_modify.set_password(nuevaContrasena)
+                user_to_modify.save()
                 data['password_changed'] = nuevaContrasena
             elif 'acc_data' in request.POST:
                 nombre = request.POST.get('nombre').strip()
@@ -369,21 +367,21 @@ def UserDetail(request, userid):
                 tipo_usuario = request.POST.get('tipo_usuario')
                 
                 tipo_instance = get_object_or_404(TipoUsuario, pk=tipo_usuario)
-                user.first_name = nombre
-                user.last_name = apellidos
-                user.email = email
-                user.tipo_usuario = tipo_instance
-                user.save()
+                user_to_modify.first_name = nombre
+                user_to_modify.last_name = apellidos
+                user_to_modify.email = email
+                user_to_modify.tipo_usuario = tipo_instance
+                user_to_modify.save()
                 
         return render(request, HTMLUSERDETAIL, {**data})
     else:
         return redirect('orders')
 
-#super - TEST N/N
+#super - TEST N/S
 @login_required
 def Users(request):
-    user = get_object_or_404(Usuarios, pk=request.user.id)
-    if user.tipo_usuario_id in adminIds:
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
         msg = ""
         form = FiltrarUsuarios(request.GET)
         USUARIOS_POR_PAGINA = 20
@@ -446,7 +444,7 @@ def Users(request):
     else:
         return redirect('orders')
 
-# N/N
+# N/S
 @login_required
 def OrderDetail(request, order):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -589,7 +587,7 @@ def OrderDetail(request, order):
         issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
         return render(request, HTMLORDERDETAIL, {**data, 'form': SeleccionarRepartidor(), issue_key: issue})
 
-#N/N
+#N/S
 @login_required 
 def Orders(request, filtered=None):
     user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -650,7 +648,7 @@ def Orders(request, filtered=None):
     except EmptyPage:
         pedidos_paginados = paginator.page(paginator.num_pages)
     return render(request, HTMLORDERS, {**data, 'pedidos': pedidos_paginados})
-#N/N
+
 @unloginRequired
 def Home(request):
     newForm = InicioSesionForm()
@@ -688,7 +686,7 @@ def Home(request):
 def Logout(request):
     logout(request)
     return redirect(reverse('home'))
-#N/A - 
+#N/S - 
 @login_required
 def Registro(request):
     newForm = RegistroUsuariosForm()
@@ -724,7 +722,7 @@ def Registro(request):
                 event = SUCCESS_4 if not user.is_active else SUCCESS_1
                 user.save()
                 
-                data['documento'] = f"Usuario login: {documento}",
+                data['documento'] = f"Usuario login: {documento}"
                 data['password']  = f"Contraseña: {form.cleaned_data['password']}"
                 data['evento']    = event
                 data['exito']     = True
@@ -738,7 +736,7 @@ def Registro(request):
             return render(request, HTMLREGISTRO, {**data})
     #GET
     return render(request, HTMLREGISTRO, {**data})
-#N/N
+#N/S
 @login_required
 def EditarCuenta(request):
     user = get_object_or_404(Usuarios, pk=str(request.user.id))
