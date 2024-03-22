@@ -21,28 +21,36 @@
                 <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none fs-3 fw-bold font-monospace">DUCAPLAST</a>
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                       {% if user.tipo_usuario_id == 0 or user.tipo_usuario_id == 1 %}
-                      <li class=""><a href="/catalogo" class="nav-link px-2 text-white">Catálogo</a></li>
-                      <li class=""><a href="/cart" class="nav-link px-2 text-white">Carrito</a></li>
-                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos</a></li>
-                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Facturas</a></li>
-                      <li class=""><a href="/registro" class="nav-link px-2 text-white">Registrar</a></li>
-                      <li class=""><a href="/users" class="nav-link px-2 text-white">Usuarios</a></li>
-                      <li class=""><a href="/clientes" class="nav-link px-2 text-white">Clientes</a></li>
-                      <li class=""><a href="/productos" class="nav-link px-2 text-white">Productos</a></li>
-                      <li class=""><a href="/charts" class="nav-link px-2 text-white">Estadísticas</a></li>
+                      <li class=""><a href="/catalogo" class="nav-link px-2 text-white">Catálogo <i class="fa fa-list" aria-hidden="true"></i></a></li>
+                      <li class=""><a href="/cart" class="nav-link px-2 text-white">Carrito <i class="fa fa-shopping-cart" aria-hidden="true"></i></a></li>
+                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos <i class="fa fa-archive"></i></a></li>
+                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Facturas <i class="fa fa-check-circle"></i></a></li>
+                      <li class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                          Administración
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                          <li class=""><a href="/registro" class="dropdown-item">Registrar <i class="fa fa-user-plus"></i></a></li>
+                          <li class=""><a href="/users" class="dropdown-item">Usuarios <i class="fa fa-user"></i></a></li>
+                          <li class=""><a href="/clientes" class="dropdown-item">Clientes <i class="fa fa-user-md"></i></a></li>
+                          <li class=""><a href="/productos" class="dropdown-item">Productos <i class="fa fa-product-hunt"></i></a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li class=""><a href="/charts" class="dropdown-item">Estadísticas <i class="fa fa-database"></i></a></li>
+                        </ul>
+                      </li>
                       {% elif user.tipo_usuario_id == 2 %}
-                      <li class=""><a href="/catalogo" class="nav-link px-2 text-white">Catálogo</a></li>
-                      <li class=""><a href="/cart" class="nav-link px-2 text-white">Carrito</a></li>
-                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Historial de ventas</a></li>
+                      <li class=""><a href="/catalogo" class="nav-link px-2 text-white">Catálogo  <i class="fa fa-list" aria-hidden="true"></i></a></li>
+                      <li class=""><a href="/cart" class="nav-link px-2 text-white">Carrito <i class="fa fa-shopping-cart" aria-hidden="true"></i></a></li>
+                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Historial de ventas <i class="fa fa-history" aria-hidden="true"></i></a></li>
                       {% elif user.tipo_usuario_id == 3 %}
-                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos</a></li>
-                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Historial de despachos</a></li>
+                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos <i class="fa fa-archive"></i></a></li>
+                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Historial de despachos <i class="fa fa-history" aria-hidden="true"></i></a></li>
                       {% elif user.tipo_usuario_id == 4 %}
-                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos</a></li>
-                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Historial de facturaciones</a></li>
+                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos <i class="fa fa-archive"></i></a></li>
+                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Historial de facturaciones <i class="fa fa-history" aria-hidden="true"></i></a></li>
                       {% elif user.tipo_usuario_id == 5 %}
-                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos <i class="fa fa-bike"></i></a></li>
-                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Historial de asignaciones</a></li>
+                      <li class=""><a href="/orders" class="nav-link px-2 text-white">Pedidos <i class="fa fa-archive"></i></a></li>
+                      <li class=""><a href="/orders/historial" class="nav-link px-2 text-white">Historial de asignaciones <i class="fa fa-history" aria-hidden="true"></i></a></li>
                       {% endif %}
                 </ul>
                 <article class="text-end">

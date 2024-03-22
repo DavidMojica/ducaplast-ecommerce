@@ -2,9 +2,9 @@
 {% block content %}
 <main class="d-flex justify-content-center align-items-center">
     <section class="card p-4">
-        <h5 class="card-title text-center">ID de este usuario: <span class="badge bg-primary">{{user.id}}</span></h5>
-        <p class="text-center">Creado en: <br><span class="badge bg-info">{{user.date_joined}}</span></p>
-        <p class="text-center">Último acceso a la plataforma: <br><span class="badge bg-info">{{user.last_login}}</span></p>
+        <h5 class="card-title text-center">ID de este usuario: <span class="badge bg-primary">{{user_modify.id}}</span></h5>
+        <p class="text-center">Creado en: <br><span class="badge bg-info">{{user_modify.date_joined}}</span></p>
+        <p class="text-center">Último acceso a la plataforma: <br><span class="badge bg-info">{{user_modify.last_login}}</span></p>
         
         <form action="" method="POST" id="formAccount" class="card p-4">
             {% csrf_token %}
@@ -14,19 +14,19 @@
                     <span class="badge bg-danger mb-1">
                         <label for="nombre">Nombre</label>
                     </span>
-                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ingrese su nombre" value="{{user.first_name}}">
+                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Ingrese su nombre" value="{{user_modify.first_name}}">
                 </li>
                 <li class="list-group-item">
                     <span class="badge bg-danger mb-1">
                         <label for="apellidos">Apellidos</label>
                     </span>
-                    <input type="text" name="apellidos" id="apellidos" class="form-control" placeholder="Ingrese sus apellidos" value="{{user.last_name}}">
+                    <input type="text" name="apellidos" id="apellidos" class="form-control" placeholder="Ingrese sus apellidos" value="{{user_modify.last_name}}">
                 </li>
                 <li class="list-group-item">
                     <span class="badge bg-danger mb-1">
                         <label for="email">Correo electrónico</label>
                     </span>
-                    <input type="text" name="email" id="email" class="form-control" placeholder="Ingrese su email" value="{{user.email}}">
+                    <input type="text" name="email" id="email" class="form-control" placeholder="Ingrese su email" value="{{user_modify.email}}">
                 </li>
                 <li class="list-group-item">
                     <span class="badge bg-danger mb-1">
@@ -34,7 +34,7 @@
                     </span>
                     <select name="tipo_usuario" id="" class="form-select">
                         {% for tipo in tipos_usuario %}
-                        <option value="{{tipo.id}}" {% if user.tipo_usuario_id == tipo.id %} selected {% endif %}>{{tipo.description}}</option>
+                        <option value="{{tipo.id}}" {% if user_modify.tipo_usuario_id == tipo.id %} selected {% endif %}>{{tipo.description}}</option>
                         {% endfor %}
                     </select>
                 </li>

@@ -38,7 +38,7 @@ const updateGlobalPrice = () => {
         const priceElement = input.parentElement.nextElementSibling.querySelector('span');
         const price = (parseFloat(priceElement.textContent.replace('$', '').replace('.', '')))/input.value;
         totalProductos += price*input.value;
-    })
+    }) 
     total_productos.textContent = addDecimal(totalProductos);
     iva.textContent = addDecimal(totalProductos*0.19);
     totalVenta.textContent = addDecimal(totalProductos + totalProductos*0.19);
@@ -48,20 +48,22 @@ const updateGlobalPrice = () => {
 const updateProductPrice = (element, price, quantity, id) => {
     if (!isNaN(quantity) && quantity > 0){
         const object_price = price*quantity;
-        element.textContent = addDecimal(object_price);
+        console.log(object_price);
+        element.textContent = object_price;
         Productos[id] = quantity;
         console.log(Productos);
         updateGlobalPrice();
     } else {
         element.textContent = "Cantidad no válida, el producto se borrará si se confirma la venta.";
         delete Productos[id];
-        console.log(Productos);
     }
 }
 
 const addDecimal = n => {
+    console.log(n);
     const p = Math.trunc(n).toString().split(',');
     p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    console.log(n)
     return p.join('.');
 }
 

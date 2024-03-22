@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
 <main class="gradient-custom">
-    {% if history %}
+    {% if history and isAdmin %}
     <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base" >
         <form action="" method="GET" class="text-center filter-form row">
             <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
