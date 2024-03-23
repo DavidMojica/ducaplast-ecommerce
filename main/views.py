@@ -360,6 +360,7 @@ def UserDetail(request, userid):
                 user_to_modify.set_password(nuevaContrasena)
                 user_to_modify.save()
                 data['password_changed'] = nuevaContrasena
+                
             elif 'acc_data' in request.POST:
                 nombre = request.POST.get('nombre').strip()
                 apellidos = request.POST.get('apellidos').strip()
@@ -405,8 +406,8 @@ def Users(request):
                     user.save()
                 else:
                     msg = SUCCESS_8
-
                     altype = 'danger'
+                    
             elif 'borrar_usuario' in request.POST:
                 user.delete()
                 msg = SUCCESS_9
@@ -815,6 +816,7 @@ def CartHandler(request):
         #Borrar  
         elif action == "2":
             if producto_id in carrito:
+                print(producto_id)
                 del carrito[producto_id]
                 event = "Producto borrado"
                 carrito_vacio = len(carrito) == 0  
@@ -824,7 +826,7 @@ def CartHandler(request):
             request.session['carritoVenta'] = carrito
             return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
                                 'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
-                                'productos_cantidad': len(request.session['carrito'])})
+                                'productos_cantidad': len(request.session['carritoVenta'])})
         #borrar todo el carrito
         elif action == "3":
             carrito.clear()

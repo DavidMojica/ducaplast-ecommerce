@@ -226,6 +226,9 @@ class RegistroUsuariosForm(forms.ModelForm):
         model = Usuarios
         fields = ('first_name', 'last_name', 'username', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
     
+    
+        
+    
 class InicioSesionForm(forms.Form):
     documento = forms.CharField(
         widget=forms.TextInput(attrs={'class':'form-control', 'placeholder': 'Documento', 'id':'documento'}),
