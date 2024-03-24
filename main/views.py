@@ -371,17 +371,35 @@ def get_chart_2(_request):
 
 #Chart3
 def get_chart_3(_request):
-    
+    anios = list(Pedido.objects.values_list('fecha__year', flat=True).distinct())
+    data = []
+    for año in anios:
+        pedidos_año = Pedido.objects.filter(fecha__year=año)
+        ingresos_por_mes = [0] * 12  
+        for pedido in pedidos_año:
+            mes_pedido = pedido.fecha.month
+            monto_pedido = pedido.valor  
+            ingresos_por_mes[mes_pedido - 1] += monto_pedido  
+
+        data.append({
+            'name': str(año),
+            'type': 'line',
+            'stack': str(año),
+            'data': ingresos_por_mes
+        })
+
+    print( anios)
     
     chart = {
             'title': {
-                'text': 'Stacked Line'
+                'text': 'Ingresos por mes'
             },
             'tooltip': {
                 'trigger': 'axis'
             },
             'legend': {
-                'data': ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+                'data': anios.sort(),
+                'top': '5%', 'right': '5%'
             },
             'grid': {
                 'left': '3%',
@@ -392,46 +410,15 @@ def get_chart_3(_request):
             'xAxis': {
                 'type': 'category',
                 'boundaryGap': False,
-                'data': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                'data': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
             },
             'yAxis': {
                 'type': 'value'
             },
-            'series': [
-                {
-                'name': 'Email',
-                'type': 'line',
-                'stack': 'Total',
-                'data': [120, 132, 101, 134, 90, 230, 210]
-                },
-                {
-                'name': 'Union Ads',
-                'type': 'line',
-                'stack': 'Total',
-                'data': [220, 182, 191, 234, 290, 330, 310]
-                },
-                {
-                'name': 'Video Ads',
-                'type': 'line',
-                'stack': 'Total',
-                'data': [150, 232, 201, 154, 190, 330, 410]
-                },
-                {
-                'name': 'Direct',
-                'type': 'line',
-                'stack': 'Total',
-                'data': [320, 332, 301, 334, 390, 330, 320]
-                },
-                {
-                'name': 'Search Engine',
-                'type': 'line',
-                'stack': 'Total',
-                'data': [820, 932, 901, 934, 1290, 1330, 1320]
-                }
-            ]
+            'series': data
         }
     
-    return JsonResponse(chart)
+    return JsonResponse(chart, safe=False)
 
 #super -- TEST N/S
 @login_required
