@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models.functions import Cast
-from django.db.models import FloatField, Count, Sum
+from django.db.models import FloatField, Count, Avg
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
@@ -281,6 +281,7 @@ def get_chart_1(_request):
     data = []
     for cliente in top_clientes_ventas:
         data.append({'value':cliente.dinero_generado, 'name': f"{cliente.nombre} ID: {cliente.id}"})
+        
     chart = {
         'title': {
             'text': 'Clientes más frecuentes',
@@ -311,6 +312,56 @@ def get_chart_1(_request):
       }
     
     return JsonResponse(chart)
+
+#Chart2
+def get_chart_2(_request):
+    pedidos_semana = Pedido.objects.all()
+    
+    pedidos_por_dia = [0,0,0,0,0,0,0] 
+    for pedido in pedidos_semana:
+        dia_semana = pedido.fecha.weekday()
+        pedidos_por_dia[dia_semana] += 1
+    
+    posicion_max = pedidos_por_dia.index(max(pedidos_por_dia))
+    pedidos_por_dia[posicion_max] = {
+        'value': pedidos_por_dia[posicion_max],
+        'itemStyle': {
+        'color': '#a90000'
+        }
+    }
+    
+    chart = {
+      'title': {
+        'text': 'Días más concurridos',
+        'subtext': "Venta en los días de la semana",
+        'x': 'center',
+      },
+      'tooltip': {
+            'show': True,
+            'trigger': 'axis',
+            'triggerOn':'mousemove|click'
+        },
+        'xAxis': {
+          'type': 'category',
+          'data': ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        },
+        'yAxis': {
+          'type': 'value'
+        },
+        'series': [
+          {
+            'data': pedidos_por_dia,
+            'type': 'bar',
+            'showBackground': True,
+            'backgroundStyle': {
+            'color': 'rgba(180, 180, 180, 0.2)'
+            }
+          }
+        ]
+    }
+    
+    return JsonResponse(chart)
+
 
 #super -- TEST N/S
 @login_required
