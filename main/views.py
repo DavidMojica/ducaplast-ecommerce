@@ -316,17 +316,24 @@ def get_chart_1(_request):
 #Chart2
 def get_chart_2(_request):
     pedidos_semana = Pedido.objects.all()
-    
     pedidos_por_dia = [0,0,0,0,0,0,0] 
     for pedido in pedidos_semana:
         dia_semana = pedido.fecha.weekday()
         pedidos_por_dia[dia_semana] += 1
     
-    posicion_max = pedidos_por_dia.index(max(pedidos_por_dia))
-    pedidos_por_dia[posicion_max] = {
-        'value': pedidos_por_dia[posicion_max],
+    pos_max = pedidos_por_dia.index(max(pedidos_por_dia))
+    pos_min = pedidos_por_dia.index(min(pedidos_por_dia))
+    
+    pedidos_por_dia[pos_max] = {
+        'value': pedidos_por_dia[pos_max],
         'itemStyle': {
         'color': '#a90000'
+        }
+    }
+    pedidos_por_dia[pos_min] = {
+        'value': pedidos_por_dia[pos_min],
+        'itemStyle': {
+        'color': '#00913f'
         }
     }
     
