@@ -1,6 +1,6 @@
 let option;
-let chart1;
-let chart2;
+let chart1, chart2, chart3, chart4;
+
 const domain = "http://127.0.0.1:8000/"
 
 //Example charts
@@ -18,7 +18,16 @@ const getOptionChart2 = async () => {
     const response = await fetch(domain+"get_chart_2/");
     return await response.json();
   } catch (ex){
-    console.log(ex.message);
+    console.log(ex);
+  }
+}
+
+const getOptionChart3 = async () => {
+  try{
+    const response = await fetch(domain+"get_chart_3/");
+    return await response.json();
+  } catch (ex){
+    console.log(ex);
   }
 }
 
@@ -28,6 +37,10 @@ const initCharts = async ()=>{
 
     chart2 = echarts.init(document.getElementById("chart2"));
     chart2.setOption(await getOptionChart2()); 
+
+    chart3 = echarts.init(document.getElementById("chart3"));
+    chart3.setOption(await getOptionChart3()); 
+  
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -37,4 +50,5 @@ document.addEventListener('DOMContentLoaded', function () {
 window.addEventListener('resize', function () {
     chart1.resize();
     chart2.resize();
+    chart3.resize();
 })

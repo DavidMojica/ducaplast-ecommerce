@@ -41,4 +41,5 @@ urlpatterns = [
     #API's de los charts
     path('get_chart_1/', views.get_chart_1, name="get_chart_1"),
     path('get_chart_2/', views.get_chart_2, name="get_chart_2"),
+    path('get_chart_3/', views.get_chart_3, name="get_chart_3"),
 ]
