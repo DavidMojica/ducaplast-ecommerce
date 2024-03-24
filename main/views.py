@@ -278,9 +278,38 @@ def ClientesView(request):
 #Chart1
 def get_chart_1(_request):
     top_clientes_ventas = Clientes.objects.annotate(num_pedidos=Count('pedido')).order_by('-num_pedidos')[:8]
-    chart = {}
+    data = []
     for cliente in top_clientes_ventas:
-        chart[f"{cliente.nombre} ID: {cliente.id}"] = cliente.dinero_generado
+        data.append({'value':cliente.dinero_generado, 'name': f"{cliente.nombre} ID: {cliente.id}"})
+    chart = {
+        'title': {
+            'text': 'Clientes más frecuentes',
+            'subtext': "Top 8",
+            'x': 'center',
+        },
+        'tooltip': {
+            'show': True,
+            'trigger': 'item',
+            'triggerOn':'mousemove|click'
+        },
+        'legend': {
+            'top': 'bottom'
+        },
+        'series': [
+          {
+            'name': 'Clientes más frecuentes',
+                'type': 'pie',
+                'radius': [40, 160],
+                'center': ['50%', '50%'],
+                'roseType': 'area',
+                'itemStyle': {
+                'borderRadius': 8
+            },
+            'data': data
+          }
+        ]
+      }
+    
     return JsonResponse(chart)
 
 #super -- TEST N/S
