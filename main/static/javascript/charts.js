@@ -4,7 +4,14 @@ let chart2;
 
 
 //Example charts
-const getOptionChart1 = () =>{
+const getOptionChart1 = async () =>{
+    try{
+      const response = await fetch("http://127.0.0.1:8000/get_chart_1/")
+      console.log(response);
+    } catch (ex){
+      console.log(ex);
+    }
+
     return {
         title: {
             text: 'Clientes más frecuentes',

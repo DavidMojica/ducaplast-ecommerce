@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models.functions import Cast
-from django.db.models import FloatField
+from django.db.models import FloatField, Count, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
@@ -272,12 +272,24 @@ def ClientesView(request):
     else:
         return redirect('orders')
 
+#-----------------------------------------------------------------------#
+#--------------------------API's de los gráficos------------------------#
+#-----------------------------------------------------------------------#
+#Chart1
+def get_chart_1(_request):
+    top_clientes_ventas = Clientes.objects.annotate(num_pedidos=Count('pedido')).order_by('-num_pedidos')[:8]
+    chart = {}
+    for cliente in top_clientes_ventas:
+        chart[f"{cliente.nombre} ID: {cliente.id}"] = cliente.dinero_generado
+    return JsonResponse(chart)
+
 #super -- TEST N/S
 @login_required
 def Charts(request):
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
     if req_user.tipo_usuario_id in adminIds:
-        return render(request, HTMLCHARTS)
+        data = {}   
+        return render(request, HTMLCHARTS, {**data})
     else:
         return redirect('orders')
 
