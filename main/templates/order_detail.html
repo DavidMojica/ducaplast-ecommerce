@@ -23,7 +23,9 @@
                     <p class="card-text">
                         Cliente: <strong>{{cliente}}</strong> <br>
                         Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
+                        {% if user.tipo_usuario_id != 3 %}
                         Valor pedido: <strong  class="price">${{pedido.valor}}</strong> <br>
+                        {% endif %}
                         Vendedor: <strong>{{pedido.vendedor}}</strong>
                     </p>
                     <p class="card-text">Estado del pedido: {{pedido.estado}} <br>
@@ -393,9 +395,11 @@
                         </tbody>
                         <tfoot class="">
                             <tr>
+                                {% if user.tipo_usuario_id != 3 %}
                                 <td>
                                     <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
                                 </td>
+                                {% endif %}
                                 {% if user.tipo_usuario_id == 3 or isAdmin %}
                                     {% if pedido.estado_id == 1 %}
                                         <td>

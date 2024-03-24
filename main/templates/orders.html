@@ -143,7 +143,9 @@
                                     <aside class="col text-center">
                                         <p>
                                             <strong>Cliente:</strong> {{p.cliente}} <br>
+                                            {% if user.tipo_usuario_id != 3 %}
                                             <strong>Valor pedido:</strong> ${{p.valor}}
+                                            {% endif %}
                                         </p>
                                     </aside>
                                 </section>

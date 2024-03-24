@@ -1,94 +1,46 @@
 let option;
-let chart1;
-let chart2;
+let chart1, chart2, chart3, chart4;
 
+const domain = "http://127.0.0.1:8000/"
 
 //Example charts
-const getOptionChart1 = () =>{
-    return {
-        title: {
-            text: 'Clientes más frecuentes',
-            subtext: "Top 8",
-            x: 'center',
-        },
-        legend: {
-            top: 'bottom'
-        },
-        toolbox: {
-            show: true,
-            feature: {
-                mark: { show: true },
-            }
-        },
-        series: [
-          {
-            name: 'Clientes más frecuentes',
-                type: 'pie',
-                radius: [40, 160],
-                center: ['50%', '50%'],
-                roseType: 'area',
-                itemStyle: {
-                borderRadius: 8
-            },
-            data: [
-              { value: 40, name: 'DUMMI SAS' },
-              { value: 38, name: 'Panaderia la 80' },
-              { value: 32, name: 'Viajes SAS' },
-              { value: 30, name: 'Trans Gavirias SAS' },
-              { value: 28, name: 'Bolivariano' },
-              { value: 26, name: 'Trans Medellin' },
-              { value: 22, name: 'Emtelco' },
-              { value: 18, name: 'UNE' }
-            ]
-          }
-        ]
-      };
+const getOptionChart1 = async () =>{
+    try{
+      const response = await fetch(domain+"get_chart_1/");
+      return await response.json();
+    } catch (ex){
+      console.log(ex);
+    }
 }
 
-const getOptionChart2 = () => {
-    return {
-      title: {
-        text: 'Días más concurridos',
-        subtext: "Ventas promedio en los días de la semana",
-        x: 'center',
-      },
-        xAxis: {
-          type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            data: [
-              120,
-              {
-                value: 200,
-                itemStyle: {
-                  color: '#a90000'
-                }
-              },
-              150,
-              80,
-              70,
-              110,
-              130
-            ],
-            type: 'bar'
-          }
-        ]
-    };
+const getOptionChart2 = async () => {
+  try{
+    const response = await fetch(domain+"get_chart_2/");
+    return await response.json();
+  } catch (ex){
+    console.log(ex);
+  }
 }
 
-const initCharts =()=>{
+const getOptionChart3 = async () => {
+  try{
+    const response = await fetch(domain+"get_chart_3/");
+    return await response.json();
+  } catch (ex){
+    console.log(ex);
+  }
+}
+
+const initCharts = async ()=>{
     chart1 = echarts.init(document.getElementById("chart1"));
-    option = getOptionChart1(); 
-    chart1.setOption(option); 
+    chart1.setOption(await getOptionChart1()); 
 
     chart2 = echarts.init(document.getElementById("chart2"));
-    option = getOptionChart2();
-    chart2.setOption(option); 
+    chart2.setOption(await getOptionChart2()); 
+
+    chart3 = echarts.init(document.getElementById("chart3"));
+    chart3.setOption(await getOptionChart3()); 
+  
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -98,4 +50,5 @@ document.addEventListener('DOMContentLoaded', function () {
 window.addEventListener('resize', function () {
     chart1.resize();
     chart2.resize();
+    chart3.resize();
 })

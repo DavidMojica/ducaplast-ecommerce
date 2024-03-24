@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models.functions import Cast
-from django.db.models import FloatField
+from django.db.models import FloatField, Count, Avg
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
@@ -272,12 +272,161 @@ def ClientesView(request):
     else:
         return redirect('orders')
 
+#-----------------------------------------------------------------------#
+#--------------------------API's de los gráficos------------------------#
+#-----------------------------------------------------------------------#
+#Chart1
+def get_chart_1(_request):
+    top_clientes_ventas = Clientes.objects.annotate(num_pedidos=Count('pedido')).order_by('-num_pedidos')[:8]
+    data = []
+    for cliente in top_clientes_ventas:
+        data.append({'value':cliente.dinero_generado, 'name': f"{cliente.nombre} ID: {cliente.id}"})
+        
+    chart = {
+        'title': {
+            'text': 'Clientes más frecuentes',
+            'subtext': "Top 8",
+            'x': 'center',
+        },
+        'tooltip': {
+            'show': True,
+            'trigger': 'item',
+            'triggerOn':'mousemove|click'
+        },
+        'legend': {
+            'top': 'bottom'
+        },
+        'series': [
+          {
+            'name': 'Clientes más frecuentes',
+                'type': 'pie',
+                'radius': [40, 160],
+                'center': ['50%', '50%'],
+                'roseType': 'area',
+                'itemStyle': {
+                'borderRadius': 8
+            },
+            'data': data
+          }
+        ]
+      }
+    
+    return JsonResponse(chart)
+
+#Chart2
+def get_chart_2(_request):
+    pedidos_semana = Pedido.objects.all()
+    pedidos_por_dia = [0,0,0,0,0,0,0] 
+    for pedido in pedidos_semana:
+        dia_semana = pedido.fecha.weekday()
+        pedidos_por_dia[dia_semana] += 1
+    
+    pos_max = pedidos_por_dia.index(max(pedidos_por_dia))
+    pos_min = pedidos_por_dia.index(min(pedidos_por_dia))
+    
+    pedidos_por_dia[pos_max] = {
+        'value': pedidos_por_dia[pos_max],
+        'itemStyle': {
+        'color': '#a90000'
+        }
+    }
+    pedidos_por_dia[pos_min] = {
+        'value': pedidos_por_dia[pos_min],
+        'itemStyle': {
+        'color': '#00913f'
+        }
+    }
+    
+    chart = {
+      'title': {
+        'text': 'Días más concurridos',
+        'subtext': "Venta en los días de la semana",
+        'x': 'center',
+      },
+      'tooltip': {
+            'show': True,
+            'trigger': 'axis',
+            'triggerOn':'mousemove|click'
+        },
+        'xAxis': {
+          'type': 'category',
+          'data': ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        },
+        'yAxis': {
+          'type': 'value'
+        },
+        'series': [
+          {
+            'data': pedidos_por_dia,
+            'type': 'bar',
+            'showBackground': True,
+            'backgroundStyle': {
+            'color': 'rgba(180, 180, 180, 0.2)'
+            }
+          }
+        ]
+    }
+    
+    return JsonResponse(chart)
+
+#Chart3
+def get_chart_3(_request):
+    anios = list(Pedido.objects.values_list('fecha__year', flat=True).distinct())
+    data = []
+    for año in anios:
+        pedidos_año = Pedido.objects.filter(fecha__year=año)
+        ingresos_por_mes = [0] * 12  
+        for pedido in pedidos_año:
+            mes_pedido = pedido.fecha.month
+            monto_pedido = pedido.valor  
+            ingresos_por_mes[mes_pedido - 1] += monto_pedido  
+
+        data.append({
+            'name': str(año),
+            'type': 'line',
+            'stack': str(año),
+            'data': ingresos_por_mes
+        })
+
+    print( anios)
+    
+    chart = {
+            'title': {
+                'text': 'Ingresos por mes'
+            },
+            'tooltip': {
+                'trigger': 'axis'
+            },
+            'legend': {
+                'data': anios.sort(),
+                'top': '5%', 'right': '5%'
+            },
+            'grid': {
+                'left': '3%',
+                'right': '4%',
+                'bottom': '3%',
+                'containLabel': True
+            },
+            'xAxis': {
+                'type': 'category',
+                'boundaryGap': False,
+                'data': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            },
+            'yAxis': {
+                'type': 'value'
+            },
+            'series': data
+        }
+    
+    return JsonResponse(chart, safe=False)
+
 #super -- TEST N/S
 @login_required
 def Charts(request):
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
     if req_user.tipo_usuario_id in adminIds:
-        return render(request, HTMLCHARTS)
+        data = {}   
+        return render(request, HTMLCHARTS, {**data})
     else:
         return redirect('orders')
 
@@ -360,6 +509,7 @@ def UserDetail(request, userid):
                 user_to_modify.set_password(nuevaContrasena)
                 user_to_modify.save()
                 data['password_changed'] = nuevaContrasena
+                
             elif 'acc_data' in request.POST:
                 nombre = request.POST.get('nombre').strip()
                 apellidos = request.POST.get('apellidos').strip()
@@ -405,8 +555,8 @@ def Users(request):
                     user.save()
                 else:
                     msg = SUCCESS_8
-
                     altype = 'danger'
+                    
             elif 'borrar_usuario' in request.POST:
                 user.delete()
                 msg = SUCCESS_9
@@ -815,6 +965,7 @@ def CartHandler(request):
         #Borrar  
         elif action == "2":
             if producto_id in carrito:
+                print(producto_id)
                 del carrito[producto_id]
                 event = "Producto borrado"
                 carrito_vacio = len(carrito) == 0  
@@ -824,7 +975,7 @@ def CartHandler(request):
             request.session['carritoVenta'] = carrito
             return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
                                 'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
-                                'productos_cantidad': len(request.session['carrito'])})
+                                'productos_cantidad': len(request.session['carritoVenta'])})
         #borrar todo el carrito
         elif action == "3":
             carrito.clear()
