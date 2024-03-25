@@ -2,6 +2,7 @@ const documentoField = document.getElementById('documento');
 const passwordField = document.getElementById('password');
 const formInicio = document.getElementById('formInicio');
 const spanEvento = document.getElementById('spanEvento');
+const passhelper = document.getElementById('passhelper');
 
 let validationState = undefined;
 //Evento de escucha submit para formulario
@@ -21,3 +22,7 @@ const validarFormulario = () =>{
 
     return '0';
 }
+
+passhelper.addEventListener('click', ()=>{
+    createToastNotify(2, "Información", "Comuniquele a un administrador para que le reinicie la contraseña. Otorguele el ID de usuario o su nombre.")
+});

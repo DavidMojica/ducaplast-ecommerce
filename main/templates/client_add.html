@@ -8,7 +8,7 @@
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-success">Crear cliente</button>
-        <span class="badge {{bg-event}}">{{msg}}</span>
+        <span class="badge {{bgevent}} mt-3">{{msg}}</span>
     </form>
 </main>
 {% endblock %}

@@ -219,14 +219,13 @@ def filtrar_productos(request):
 #-----------------------------------------------------------------------#
 #-----------------------------------Views-------------------------------#
 #-----------------------------------------------------------------------#
-
 @login_required
 def ClientAdd(request):
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
     if req_user.tipo_usuario_id in adminIds:
         newForm = ModificarCliente()
         data = {'form': newForm,
-                'bg-event': 'bg-danger'}
+                'bgevent': 'bg-danger'}
         
         if request.method == 'POST':
             form = ModificarCliente(request.POST)
@@ -237,6 +236,7 @@ def ClientAdd(request):
                 # Verificar si ya existe un cliente con el mismo nombre
                 if Clientes.objects.filter(nombre=nombre).exists():
                     data['msg'] = ERROR_22
+                    data['form'] = form
                 else:
                     nuevo_cliente = Clientes(
                         nombre=nombre,
@@ -244,7 +244,7 @@ def ClientAdd(request):
                     )
                     nuevo_cliente.save()
                     data['msg'] = SUCCESS_10
-                    data['bg-event'] = 'bg-success'
+                    data['bgevent'] = 'bg-success'
             else:
                 data['msg'] = ERROR_2
         

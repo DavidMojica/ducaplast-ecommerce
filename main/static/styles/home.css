@@ -106,3 +106,7 @@ footer section ul li:hover{
         text-align: center;
     }
 }
+
+.passhelper{
+    cursor: pointer;
+}
