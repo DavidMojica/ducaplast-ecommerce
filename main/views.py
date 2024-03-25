@@ -8,7 +8,7 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField, Count, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
+from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm,RegistroUsuariosFormAdmin ,InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -727,13 +727,18 @@ def Logout(request):
 def Registro(request):
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
     if req_user.tipo_usuario_id in adminIds:
-    
-        newForm = RegistroUsuariosForm()
+        if req_user.tipo_usuario_id == 1:
+            newForm = RegistroUsuariosFormAdmin()
+        else:
+            newForm = RegistroUsuariosForm()
         data = {'form': newForm, 'exito': False}
         #Post
         if request.method == "POST":
-            form = RegistroUsuariosForm(request.POST)
-            data['form'] = form
+            if req_user.tipo_usuario_id == 1:
+                form = RegistroUsuariosFormAdmin(request.POST)
+            else:
+                form = RegistroUsuariosForm(request.POST)
+                data['form'] = form
             #Verificar que el documento no se haya registrado antes.
             if form.has_error("username", code="unique"):
                 data['evento'] = ERROR_1
