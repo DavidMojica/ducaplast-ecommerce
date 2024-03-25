@@ -43,6 +43,7 @@ HTMLPRODUCTOADD = "product_add.html"
 HTMLCHARTS = "charts.html"
 HTMLCLIENTES = "clientes.html"
 HTMLCLIENTEDETAIL = "client_detail.html"
+HTMLCLIENTEADD = "client_add.html"
 
 #Notificaciones
 SUCCESS_1 = "El usuario ha sido creado correctamente."
@@ -54,6 +55,7 @@ SUCCESS_6 = "Se ha suspendido al usuario correctamente"
 SUCCESS_7 = "Se ha removido la suspensión correctamente"
 SUCCESS_8 = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
 SUCCESS_9 = "Se ha borrado un usuario correctamente"
+SUCCESS_10 = "Se ha creado el cliente correctamente"
 ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
@@ -75,6 +77,7 @@ ERROR_18 = "Este pedido ya fue marcado como despachado por alguien más"
 ERROR_19 = "El repartidor de este pedido ya fue elegido por alguien más"
 ERROR_20 = "JSON no válido"
 ERROR_21 = "No hay productos en el pedido."
+ERROR_22 = 'El nombre del cliente ya está registrado.'
 
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
@@ -216,8 +219,39 @@ def filtrar_productos(request):
 #-----------------------------------------------------------------------#
 #-----------------------------------Views-------------------------------#
 #-----------------------------------------------------------------------#
-#superUser
-#Super -- TEST -N/S
+
+@login_required
+def ClientAdd(request):
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
+        newForm = ModificarCliente()
+        data = {'form': newForm,
+                'bg-event': 'bg-danger'}
+        
+        if request.method == 'POST':
+            form = ModificarCliente(request.POST)
+            if form.is_valid():
+                nombre = form.cleaned_data.get('nombre')
+                direccion = form.cleaned_data.get('direccion')
+                
+                # Verificar si ya existe un cliente con el mismo nombre
+                if Clientes.objects.filter(nombre=nombre).exists():
+                    data['msg'] = ERROR_22
+                else:
+                    nuevo_cliente = Clientes(
+                        nombre=nombre,
+                        direccion=direccion
+                    )
+                    nuevo_cliente.save()
+                    data['msg'] = SUCCESS_10
+                    data['bg-event'] = 'bg-success'
+            else:
+                data['msg'] = ERROR_2
+        
+        return render(request, HTMLCLIENTEADD, {**data})
+    else:
+        return redirect('orders')
+
 @login_required
 def ClientDetail(request, clientid=None):
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
