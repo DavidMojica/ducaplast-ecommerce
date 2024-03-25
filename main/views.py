@@ -1,15 +1,14 @@
-from datetime import timedelta
 import random
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.db.models.functions import Cast
-from django.db.models import FloatField, Count, Avg
+from django.db.models import FloatField, Count, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
+from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm,RegistroUsuariosFormAdmin ,InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
 from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerDespacho
 
 import re, json
@@ -44,6 +43,7 @@ HTMLPRODUCTOADD = "product_add.html"
 HTMLCHARTS = "charts.html"
 HTMLCLIENTES = "clientes.html"
 HTMLCLIENTEDETAIL = "client_detail.html"
+HTMLCLIENTEADD = "client_add.html"
 
 #Notificaciones
 SUCCESS_1 = "El usuario ha sido creado correctamente."
@@ -55,6 +55,7 @@ SUCCESS_6 = "Se ha suspendido al usuario correctamente"
 SUCCESS_7 = "Se ha removido la suspensión correctamente"
 SUCCESS_8 = "No se puede quitar la suspensión a los repartidores porque no se les ha concedido la entrada a la plataforma todavía."
 SUCCESS_9 = "Se ha borrado un usuario correctamente"
+SUCCESS_10 = "Se ha creado el cliente correctamente"
 ERROR_1 = "El documento que intentó ingresar, ya existe."
 ERROR_2 = "Formulario inválido."
 ERROR_3 = "Error desconocido."
@@ -76,6 +77,7 @@ ERROR_18 = "Este pedido ya fue marcado como despachado por alguien más"
 ERROR_19 = "El repartidor de este pedido ya fue elegido por alguien más"
 ERROR_20 = "JSON no válido"
 ERROR_21 = "No hay productos en el pedido."
+ERROR_22 = 'El nombre del cliente ya está registrado.'
 
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
@@ -217,8 +219,39 @@ def filtrar_productos(request):
 #-----------------------------------------------------------------------#
 #-----------------------------------Views-------------------------------#
 #-----------------------------------------------------------------------#
-#superUser
-#Super -- TEST -N/S
+@login_required
+def ClientAdd(request):
+    req_user = get_object_or_404(Usuarios, pk=request.user.id)
+    if req_user.tipo_usuario_id in adminIds:
+        newForm = ModificarCliente()
+        data = {'form': newForm,
+                'bgevent': 'bg-danger'}
+        
+        if request.method == 'POST':
+            form = ModificarCliente(request.POST)
+            if form.is_valid():
+                nombre = form.cleaned_data.get('nombre')
+                direccion = form.cleaned_data.get('direccion')
+                
+                # Verificar si ya existe un cliente con el mismo nombre
+                if Clientes.objects.filter(nombre=nombre).exists():
+                    data['msg'] = ERROR_22
+                    data['form'] = form
+                else:
+                    nuevo_cliente = Clientes(
+                        nombre=nombre,
+                        direccion=direccion
+                    )
+                    nuevo_cliente.save()
+                    data['msg'] = SUCCESS_10
+                    data['bgevent'] = 'bg-success'
+            else:
+                data['msg'] = ERROR_2
+        
+        return render(request, HTMLCLIENTEADD, {**data})
+    else:
+        return redirect('orders')
+
 @login_required
 def ClientDetail(request, clientid=None):
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
@@ -271,155 +304,7 @@ def ClientesView(request):
         return render(request, HTMLCLIENTES, {**data, 'clientes':clientes_paginados})
     else:
         return redirect('orders')
-
-#-----------------------------------------------------------------------#
-#--------------------------API's de los gráficos------------------------#
-#-----------------------------------------------------------------------#
-#Chart1
-def get_chart_1(_request):
-    top_clientes_ventas = Clientes.objects.annotate(num_pedidos=Count('pedido')).order_by('-num_pedidos')[:8]
-    data = []
-    for cliente in top_clientes_ventas:
-        data.append({'value':cliente.dinero_generado, 'name': f"{cliente.nombre} ID: {cliente.id}"})
-        
-    chart = {
-        'title': {
-            'text': 'Clientes más frecuentes',
-            'subtext': "Top 8",
-            'x': 'center',
-        },
-        'tooltip': {
-            'show': True,
-            'trigger': 'item',
-            'triggerOn':'mousemove|click'
-        },
-        'legend': {
-            'top': 'bottom'
-        },
-        'series': [
-          {
-            'name': 'Clientes más frecuentes',
-                'type': 'pie',
-                'radius': [40, 160],
-                'center': ['50%', '50%'],
-                'roseType': 'area',
-                'itemStyle': {
-                'borderRadius': 8
-            },
-            'data': data
-          }
-        ]
-      }
     
-    return JsonResponse(chart)
-
-#Chart2
-def get_chart_2(_request):
-    pedidos_semana = Pedido.objects.all()
-    pedidos_por_dia = [0,0,0,0,0,0,0] 
-    for pedido in pedidos_semana:
-        dia_semana = pedido.fecha.weekday()
-        pedidos_por_dia[dia_semana] += 1
-    
-    pos_max = pedidos_por_dia.index(max(pedidos_por_dia))
-    pos_min = pedidos_por_dia.index(min(pedidos_por_dia))
-    
-    pedidos_por_dia[pos_max] = {
-        'value': pedidos_por_dia[pos_max],
-        'itemStyle': {
-        'color': '#a90000'
-        }
-    }
-    pedidos_por_dia[pos_min] = {
-        'value': pedidos_por_dia[pos_min],
-        'itemStyle': {
-        'color': '#00913f'
-        }
-    }
-    
-    chart = {
-      'title': {
-        'text': 'Días más concurridos',
-        'subtext': "Venta en los días de la semana",
-        'x': 'center',
-      },
-      'tooltip': {
-            'show': True,
-            'trigger': 'axis',
-            'triggerOn':'mousemove|click'
-        },
-        'xAxis': {
-          'type': 'category',
-          'data': ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-        },
-        'yAxis': {
-          'type': 'value'
-        },
-        'series': [
-          {
-            'data': pedidos_por_dia,
-            'type': 'bar',
-            'showBackground': True,
-            'backgroundStyle': {
-            'color': 'rgba(180, 180, 180, 0.2)'
-            }
-          }
-        ]
-    }
-    
-    return JsonResponse(chart)
-
-#Chart3
-def get_chart_3(_request):
-    anios = list(Pedido.objects.values_list('fecha__year', flat=True).distinct())
-    data = []
-    for año in anios:
-        pedidos_año = Pedido.objects.filter(fecha__year=año)
-        ingresos_por_mes = [0] * 12  
-        for pedido in pedidos_año:
-            mes_pedido = pedido.fecha.month
-            monto_pedido = pedido.valor  
-            ingresos_por_mes[mes_pedido - 1] += monto_pedido  
-
-        data.append({
-            'name': str(año),
-            'type': 'line',
-            'stack': str(año),
-            'data': ingresos_por_mes
-        })
-
-    print( anios)
-    
-    chart = {
-            'title': {
-                'text': 'Ingresos por mes'
-            },
-            'tooltip': {
-                'trigger': 'axis'
-            },
-            'legend': {
-                'data': anios.sort(),
-                'top': '5%', 'right': '5%'
-            },
-            'grid': {
-                'left': '3%',
-                'right': '4%',
-                'bottom': '3%',
-                'containLabel': True
-            },
-            'xAxis': {
-                'type': 'category',
-                'boundaryGap': False,
-                'data': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            },
-            'yAxis': {
-                'type': 'value'
-            },
-            'series': data
-        }
-    
-    return JsonResponse(chart, safe=False)
-
 #super -- TEST N/S
 @login_required
 def Charts(request):
@@ -842,13 +727,18 @@ def Logout(request):
 def Registro(request):
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
     if req_user.tipo_usuario_id in adminIds:
-    
-        newForm = RegistroUsuariosForm()
+        if req_user.tipo_usuario_id == 1:
+            newForm = RegistroUsuariosFormAdmin()
+        else:
+            newForm = RegistroUsuariosForm()
         data = {'form': newForm, 'exito': False}
         #Post
         if request.method == "POST":
-            form = RegistroUsuariosForm(request.POST)
-            data['form'] = form
+            if req_user.tipo_usuario_id == 1:
+                form = RegistroUsuariosFormAdmin(request.POST)
+            else:
+                form = RegistroUsuariosForm(request.POST)
+                data['form'] = form
             #Verificar que el documento no se haya registrado antes.
             if form.has_error("username", code="unique"):
                 data['evento'] = ERROR_1
@@ -1094,3 +984,231 @@ def Cart(request):
             data['event'] = "Nombre o direccion inválida"
             return render(request, HTMLCARRITO, data)
     return render(request, HTMLCARRITO, data)
+
+#-----------------------------------------------------------------------#
+#--------------------------API's de los gráficos------------------------#
+#-----------------------------------------------------------------------#
+#Chart1 - Clientes más frecuentes
+def get_chart_1(_request):
+    top_clientes_ventas = Clientes.objects.annotate(num_pedidos=Count('pedido')).order_by('-num_pedidos')[:8]
+    data = []
+    for cliente in top_clientes_ventas:
+        data.append({'value':cliente.dinero_generado, 'name': f"{cliente.nombre} ID: {cliente.id}"})
+        
+    chart = {
+        'title': {
+            'text': 'Clientes más frecuentes',
+            'subtext': "Top 8",
+            'x': 'center',
+        },
+        'tooltip': {
+            'show': True,
+            'trigger': 'item',
+            'triggerOn':'mousemove|click'
+        },
+        'legend': {
+            'top': 'bottom'
+        },
+        'series': [
+          {
+            'name': 'Clientes más frecuentes',
+                'type': 'pie',
+                'radius': [40, 160],
+                'center': ['50%', '50%'],
+                'roseType': 'area',
+                'itemStyle': {
+                'borderRadius': 8
+            },
+            'data': data
+          }
+        ]
+      }
+    
+    return JsonResponse(chart)
+
+#Chart2 - Dias mas concurridos
+def get_chart_2(_request):
+    pedidos_semana = Pedido.objects.all()
+    pedidos_por_dia = [0,0,0,0,0,0,0] 
+    for pedido in pedidos_semana:
+        dia_semana = pedido.fecha.weekday()
+        pedidos_por_dia[dia_semana] += 1
+    
+    pos_max = pedidos_por_dia.index(max(pedidos_por_dia))
+    pos_min = pedidos_por_dia.index(min(pedidos_por_dia))
+    
+    pedidos_por_dia[pos_max] = {
+        'value': pedidos_por_dia[pos_max],
+        'itemStyle': {
+        'color': '#a90000'
+        }
+    }
+    pedidos_por_dia[pos_min] = {
+        'value': pedidos_por_dia[pos_min],
+        'itemStyle': {
+        'color': '#00913f'
+        }
+    }
+    
+    chart = {
+      'title': {
+        'text': 'Días más concurridos',
+        'subtext': "Venta en los días de la semana",
+        'x': 'center',
+      },
+      'tooltip': {
+            'show': True,
+            'trigger': 'axis',
+            'triggerOn':'mousemove|click'
+        },
+        'xAxis': {
+          'type': 'category',
+          'data': ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        },
+        'yAxis': {
+          'type': 'value'
+        },
+        'series': [
+          {
+            'data': pedidos_por_dia,
+            'type': 'bar',
+            'showBackground': True,
+            'backgroundStyle': {
+            'color': 'rgba(180, 180, 180, 0.2)'
+            }
+          }
+        ]
+    }
+    
+    return JsonResponse(chart)
+
+#Chart3 - Ingresos por mes
+def get_chart_3(_request):
+    anios = list(Pedido.objects.values_list('fecha__year', flat=True).distinct())
+    data = []
+    for año in anios:
+        pedidos_año = Pedido.objects.filter(fecha__year=año)
+        ingresos_por_mes = [0] * 12  
+        for pedido in pedidos_año:
+            mes_pedido = pedido.fecha.month
+            monto_pedido = pedido.valor  
+            ingresos_por_mes[mes_pedido - 1] += monto_pedido  
+        data.append({
+            'name': str(año),
+            'type': 'line',
+            'stack': str(año),
+            'data': ingresos_por_mes
+        })
+    chart = {
+            'title': {
+                'text': 'Ingresos por mes',
+                'subtext': 'Se generará un año nuevo cuando se detecte un pedido en dicho momento'
+            },
+            'tooltip': {
+                'trigger': 'axis'
+            },
+            'legend': {
+                'data': anios.sort(),
+                'top': '5%', 'right': '5%'
+            },
+            'grid': {
+                'left': '3%',
+                'right': '4%',
+                'bottom': '3%',
+                'containLabel': True
+            },
+            'xAxis': {
+                'type': 'category',
+                'boundaryGap': False,
+                'data': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            },
+            'yAxis': {
+                'type': 'value'
+            },
+            'series': data
+        }
+    
+    return JsonResponse(chart, safe=False)
+
+#Chart4 - Productos que más se venden
+def get_chart_4(_request):
+    top_productos = ProductosPedido.objects.values('producto__descripcion').annotate(total_vendido=Sum('cantidad')).order_by('-total_vendido')[:20]
+    dataAxis = []
+    data = []
+    for producto_info in top_productos:
+        producto = producto_info['producto__descripcion']
+        total_vendido = producto_info['total_vendido']
+        dataAxis.append(producto)
+        data.append(total_vendido)
+    yMax = max(data)
+    dataShadow = []
+    for i in range(len(data)):
+        dataShadow.append(yMax)
+    chart = {
+            'title': {
+                'text': 'Productos que más se venden',
+                'subtext': 'Top 20 (Puede hacer zoom con la rueda del mouse)'
+            },
+            'xAxis': {
+                'data': dataAxis,
+                'axisLabel': {
+                    'inside': True,
+                    'textStyle': {
+                        'color': '#000'
+                    }
+                },
+                'axisTick': {
+                    'show': False
+                },
+                'axisLine': {
+                    'show': False
+                },
+                'z': 10
+            },
+            'yAxis': {
+                'axisLine': {
+                    'show': False
+                },
+                'axisTick': {
+                    'show': False
+                },
+                'axisLabel': {
+                    'textStyle': {
+                        'color': '#000'
+                    }
+                }
+            },
+            'tooltip': {
+                'trigger': 'axis'
+            },
+            'dataZoom': [
+                {
+                    'type': 'inside'
+                }
+            ],
+            'series': [
+                { 
+                    'type': 'bar',
+                    'itemStyle': {
+                        'color': 'rgba(0,0,0,0.05)'
+                    },
+                    'barGap': '-100%',
+                    'barCategoryGap': '40%',
+                    'data': dataShadow,
+                    'animation': True
+                },
+                {
+                    'type': 'bar',
+                    'itemStyle': {
+                        'color': "#438bc7"
+                    },
+                    'emphasis': {
+                        'itemStyle': {
+                            'color': "#438bc7"
+                        }
+                    },
+                    'data': data
+                }
+            ]
+        }
+    return JsonResponse(chart)
