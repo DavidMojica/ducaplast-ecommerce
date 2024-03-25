@@ -1,5 +1,5 @@
 let option;
-let chart1, chart2, chart3, chart4, chart5;
+let chart1, chart2, chart3, chart4;
 
 const domain = "http://127.0.0.1:8000/"
 
@@ -38,14 +38,6 @@ const getOptionChart4 = async () => {
     console.log(ex);
   }
 }
-// const getOptionChart5 = async () => {
-//   try{
-//     const response = await fetch(domain+"get_chart_5/");
-//     return await response.json();
-//   } catch (ex){
-//     console.log(ex);
-//   }
-// }
 
 const initCharts = async ()=>{
     chart1 = echarts.init(document.getElementById("chart1"));
@@ -70,8 +62,6 @@ const initCharts = async ()=>{
         });
     });
     
-    chart5 = echarts.init(document.getElementById("chart5"));
-    chart5.setOption(await getOptionChart5()); 
   }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -83,5 +73,4 @@ window.addEventListener('resize', function () {
     chart2.resize();
     chart3.resize();
     chart4.resize();
-    chart5.resize();
 })
