@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models.functions import Cast
-from django.db.models import FloatField, Count, Avg
+from django.db.models import FloatField, Count, Avg, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm, InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
@@ -422,26 +422,29 @@ def get_chart_3(_request):
 
 #Chart4
 def get_chart_4(_request):
-    dataAxis = ['点', '击', '柱', '子', '或', '者', '两', '指', '在', '触', '屏', '上', '滑', '动', '能', '够', '自', '动', '缩', '放'];
-    data = [220, 182, 191, 234, 290, 330, 310, 123, 442, 321, 90, 149, 210, 122, 133, 334, 198, 123, 125, 220]
-    yMax = 500
+    top_productos = ProductosPedido.objects.values('producto__descripcion').annotate(total_vendido=Sum('cantidad')).order_by('-total_vendido')[:20]
+    dataAxis = []
+    data = []
+    for producto_info in top_productos:
+        producto = producto_info['producto__descripcion']
+        total_vendido = producto_info['total_vendido']
+        dataAxis.append(producto)
+        data.append(total_vendido)
+    yMax = max(data)
     dataShadow = []
-
     for i in range(len(data)):
         dataShadow.append(yMax)
-
-
     chart = {
             'title': {
-                'text': '特性示例：渐变色 阴影 点击缩放',
-                'subtext': 'Feature Sample: Gradient Color, Shadow, Click Zoom'
+                'text': 'Productos que más se venden',
+                'subtext': 'Top 20 (Puede hacer zoom con la rueda del mouse)'
             },
             'xAxis': {
                 'data': dataAxis,
                 'axisLabel': {
                     'inside': True,
                     'textStyle': {
-                        'color': '#fff'
+                        'color': '#000'
                     }
                 },
                 'axisTick': {
@@ -461,9 +464,12 @@ def get_chart_4(_request):
                 },
                 'axisLabel': {
                     'textStyle': {
-                        'color': '#999'
+                        'color': '#000'
                     }
                 }
+            },
+            'tooltip': {
+                'trigger': 'axis'
             },
             'dataZoom': [
                 {
@@ -479,23 +485,22 @@ def get_chart_4(_request):
                     'barGap': '-100%',
                     'barCategoryGap': '40%',
                     'data': dataShadow,
-                    'animation': False
+                    'animation': True
                 },
                 {
                     'type': 'bar',
                     'itemStyle': {
-                        'color': "new echarts.graphic.LinearGradient(0, 0, 0, 1,[{offset: 0, color: #83bff6},{offset: 0.5, color: #188df0},{offset: 1, color: #188df0}])"
+                        'color': "#438bc7"
                     },
                     'emphasis': {
                         'itemStyle': {
-                            'color': "new echarts.graphic.LinearGradient(0, 0, 0, 1,[{offset: 0, color: #2378f7},{offset: 0.7, color: #2378f7},{offset: 1, color: #83bff6}])"
+                            'color': "#438bc7"
                         }
                     },
                     'data': data
                 }
             ]
         }
-    
     return JsonResponse(chart)
 
 #Chart5
