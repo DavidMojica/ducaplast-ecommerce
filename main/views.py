@@ -497,7 +497,11 @@ def OrderDetail(request, order):
             if "confirmar_despacho" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
-                ayudarEnDespacho(request, user, pedido)           
+                despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
+                if not despachadores_activos.filter(despachador_id=user.id).exists():
+                    ayudarEnDespacho(request, user, pedido)
+                else:
+                    issue = ERROR_15        
             elif 'ayudarDespacho' in request.POST:
                 despachadores_activos = HandlerDespacho.objects.filter(pedido=pedido) 
                 if not despachadores_activos.filter(despachador_id=user.id).exists():
@@ -629,7 +633,7 @@ def Orders(request, filtered=None):
     form = FiltrarRecibos(request.GET)
     PEDIDOS_POR_PAGINA = 10
     pedidos = []
-    data= {'user': user, 'history': False, 'form':form}
+    data= {'user': user, 'history': False, 'form':form, 'isAdmin':False}
 
     if not filtered:
         if user.tipo_usuario_id in adminIds:
@@ -653,6 +657,7 @@ def Orders(request, filtered=None):
                 cliente = form.cleaned_data.get('cliente')
                 fecha = form.cleaned_data.get('fecha')
                 completado_fecha = form.cleaned_data.get('completado_fecha')
+                data['isAdmin'] = True
                 if id:
                     pedidos = pedidos.filter(id=id)
                 if vendedor:
