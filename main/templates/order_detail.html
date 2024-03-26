@@ -393,7 +393,7 @@
                                 </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot class="">
+                        <tfoot>
                             <tr>
                                 {% if user.tipo_usuario_id != 3 %}
                                 <td>
@@ -415,7 +415,7 @@
                             {% if user.tipo_usuario_id == 3 or isAdmin %}
                                 {% if pedido.estado_id == 1  %} 
                                     <tr>
-                                        <td><p>Nota al pedido. No es obligatorio.</p></td>
+                                        <td><p class="text-bold">Nota al pedido. No es obligatorio.</p></td>
                                         <td class="text-center">
                                             <form action="" method="post" id="notaDespacho">
                                                 {% csrf_token %}

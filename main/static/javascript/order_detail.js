@@ -26,7 +26,7 @@ $(btnModificarCantidad).on('click', function(e){
             dataType: 'json',
             success: data => {
                 if (data.success){
-                    $('.price').text(data.total_actualizado);
+                    createToastNotify(0,"Hecho","Cantidad modificada correctamente")
                 }
                 else createToastNotify(1, "Error", data.msg);
             },
