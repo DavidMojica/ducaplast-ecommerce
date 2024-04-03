@@ -2,16 +2,17 @@
 insert into main_tipousuario (id, description) values(0, 'Gerente');
 insert into main_tipousuario (id, description) values(1, 'Administrador');
 insert into main_tipousuario (id, description) values(2, 'Vendedor');
-insert into main_tipousuario (id, description) values(3, 'Despachador');
+insert into main_tipousuario (id, description) values(3, 'Empacador');
 insert into main_tipousuario (id, description) values(4, 'Facturador');
-insert into main_tipousuario (id, description) values(5, 'Asignador');
+insert into main_tipousuario (id, description) values(5, 'Despachador');
 insert into main_tipousuario (id, description) values(6, 'Repartidor');
 --select * from main_tipousuario
 
-insert into main_estados (id, description) values(0, 'Pendiente de despacho');
-insert into main_estados (id, description) values(1, 'En despacho');
+insert into main_estados (id, description) values(0, 'Para empacar');
+insert into main_estados (id, description) values(1, 'Siendo empacado');
 insert into main_estados (id, description) values(2, 'En facturacion');
-insert into main_estados (id, description) values(3, 'Pendiente de reparto');
+insert into main_estados (id, description) values(3, 'Pendiente de despacho');
 insert into main_estados (id, description) values(4, 'En reparto');
-insert into main_estados (id, description) values(5, 'Completado');
+insert into main_estados (id, description) values(5, 'Recibido');
+insert into main_estados (id, description) values(6, 'Cancelado');
 --select * from main_estados

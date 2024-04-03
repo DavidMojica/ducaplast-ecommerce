@@ -52,12 +52,12 @@ class Pedido(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
-    notaDespachador = models.CharField(max_length=500, null=True, blank=True)
-    despachado_hora = models.DateTimeField(null=True, blank=True)
+    notaEmpacador = models.CharField(max_length=500, null=True, blank=True)
+    empacado_hora = models.DateTimeField(null=True, blank=True)
     facturado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="facturado_por")
     facturado_hora = models.DateTimeField(null=True, blank=True)
-    asignador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
-    asignacion_hora = models.DateTimeField(null=True, blank=True)
+    despachador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
+    despacho_hora = models.DateTimeField(null=True, blank=True)
     repartido_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="repartido_por")
     completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="completado_por")
     completado_hora = models.DateTimeField(null=True, blank=True)
@@ -77,7 +77,7 @@ class Pedido(models.Model):
     def get_status_color(self):
         if self.estado_id == 0:
             return 'bg-danger'
-        elif self.estado_id in [1,2]:
+        elif self.estado_id in [1,2] or self.estado_id == 5:
             return 'bg-warning'
         elif self.estado_id in [3,4]:
             return 'bg-primary'
@@ -113,6 +113,6 @@ class ProductosPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)   
     
-class HandlerDespacho(models.Model):
-    despachador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+class HandlerEmpaquetacion(models.Model):
+    empacador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE) 

@@ -28,21 +28,38 @@
                         {% endif %}
                         Vendedor: <strong>{{pedido.vendedor}}</strong>
                     </p>
-                    <p class="card-text">Estado del pedido: {{pedido.estado}} <br>
-                        {% if pedido.estado_id == 0 %}
-                        Este pedido está a la espera de ser despachado.
-                        {% elif pedido.estado_id == 1 %}
-                        Este pedido está siendo despachado 
-                        {% elif pedido.estado_id == 2 %}
-                        Este pedido está siendo facturado
-                        {% elif pedido.estado_id == 3 %}
-                        Este pedido está a la espera de que se le asigne un repartidor
-                        {% elif pedido.estado_id == 4 %}
-                        Este pedido salió a reparto
-                        {% elif pedido.estado_id == 5 %}
-                        Este pedido ya fue entregado con éxito
+                    <p class="card-text">Estado del pedido:
+                        {% if pedido.estado_id == 5 %}
+                            {% if not isAdmin %}
+                                Cancelado
+                            {% else %}
+                                {{pedido.estado}} 
+                            {% endif %}
                         {% else %}
-                        Descripción no disponible
+                            {{pedido.estado}} 
+                        {% endif %}
+                         
+                         <br>
+                        {% if pedido.estado_id == 0 %}
+                            Este pedido está a la espera de ser empacado.
+                        {% elif pedido.estado_id == 1 %}
+                            Este pedido está siendo empacado
+                        {% elif pedido.estado_id == 2 %}
+                            Este pedido está siendo facturado
+                        {% elif pedido.estado_id == 3 %}
+                            Este pedido está a la espera de que se le asigne un repartidor
+                        {% elif pedido.estado_id == 4 %}
+                            Este pedido salió a reparto
+                        {% elif pedido.estado_id == 5 %}
+                            {% if isAdmin %}
+                                Este pedido está pendiente de pago
+                            {% else %}
+                                Este pedido ya fue entregado con éxito
+                            {% endif %}
+                        {% elif pedido.estado_id == 6 %}
+                            Este pedido ya fue entregado con éxito
+                        {% else %}
+                            Descripción no disponible
                         {% endif %}
                     </p>
                     {% if pedido.nota %}
@@ -53,33 +70,33 @@
                     {% endif %}
                 </section>
             </article>
-            <!-- Despacho -->
+            <!-- Empaquetamietno-->
             <article class="card mb-3">
                 <section class="card-header">
-                    <h5 class="card-title text-center">Despacho</h5>
+                    <h5 class="card-title text-center">Empaquetamiento</h5>
                 </section>
                 <section class="card-body">
                     {% if pedido.estado_id == 0 %}
-                        <h5>Este pedido está a la espera de ser despachado.</h5>
+                        <h5>Este pedido está a la espera de ser empacado.</h5>
                         {% if user.tipo_usuario_id == 3 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Despachar</button>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Empacar</button>
                             <!-- modal -->
                             <section class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
                                     <article class="modal-content">
                                         <section class="modal-header">
-                                            <h5 class="modal-title">Confirmar despacho</h5>
+                                            <h5 class="modal-title">Confirmar empaque</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </section>
                                         <section class="modal-body">
-                                            <p>¿Realmente quiere comenzar este despacho?</p>
+                                            <p>¿Empacar este pedido?</p>
                                         </section>
                                         <section class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                            <form action="" method="POST" id="confirmar_despacho">
+                                            <form action="" method="POST">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="confirmar_despacho">
+                                                <input type="hidden" name="confirmar_empaque">
                                                 <button type="submit" class="btn btn-warning">Confirmar</button>
                                             </form>
                                         </section>
@@ -88,17 +105,17 @@
                             </section>
                         {% endif %}
                     {% elif pedido.estado_id == 1 %}
-                        <h5>Este pedido está siendo despachado por:</h5>
+                        <h5>Este pedido está siendo empacado por:</h5>
                         <ul class="list-group list-group-flush">
-                            {% for d in despachadoresActivos %}
+                            {% for e in empacadoresActivos %}
                             <li class="list-group-item">
-                                <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                                Cod. empleado {{d.despachador.id}}</p>
+                                <p>{{e.empacador.first_name}} {{e.empacador.last_name}} <br>
+                                Cod. empleado {{e.empacador.id}}</p>
                             </li>
                             {% endfor %}          
                         </ul>
-                        {% for d in despachadoresActivos %}
-                            {% if user.id == d.despachador.id %}
+                        {% for e in empacadoresActivos %}
+                            {% if user.id == e.empacador.id %}
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalC">Marcar como completo</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalC" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
@@ -109,14 +126,14 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </section>
                                         <section class="modal-body">
-                                            <p>¿Este despacho ya está listo para ser facturado?</p>
+                                            <p>¿Este pedido ya está empacado?</p>
                                         </section>
                                         <section class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
                                             <form action="" method="POST">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="completarDespacho">
-                                                <button type="submit" class="btn btn-success">Sí, está listo</button>
+                                                <input type="hidden" name="completarEmpaque">
+                                                <button type="submit" class="btn btn-success">Sí, está empacado</button>
                                             </form>
                                         </section>
                                     </article>
@@ -125,24 +142,24 @@
                             {% endif %}
                         {% endfor %}
                         {% if puede_ayudar %}
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar con el despacho</button>
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalH">Ayudar a empacar</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalH" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
                                     <article class="modal-content">
                                         <section class="modal-header">
-                                            <h5 class="modal-title">Confirmar ayudar en despacho</h5>
+                                            <h5 class="modal-title">Confirmar ayudar a empacar</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </section>
                                         <section class="modal-body">
-                                            <p>¿Realmente quiere ayudar en este despacho?</p>
+                                            <p>¿Realmente quiere ayudar a empacar este pedido?</p>
                                         </section>
                                         <section class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
                                             <form action="" method="POST">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="ayudarDespacho">
-                                                <button type="submit" class="btn btn-warning">Ayudar con el despacho</button>
+                                                <input type="hidden" name="ayudar_a_empacar">
+                                                <button type="submit" class="btn btn-warning">Ayudar a empacar</button>
                                             </form>
                                         </section>
                                     </article>
@@ -150,22 +167,22 @@
                             </section>
                         {% endif %}
                     {% elif pedido.estado_id > 1 %}
-                        <h5>Este pedido fue despachado por:</h5>
+                        <h5>Este pedido fue empacado por:</h5>
                         <ul class="list-group list-group-flush">
-                            {% for d in despachadoresActivos %}
+                            {% for e in empacadoresActivos %}
                             <li class="list-group-item">
-                                <p>{{d.despachador.first_name}} {{d.despachador.last_name}} <br>
-                                Cod. empleado {{d.despachador.id}}</p>
+                                <p>{{e.empacador.first_name}} {{e.empacador.last_name}} <br>
+                                Cod. empleado {{e.empacador.id}}</p>
                             </li>
                             {% endfor %}          
                         </ul>
-                        <p>Hora de despacho: <span class="badge bg-info">{% if pedido.despachado_hora %} {{pedido.despachado_hora}} {% else %} No se pudo recuperar la hora de despacho {% endif %}</span>
+                        <p>Hora empacado: <span class="badge bg-info">{% if pedido.empacado_hora %} {{pedido.empacado_hora}} {% else %} No se pudo recuperar la hora de empaquetamiento {% endif %}</span>
                         </p>
                         <span class="badge bg-danger">{{issue3}}</span>
                     {% endif %}
-                    {% if pedido.notaDespachador %}
-                        <h5 class="mt-3">Nota de despacho</h5>
-                        <p>{{pedido.notaDespachador}}</p>
+                    {% if pedido.notaEmpacador %}
+                        <h5 class="mt-3">Nota del empacador</h5>
+                        <p>{{pedido.notaEmpacador}}</p>
                     {% endif %}
                 </section>
             </article>
@@ -215,7 +232,7 @@
                     {% endif %}
                 </article>
             </section>
-            <!-- Asignacion -->
+            <!-- Despacho -->
             <section class="card mb-3">
                 <article class="card-header text-center">
                     <h5>Reparto</h5>
@@ -254,14 +271,14 @@
                         {% endif %}
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
-                        <p>Asignó el repartidor: {{pedido.asignador_reparto}} <br>
+                        <p>Despachador: {{pedido.despachador_reparto}} <br>
                         Repartidor elegido: {{pedido.repartido_por}} <br>
-                        Hora de asignacion: <span class="badge bg-info">{{pedido.asignacion_hora}}</span></p>
+                        Hora de despacho: <span class="badge bg-info">{{pedido.despacho_hora}}</span></p>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalAsignadorModificar">Modificar repartidor</button>
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalDespachadorModificar">Modificar repartidor</button>
                             <!-- modal -->
-                            <section class="modal fade" id="modalAsignadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                            <section class="modal fade" id="modalDespachadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
                                     <article class="modal-content">
                                         <section class="modal-header">
@@ -417,10 +434,10 @@
                                     <tr>
                                         <td><p class="text-bold">Nota al pedido. No es obligatorio.</p></td>
                                         <td class="text-center">
-                                            <form action="" method="post" id="notaDespacho">
+                                            <form action="" method="post" id="notaEmpacador">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="notaDespacho" id="notaDespacho">
-                                                <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaDespachador and pedido.notaDespachador is not None %} {{pedido.notaDespachador}} {% endif %}</textarea>
+                                                <input type="hidden" name="notaEmpacador" id="notaEmpacador">
+                                                <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaEmpacador and pedido.notaEmpacador is not None %} {{pedido.notaEmpacador}} {% endif %}</textarea>
                                                 <button type="submit" class="btn btn-success">Guardar nota</button>
                                             </form>
                                         </td>
@@ -434,7 +451,7 @@
         </aside>
     </section>
     {% else %}
-    <section class="alert alert-danger" role="alert">{{msg}}</section>
+        <section class="alert alert-danger" role="alert">{{msg}}</section>
     {% endif %}
 </main>
 {% endblock %}
