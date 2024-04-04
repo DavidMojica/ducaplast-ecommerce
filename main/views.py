@@ -141,6 +141,10 @@ def getPuedeAyudar(pedido, empacadores_activos, user):
         return not empacadores_activos.filter(empacador_id=user.id).exists()
     return False  
 
+def markAsOutOfStock(request, pedido, productoAgotadoID):
+    ProductosPedido.objects.filter(pedido_id=pedido, producto_id=productoAgotadoID).update(cantidad=0)
+        
+        
 def loadCart(request, pedido, initial=True):
     carrito = {}
     productos = ProductosPedido.objects.filter(pedido_id=pedido)
@@ -178,6 +182,7 @@ def updateCart(request, pedido, productos_modificados):
     pedido.valor = calcular_total_actualizado(request)
     pedido.save()
     return carrito
+
 
 def filtrar_productos(request):
     form = FiltrarProductos(request.GET)
@@ -535,11 +540,12 @@ def OrderDetail(request, order):
                 carrito = updateCart(request,pedido,productosModificados)
                 total_actualizado = calcular_total_actualizado(request)
                 return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
-            elif 'borrarProducto' in request.POST:
+            elif 'productoAgotado' in request.POST:
                 producto_id = int(request.POST.get('producto_id'))
-                ProductosPedido.objects.filter(pedido=pedido, producto_id=producto_id).delete()
+                markAsOutOfStock(request,pedido,producto_id)
                 carrito = loadCart(request, pedido, False)
                 total_actualizado = calcular_total_actualizado(request)  
+                print(total_actualizado)
             elif 'notaEmpacador' in request.POST:
                 notaPedido = request.POST.get('notaPedido')
                 pedido.notaEmpacador = notaPedido.strip()
