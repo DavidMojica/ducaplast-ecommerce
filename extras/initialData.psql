@@ -19,5 +19,7 @@ insert into main_estados (id, description) values(6, 'Cancelado');
 insert into main_tipoproducto (id, description) values(0, 'Bolsas');
 insert into main_tipoproducto (id, description) values(1, 'Desechables');
 insert into main_tipoproducto (id, description) values(2, 'Varios');
-
 --select * from main_tipoproducto
+
+insert into main_rolreparto(id, description) values(0, 'Principal');
+insert into main_rolreparto(id, description) values(1, 'Ayudante');

@@ -1,5 +1,22 @@
 const btnModificarCantidad = document.getElementById('btnModificarCantidad');
 let productosActualizados = {};
+
+const modificarRepartidor = document.getElementById('modificarRepartidor');
+const repartidor = document.getElementById('repartidor');
+const repartidorSecundario = document.getElementById('repartidorSecundario');
+
+modificarRepartidor.addEventListener('submit', e => {
+    e.preventDefault();
+
+    if (repartidor.value == repartidorSecundario.value) {
+        createToastNotify(1, "Error", "No puede seleccionar al mismo repartidor en ambos campos.");
+    }else{
+        modificarRepartidor.submit();
+    }
+});
+
+
+
 let ban = true;
 $(btnModificarCantidad).on('click', function(e){
     e.preventDefault();

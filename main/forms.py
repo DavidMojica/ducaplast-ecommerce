@@ -88,7 +88,7 @@ class SeleccionarRepartidor(forms.Form):
 
     repartidor = forms.ModelChoiceField(
         label="Por favor asigne el repartidor que se encargará de esta entrega.",
-        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor', 'name': 'repartidor'}),
+        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor', 'name': 'repartidor', 'id':'repartidor'}),
         queryset=Usuarios.objects.filter(tipo_usuario_id=6),
         empty_label="Seleccione repartidor (Obligatorio)",
         required=True
@@ -96,7 +96,7 @@ class SeleccionarRepartidor(forms.Form):
     
     repartidorSecundario = forms.ModelChoiceField(
         label="Seleccione repartidor secundario si es necesario",
-        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor secundario', 'name': 'repartidorSecundario'}),
+        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor secundario', 'name': 'repartidorSecundario', 'id':'repartidorSecundario'}),
         queryset=Usuarios.objects.filter(tipo_usuario_id=6),
         empty_label="Seleccione repartidor secundario (Opcional)",
         required=False

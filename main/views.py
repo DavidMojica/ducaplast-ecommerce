@@ -9,7 +9,7 @@ from django.db.models import FloatField, Count, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm,RegistroUsuariosFormAdmin ,InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion, HandlerReparto
+from .models import Estados, RolReparto, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion, HandlerReparto
 
 import re, json
 
@@ -142,12 +142,22 @@ def getPuedeAyudar(pedido, empacadores_activos, user):
     return False  
 
 @login_required
-def handler_repartir(request, repartidor, pedido):
-    repartidor_asignado = HandlerReparto.objects.filter(repartidor=repartidor, pedido=pedido).exists()
+def handler_repartir(request, repartidor_id, pedido, opc):
+    repartidor = get_object_or_404(Usuarios, pk=repartidor_id)
 
-    if not repartidor_asignado:
-        handler = HandlerReparto(repartidor=repartidor, pedido=pedido)
-        handler.save()
+    if opc == 0:  # Añadir un repartidor al pedido
+        repartidor_asignado = HandlerReparto.objects.filter(repartidor=repartidor, pedido=pedido).exists()
+
+        if not repartidor_asignado:
+            HandlerReparto.objects.create(repartidor=repartidor, pedido=pedido)
+    elif opc == 1:  # Modificar el repartidor asignado al pedido
+        handler_reparto = HandlerReparto.objects.filter(pedido=pedido).first()
+        
+        if handler_reparto:
+            handler_reparto.repartidor = repartidor
+            handler_reparto.save()
+        else:
+            HandlerReparto.objects.create(repartidor=repartidor, pedido=pedido)
 
 def actualizarCantidad(request, pedido, producto_id, cantidad):
     ProductosPedido.objects.filter(pedido_id=pedido, producto_id=producto_id).update(cantidad=cantidad)
@@ -578,19 +588,39 @@ def OrderDetail(request, order):
                     issue = ERROR_17
 
         #----------------TAREAS DE DESPACHO, ESTADO 3----------------#
-        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id == 3: # Despachadores
+        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4]: # Despachadores
             if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
+                print("confirmar")
                 if not pedido.estado_id >= 4:
                     if form.is_valid():
                         pedido.estado_id = 4
                         pedido.despachador_reparto = user
                         pedido.despacho_hora = timezone.now()
-                        repartidor = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
-                        handler_repartir(request,repartidor, pedido)
-                        if request.POST.get('repartidorSecundario'):
-                            repartidorSecundario = get_object_or_404(Usuarios, pk=request.POST.get('repartidorSecundario'))
-                            handler_repartir(request,repartidorSecundario, pedido)
+                        
+                        repartidor = form.cleaned_data['repartidor']
+                        repartidor_primario = get_object_or_404(Usuarios, pk=repartidor.id)
+                        
+                        if repartidor_primario:
+                            rol_primario = get_object_or_404(RolReparto, pk=0)
+                            handler_primario = HandlerReparto(repartidor=repartidor_primario, pedido=pedido, rol=rol_primario)
+                            handler_primario.save()
+                            
+                            repartidor_secundario = form.cleaned_data.get('repartidorSecundario')
+                            if repartidor_secundario:
+                                
+                                if repartidor.id != repartidor_secundario.id:
+                                    repartidor_secundario = get_object_or_404(Usuarios, pk=repartidor_secundario.id)
+                                    if repartidor_secundario:
+                                        rol_secundario = get_object_or_404(RolReparto, pk=1)
+                                        handler_secundario = HandlerReparto(repartidor=repartidor_secundario, pedido=pedido, rol=rol_secundario)
+                                        handler_secundario.save()
+                        
+                        else:
+                            return render(request, HTMLORDERDETAIL,{
+                            'success': False,
+                            'msg': "El repartidor principal no puede quedar vacío."
+                        }) 
                         pedido.save()
                     else:
                         return render(request, HTMLORDERDETAIL,{
@@ -603,7 +633,31 @@ def OrderDetail(request, order):
                 form = SeleccionarRepartidor(request.POST)
                 if form.is_valid():
                     pedido.despacho_modificado_hora = timezone.now()
-                    handler_repartir(request,request.POST.get('repartidor'), pedido)
+                    repartidor_principal_nuevo = form.cleaned_data['repartidor'] 
+                    repartidor_secundario_nuevo = form.cleaned_data['repartidorSecundario'] 
+                    
+                    if repartidor_principal_nuevo:
+                        if repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id: 
+                            rol = get_object_or_404(RolReparto, pk=0)
+                            handler_primario = HandlerReparto.objects.filter(pedido=pedido, rol=rol).first()
+                            
+                            if handler_primario:
+                                handler_primario.repartidor = repartidor_principal_nuevo
+                                handler_primario.save()
+                           
+                    
+                    if repartidor_secundario_nuevo and repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id:
+                        rol_secundario = get_object_or_404(RolReparto, pk=1)
+                        handler_secundario, created = HandlerReparto.objects.get_or_create(pedido=pedido,repartidor=repartidor_secundario_nuevo, rol=rol_secundario)
+                        
+                        if created:
+                            handler_secundario.repartidor = repartidor_secundario_nuevo
+                            handler_secundario.save()
+                        else:
+                            handler_secundario.repartidor = repartidor_secundario_nuevo
+                            handler_secundario.save()
+                            
+
                     pedido.save()
             else:
                 return render(request,HTMLORDERDETAIL,{

@@ -49,6 +49,13 @@ class TipoProducto(models.Model):
     
     def __str__(self):
         return self.description 
+
+class RolReparto(models.Model):
+    id = models.IntegerField(primary_key=True)
+    description = models.CharField(max_length=25)
+    
+    def __str__(self):
+        return self.description 
     
 class Pedido(models.Model):
     id = models.AutoField(primary_key=True)
@@ -128,4 +135,5 @@ class HandlerEmpaquetacion(models.Model):
 class HandlerReparto(models.Model):
     repartidor = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE) 
+    rol = models.ForeignKey(RolReparto,on_delete=models.CASCADE, null=True)
     
