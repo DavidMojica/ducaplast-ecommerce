@@ -636,26 +636,24 @@ def OrderDetail(request, order):
                     repartidor_principal_nuevo = form.cleaned_data['repartidor'] 
                     repartidor_secundario_nuevo = form.cleaned_data['repartidorSecundario'] 
                     
-                    if repartidor_principal_nuevo:
-                        if repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id: 
-                            rol = get_object_or_404(RolReparto, pk=0)
-                            handler_primario = HandlerReparto.objects.filter(pedido=pedido, rol=rol).first()
-                            
-                            if handler_primario:
-                                handler_primario.repartidor = repartidor_principal_nuevo
-                                handler_primario.save()
-                           
-                    
+                    if repartidor_principal_nuevo and repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id:
+                        rol_primario = get_object_or_404(RolReparto, pk=0)
+                        handler_primario, _ = HandlerReparto.objects.get_or_create(pedido=pedido, rol=rol_primario)
+                        handler_primario.repartidor = repartidor_principal_nuevo
+                        handler_primario.save()
+                        
+                        # Eliminar otros handlers primarios si existen
+                        HandlerReparto.objects.filter(pedido=pedido, rol__pk=0).exclude(id=handler_primario.id).delete()
+
                     if repartidor_secundario_nuevo and repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id:
                         rol_secundario = get_object_or_404(RolReparto, pk=1)
-                        handler_secundario, created = HandlerReparto.objects.get_or_create(pedido=pedido,repartidor=repartidor_secundario_nuevo, rol=rol_secundario)
+                        handler_secundario, _ = HandlerReparto.objects.get_or_create(pedido=pedido, rol=rol_secundario)
+                        handler_secundario.repartidor = repartidor_secundario_nuevo
+                        handler_secundario.save()
                         
-                        if created:
-                            handler_secundario.repartidor = repartidor_secundario_nuevo
-                            handler_secundario.save()
-                        else:
-                            handler_secundario.repartidor = repartidor_secundario_nuevo
-                            handler_secundario.save()
+                        # Eliminar otros handlers secundarios si existen
+                        HandlerReparto.objects.filter(pedido=pedido, rol__pk=1).exclude(id=handler_secundario.id).delete()
+
                             
 
                     pedido.save()
