@@ -362,8 +362,10 @@
                         <thead>
                             <tr>
                                 <th scope="col">Producto</th>
-                                <th scope="col">Cantidad</th>
-                                <th scope="col">Acción</th>
+                                <th scope="col">Cantidad</th>´
+                                {% if pedido.estado_id == 1 %}
+                                    <th scope="col">Acción</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -378,14 +380,16 @@
                                     </td>
                                     {% if user.tipo_usuario_id == 3 or isAdmin  %}
                                         {% if pedido.estado_id == 1 %}
-                                            <td class="modificarCantidad">
-                                                {% if p.cantidad > 0 %}
-                                                    <input type="hidden" name="" value="{{p.producto_id}}">
-                                                    <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
-                                                {% else %}
+                                            {% if p.cantidad > 0 %}
+                                                <td class="modificarCantidad">
+                                                        <input type="hidden" name="" value="{{p.producto_id}}">
+                                                        <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
+                                                </td>
+                                            {% else %}
+                                                <td>
                                                     <strong>Producto agotado</strong>
-                                                {% endif%}
-                                            </td>
+                                                </td>
+                                            {% endif%}
                                             <td>
                                                 {% if p.cantidad > 0 %}
                                                     <!-- trigger -->
@@ -413,9 +417,28 @@
                                                         </article>
                                                     </section>
                                                 {% else %}
-                                                    <button type="button" class="btn btn-success btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
+                                                    <button type="button" class="btn btn-success btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoNoAgotado-{{p.producto_id}}">
                                                         Marcar como existente
                                                     </button>
+                                                    <section class="modal fade" id="modalProductoNoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                        <article class="modal-dialog modal-dialog-centered">
+                                                        <article class="modal-content">
+                                                            <section class="modal-header">
+                                                            <h5 class="modal-title">Marcar como agotado</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </section>
+                                                            <section class="modal-body">
+                                                            <p>¿Encontraron más existencias de {{p.producto.descripcion}} ?</p>
+                                                            <form action="" method="POST" id="modificarRepartidor">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="productoNoAgotado">
+                                                                <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                                <button type="submit" class="btn btn-success mt-4 delete-item">Confirmar</button>                             
+                                                            </form> 
+                                                            </section>
+                                                        </article>
+                                                        </article>
+                                                    </section>
                                                 {% endif %}
                                             </td>
                                         {% else %}
@@ -436,11 +459,12 @@
                                 {% endif %}
                                 {% if user.tipo_usuario_id == 3 or isAdmin %}
                                     {% if pedido.estado_id == 1 %}
-                                        <td>
+                                        <td></td>
+                                        <td class="text-center">
                                             <form action="" method="POST" id="modificarCantidad">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="modificarCantidad">
-                                                <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
+                                                <button type="submit" class="btn btn-sm btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
                                             </form>
                                         </td>
                                     {% endif %}
