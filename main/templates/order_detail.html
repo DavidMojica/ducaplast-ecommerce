@@ -110,7 +110,8 @@
                             {% for e in empacadoresActivos %}
                             <li class="list-group-item">
                                 <p>{{e.empacador.first_name}} {{e.empacador.last_name}} <br>
-                                Cod. empleado {{e.empacador.id}}</p>
+                                    Cod. empleado {{e.empacador.id}}
+                                </p>
                             </li>
                             {% endfor %}          
                         </ul>
@@ -254,12 +255,18 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </section>
                                         <section class="modal-body">
-                                            <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
                                             <form action="" method="POST" id="confirmarRepartidor" class="text-end ">
                                                 {% csrf_token %}
-                                                {{form.repartidor}}
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>{{form.repartidor.label}}</strong>
+                                                    {{form.repartidor}}
+                                                </fieldset>
+                                                <fieldset class="text-start">
+                                                    <strong>{{form.repartidorSecundario.label}}</strong>
+                                                    {{form.repartidorSecundario}}
+                                                </fieldset>
                                                 <input type="hidden" name="confirmarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor(es)</button>                             
                                             </form> 
                                         </section>
                                         <section class="modal-footer">
@@ -272,8 +279,18 @@
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
                         <p>Despachador: {{pedido.despachador_reparto}} <br>
-                        Repartidor elegido: {{pedido.repartido_por}} <br>
                         Hora de despacho: <span class="badge bg-info">{{pedido.despacho_hora}}</span></p>
+                        <h5>Repartidor(es) elegido(s)</h5>
+                        <ul class="list-group list-group-flush">
+                            {% for r in repartidoresActivos %}
+                            <li class="list-group-item">
+                                <p>{{r.repartidor.first_name}} {{r.repartidor.last_name}}
+                                    Cod. Empleado {{r.repartidor.id}}
+                                </p>
+                            </li>
+                            {% endfor %}
+
+                        </ul>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalDespachadorModificar">Modificar repartidor</button>
@@ -289,7 +306,14 @@
                                             <p>Modificar al repartidor</p>
                                             <form action="" method="POST" id="modificarRepartidor" class="text-end">
                                                 {% csrf_token %}
-                                                {{form.repartidor}}
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Modificar repartidor principal</strong>
+                                                    {{form.repartidor}}
+                                                </fieldset>
+                                                <fieldset class="text-start">
+                                                    <strong>Modificar repartidor secundario</strong>
+                                                    {{form.repartidorSecundario}}
+                                                </fieldset>
                                                 <input type="hidden" name="modificarRepartidor">
                                                 <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
                                             </form> 

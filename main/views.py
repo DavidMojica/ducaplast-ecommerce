@@ -9,7 +9,7 @@ from django.db.models import FloatField, Count, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm,RegistroUsuariosFormAdmin ,InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
-from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion
+from .models import Estados, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion, HandlerReparto
 
 import re, json
 
@@ -140,6 +140,14 @@ def getPuedeAyudar(pedido, empacadores_activos, user):
     if pedido.estado_id in [1, 2]:
         return not empacadores_activos.filter(empacador_id=user.id).exists()
     return False  
+
+@login_required
+def handler_repartir(request, repartidor, pedido):
+    repartidor_asignado = HandlerReparto.objects.filter(repartidor=repartidor, pedido=pedido).exists()
+
+    if not repartidor_asignado:
+        handler = HandlerReparto(repartidor=repartidor, pedido=pedido)
+        handler.save()
 
 def actualizarCantidad(request, pedido, producto_id, cantidad):
     ProductosPedido.objects.filter(pedido_id=pedido, producto_id=producto_id).update(cantidad=cantidad)
@@ -492,6 +500,7 @@ def OrderDetail(request, order):
     cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
     productos = ProductosPedido.objects.filter(pedido_id=order)
     empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido)
+    repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
     
     #Post
@@ -577,7 +586,11 @@ def OrderDetail(request, order):
                         pedido.estado_id = 4
                         pedido.despachador_reparto = user
                         pedido.despacho_hora = timezone.now()
-                        pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                        repartidor = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                        handler_repartir(request,repartidor, pedido)
+                        if request.POST.get('repartidorSecundario'):
+                            repartidorSecundario = get_object_or_404(Usuarios, pk=request.POST.get('repartidorSecundario'))
+                            handler_repartir(request,repartidorSecundario, pedido)
                         pedido.save()
                     else:
                         return render(request, HTMLORDERDETAIL,{
@@ -589,8 +602,8 @@ def OrderDetail(request, order):
             elif 'modificarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if form.is_valid():
-                    pedido.despacho_hora = timezone.now()
-                    pedido.repartido_por = get_object_or_404(Usuarios, pk=request.POST.get('repartidor'))
+                    pedido.despacho_modificado_hora = timezone.now()
+                    handler_repartir(request,request.POST.get('repartidor'), pedido)
                     pedido.save()
             else:
                 return render(request,HTMLORDERDETAIL,{
@@ -620,13 +633,14 @@ def OrderDetail(request, order):
         'productos': productos,
         'user': user,
         'empacadoresActivos': empacadores_activos,
+        'repartidoresActivos': repartidores_activos,
         'isAdmin': False
     }
         
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
         data['puede_ayudar'] = getPuedeAyudar(pedido, empacadores_activos, user)
-        form = SeleccionarRepartidor() if pedido.estado_id == 3 or 4 else None
+        form = SeleccionarRepartidor(pedido=pedido) if pedido.estado_id == 3 or 4 else None
         return render(request, HTMLORDERDETAIL, {**data, 'form':form})
     elif user.tipo_usuario_id == 2:
         return render(request, HTMLORDERDETAIL, {**data}) if pedido.vendedor_id == user.id else render(request, HTMLORDERDETAIL, {'success': False, 'msg': ERROR_13})
@@ -634,9 +648,9 @@ def OrderDetail(request, order):
         data['puede_ayudar'] = getPuedeAyudar(pedido, empacadores_activos, user)
         return render(request, HTMLORDERDETAIL, {**data, 'issue3':issue})
     elif user.tipo_usuario_id in [4,5]: #Facturadores - despachadores
-        form = SeleccionarRepartidor() if user.tipo_usuario_id == 5 else None
+        form = SeleccionarRepartidor(pedido=pedido) if user.tipo_usuario_id == 5 else None
         issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
-        return render(request, HTMLORDERDETAIL, {**data, 'form': SeleccionarRepartidor(), issue_key: issue})
+        return render(request, HTMLORDERDETAIL, {**data, 'form': form, issue_key: issue})
 
 #N/S
 @login_required 
