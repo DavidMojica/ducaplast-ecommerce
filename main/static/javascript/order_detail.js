@@ -1,5 +1,34 @@
 const btnModificarCantidad = document.getElementById('btnModificarCantidad');
 let productosActualizados = {};
+const repartidor = document.getElementById('repartidor');
+const repartidorSecundario = document.getElementById('repartidorSecundario');
+
+
+const validarRepartidores = form => {
+    if (repartidor.value === repartidorSecundario.value) 
+        createToastNotify(1, "Error", "No puede seleccionar al mismo repartidor en ambos campos.");
+    else form.submit();
+}
+
+try{
+    const modificarRepartidor = document.getElementById('modificarRepartidor');
+    modificarRepartidor.addEventListener('submit', e => {
+        e.preventDefault();
+        validarRepartidores(modificarRepartidor);
+    });
+} catch {}
+
+try {
+    const confirmarRepartidor = document.getElementById('confirmarRepartidor');
+    confirmarRepartidor.addEventListener('submit', e=>{
+        e.preventDefault();
+        validarRepartidores(confirmarRepartidor);
+    });
+} catch {}
+
+
+
+
 let ban = true;
 $(btnModificarCantidad).on('click', function(e){
     e.preventDefault();

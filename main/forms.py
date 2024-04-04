@@ -1,5 +1,5 @@
 from django import forms
-from .models import TipoUsuario, Usuarios, Clientes, Producto, Pedido
+from .models import HandlerReparto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
 
 class FiltrarRecibos(forms.ModelForm):
@@ -66,13 +66,45 @@ class ProductoForm(forms.ModelForm):
         }
         
 class SeleccionarRepartidor(forms.Form):
+    def __init__(self, *args, **kwargs):
+        pedido = kwargs.pop('pedido', None)
+        super(SeleccionarRepartidor, self).__init__(*args, **kwargs)
+        
+        repartidores_queryset = Usuarios.objects.filter(tipo_usuario_id=6)
+        
+        if pedido:
+            handler_reparto = HandlerReparto.objects.filter(pedido=pedido).first()
+            if handler_reparto:
+                repartidor_asignado = handler_reparto.repartidor
+                self.fields['repartidor'].queryset = repartidores_queryset
+                self.fields['repartidor'].initial = repartidor_asignado.pk  
+                
+                
+                self.fields['repartidorSecundario'].queryset = repartidores_queryset
+                
+                repartidor_secundario_asignado = HandlerReparto.objects.filter(pedido=pedido).exclude(repartidor=repartidor_asignado).first()
+                if repartidor_secundario_asignado:
+                    self.fields['repartidorSecundario'].initial = repartidor_secundario_asignado.repartidor.pk
+
     repartidor = forms.ModelChoiceField(
-        label="Repartidor",
-        widget=forms.Select(attrs={'class': 'form-select', 'placeholder':'Seleccione repartidor', 'name': 'repartidor'}),
+        label="Por favor asigne el repartidor que se encargará de esta entrega.",
+        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor', 'name': 'repartidor', 'id':'repartidor'}),
         queryset=Usuarios.objects.filter(tipo_usuario_id=6),
-        empty_label="Seleccione repartidor",
+        empty_label="Seleccione repartidor (Obligatorio)",
         required=True
     )
+    
+    repartidorSecundario = forms.ModelChoiceField(
+        label="Seleccione repartidor secundario si es necesario",
+        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor secundario', 'name': 'repartidorSecundario', 'id':'repartidorSecundario'}),
+        queryset=Usuarios.objects.filter(tipo_usuario_id=6),
+        empty_label="Seleccione repartidor secundario (Opcional)",
+        required=False
+    )
+
+
+
+    
 
 class DetallesPedido(forms.Form):
     cliente = forms.ModelChoiceField(

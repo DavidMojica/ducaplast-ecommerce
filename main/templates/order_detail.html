@@ -23,8 +23,8 @@
                     <p class="card-text">
                         Cliente: <strong>{{cliente}}</strong> <br>
                         Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
-                        {% if user.tipo_usuario_id != 3 %}
-                        Valor pedido: <strong  class="price">${{pedido.valor}}</strong> <br>
+                        {% if isAdmin  %}
+                            Valor pedido: <strong  class="price">${{pedido.valor}}</strong> <br>
                         {% endif %}
                         Vendedor: <strong>{{pedido.vendedor}}</strong>
                     </p>
@@ -110,7 +110,8 @@
                             {% for e in empacadoresActivos %}
                             <li class="list-group-item">
                                 <p>{{e.empacador.first_name}} {{e.empacador.last_name}} <br>
-                                Cod. empleado {{e.empacador.id}}</p>
+                                    Cod. empleado {{e.empacador.id}}
+                                </p>
                             </li>
                             {% endfor %}          
                         </ul>
@@ -254,12 +255,18 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </section>
                                         <section class="modal-body">
-                                            <p>Por favor asigne el repartidor que se encargará de esta entrega.</p>
                                             <form action="" method="POST" id="confirmarRepartidor" class="text-end ">
                                                 {% csrf_token %}
-                                                {{form.repartidor}}
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>{{form.repartidor.label}}</strong>
+                                                    {{form.repartidor}}
+                                                </fieldset>
+                                                <fieldset class="text-start">
+                                                    <strong>{{form.repartidorSecundario.label}}</strong>
+                                                    {{form.repartidorSecundario}}
+                                                </fieldset>
                                                 <input type="hidden" name="confirmarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor(es)</button>                             
                                             </form> 
                                         </section>
                                         <section class="modal-footer">
@@ -272,8 +279,18 @@
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
                         <p>Despachador: {{pedido.despachador_reparto}} <br>
-                        Repartidor elegido: {{pedido.repartido_por}} <br>
                         Hora de despacho: <span class="badge bg-info">{{pedido.despacho_hora}}</span></p>
+                        <h5>Repartidor(es) elegido(s)</h5>
+                        <ul class="list-group list-group-flush">
+                            {% for r in repartidoresActivos %}
+                            <li class="list-group-item">
+                                <p>{{r.repartidor.first_name}} {{r.repartidor.last_name}}
+                                    Cod. Empleado {{r.repartidor.id}}
+                                </p>
+                            </li>
+                            {% endfor %}
+
+                        </ul>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalDespachadorModificar">Modificar repartidor</button>
@@ -289,7 +306,14 @@
                                             <p>Modificar al repartidor</p>
                                             <form action="" method="POST" id="modificarRepartidor" class="text-end">
                                                 {% csrf_token %}
-                                                {{form.repartidor}}
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Modificar repartidor principal</strong>
+                                                    {{form.repartidor}}
+                                                </fieldset>
+                                                <fieldset class="text-start">
+                                                    <strong>Modificar repartidor secundario</strong>
+                                                    {{form.repartidorSecundario}}
+                                                </fieldset>
                                                 <input type="hidden" name="modificarRepartidor">
                                                 <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
                                             </form> 
@@ -362,44 +386,84 @@
                         <thead>
                             <tr>
                                 <th scope="col">Producto</th>
-                                <th scope="col">Cantidad</th>
+                                <th scope="col">Cantidad</th>´
+                                {% if pedido.estado_id == 1 %}
+                                    <th scope="col">Acción</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
                             {% for p in productos %}
                                 <tr id="p-{{p.producto_id}}">
-                                    <td>{{ p.producto.descripcion }}</td>
+                                    <td>
+                                        {% if p.cantidad > 0 %}
+                                            {{ p.producto.descripcion }}
+                                        {% else %}
+                                            <strike>{{ p.producto.descripcion }}</strike>
+                                        {% endif %}
+                                    </td>
                                     {% if user.tipo_usuario_id == 3 or isAdmin  %}
                                         {% if pedido.estado_id == 1 %}
-                                            <td class="modificarCantidad">
-                                                <input type="hidden" name="" value="{{p.producto_id}}">
-                                                <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
-                                            </td>
+                                            {% if p.cantidad > 0 %}
+                                                <td class="modificarCantidad">
+                                                        <input type="hidden" name="" value="{{p.producto_id}}">
+                                                        <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
+                                                </td>
+                                            {% else %}
+                                                <td>
+                                                    <strong>Producto agotado</strong>
+                                                </td>
+                                            {% endif%}
                                             <td>
-                                                <!-- trigger -->
-                                                <button type="button" class="btn btn-primary btn-sm me-1 mb-2 cart-handler" title="Eliminar item" data-bs-toggle="modal" data-bs-target="#modalBorrarProducto-{{p.producto_id}}">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                                <!-- modal -->
-                                                <section class="modal fade" id="modalBorrarProducto-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                                                    <article class="modal-dialog modal-dialog-centered">
-                                                    <article class="modal-content">
-                                                        <section class="modal-header">
-                                                        <h5 class="modal-title">Borrar producto</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </section>
-                                                        <section class="modal-body">
-                                                        <p>¿Está seguro de borrar {{p.producto.descripcion}} del pedido? Esta acción es irreversible</p>
-                                                        <form action="" method="POST" id="modificarRepartidor">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="borrarProducto">
-                                                            <input type="hidden" name="producto_id" value="{{p.producto_id}}">
-                                                            <button type="submit" class="btn btn-danger mt-4 delete-item">Borrar producto</button>                             
-                                                        </form> 
-                                                        </section>
-                                                    </article>
-                                                    </article>
-                                                </section>
+                                                {% if p.cantidad > 0 %}
+                                                    <!-- trigger -->
+                                                    <button type="button" class="btn btn-danger btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
+                                                        Marcar como agotado
+                                                    </button>
+                                                    <!-- modal -->
+                                                    <section class="modal fade" id="modalProductoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                        <article class="modal-dialog modal-dialog-centered">
+                                                        <article class="modal-content">
+                                                            <section class="modal-header">
+                                                            <h5 class="modal-title">Marcar como agotado</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </section>
+                                                            <section class="modal-body">
+                                                            <p>Al hacer click en confirmar, usted confirma que {{p.producto.descripcion}} no tiene existencias en ninguna de las bodegas.</p>
+                                                            <form action="" method="POST" id="modificarRepartidor">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="productoAgotado">
+                                                                <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                                <button type="submit" class="btn btn-danger mt-4 delete-item">Confirmar</button>                             
+                                                            </form> 
+                                                            </section>
+                                                        </article>
+                                                        </article>
+                                                    </section>
+                                                {% else %}
+                                                    <button type="button" class="btn btn-success btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoNoAgotado-{{p.producto_id}}">
+                                                        Marcar como existente
+                                                    </button>
+                                                    <section class="modal fade" id="modalProductoNoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                        <article class="modal-dialog modal-dialog-centered">
+                                                        <article class="modal-content">
+                                                            <section class="modal-header">
+                                                            <h5 class="modal-title">Marcar como agotado</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </section>
+                                                            <section class="modal-body">
+                                                            <p>¿Encontraron más existencias de {{p.producto.descripcion}} ?</p>
+                                                            <form action="" method="POST" id="modificarRepartidor">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="productoNoAgotado">
+                                                                <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                                <button type="submit" class="btn btn-success mt-4 delete-item">Confirmar</button>                             
+                                                            </form> 
+                                                            </section>
+                                                        </article>
+                                                        </article>
+                                                    </section>
+                                                {% endif %}
                                             </td>
                                         {% else %}
                                             <td>{{ p.cantidad }}</td>
@@ -412,18 +476,19 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                {% if user.tipo_usuario_id != 3 %}
-                                <td>
-                                    <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
-                                </td>
+                                {% if isAdmin %}
+                                    <td>
+                                        <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
+                                    </td>
                                 {% endif %}
                                 {% if user.tipo_usuario_id == 3 or isAdmin %}
                                     {% if pedido.estado_id == 1 %}
-                                        <td>
+                                        <td></td>
+                                        <td class="text-center">
                                             <form action="" method="POST" id="modificarCantidad">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="modificarCantidad">
-                                                <button type="submit" class="btn btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
+                                                <button type="submit" class="btn btn-sm btn-warning" id="btnModificarCantidad">Actualizar cantidades</button>
                                             </form>
                                         </td>
                                     {% endif %}
