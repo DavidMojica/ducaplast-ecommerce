@@ -73,6 +73,8 @@ class Pedido(models.Model):
     despachador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
     despacho_hora = models.DateTimeField(null=True, blank=True)
     despacho_modificado_hora = models.DateTimeField(null=True, blank=True)
+    credito_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="credito_por")
+    credito_hora = models.DateTimeField(null=True, blank=True)
     completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="completado_por")
     completado_hora = models.DateTimeField(null=True, blank=True)
     consecutivo = models.CharField(max_length=20, null=True, unique=True)    

@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <main class="d-flex justify-content-center align-items-center">
     <form method="post" class="card p-4">
-        <h3>Añadir producto</h3>
+        <h3>{{label_marker}} producto</h3>
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-success">Guardar cambios</button>

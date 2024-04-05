@@ -340,6 +340,10 @@ def Charts(request):
 #super -- TEST N/S
 @login_required
 def ProductDetails(request, productid=None):
+    label_marker = "Añadir"
+    if productid:
+        label_marker = "Editar"
+
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
     if req_user.tipo_usuario_id in adminIds:
         producto = Producto.objects.get(pk=productid)
@@ -350,7 +354,7 @@ def ProductDetails(request, productid=None):
                 return redirect('productos') # Redirecciona a la vista de productos
         else:
             form = ProductoForm(instance=producto)
-        return render(request, HTMLPRODUCTODETAIL, {'form': form})
+        return render(request, HTMLPRODUCTODETAIL, {'form': form, 'label_marker': label_marker})
     else:
         return redirect('orders')
 
@@ -513,6 +517,8 @@ def OrderDetail(request, order):
     repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
     
+    print(f"estado {pedido.estado_id}")
+    print(f"uid {user.tipo_usuario_id}")
     #GET   
     data = {
         'success': True,
@@ -600,7 +606,7 @@ def OrderDetail(request, order):
                     issue = ERROR_17
 
         #----------------TAREAS DE DESPACHO, ESTADO 3----------------#
-        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4]: # Despachadores
+        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4,5]: # Despachadores
             if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if not pedido.estado_id >= 4:
@@ -689,19 +695,26 @@ def OrderDetail(request, order):
                     
                     pedido.despacho_modificado_hora = timezone.now()
                     pedido.save()
-            else:
-                data['success']=False
-                data['msg'] = ERROR_13
-                return render(request,HTMLORDERDETAIL,{**data})
-        #----------------TAREAS DE COMPLETACIÓN, ESTADO 4 PARA 5----------------#
-        elif user.tipo_usuario_id in adminIds and pedido.estado_id == 4:
-            if 'completarPedido' in request.POST:
+            #---------Completacion-----#
+            elif 'credito' in request.POST:
                 if not pedido.estado_id >= 5:
                     pedido.estado_id = 5
+                    pedido.credito_por = user
+                    pedido.credito_hora = timezone.now()
+                    pedido.save()
+            elif 'completarPedido' in request.POST:
+                if not pedido.estado_id >= 6:
+                    pedido.estado_id = 6
                     pedido.actualizar_dinero_generado_cliente()
                     pedido.completado_por = user
                     pedido.completado_hora = timezone.now()
                     pedido.save()
+            else:
+                data['success']=False
+                data['msg'] = ERROR_13
+                return render(request,HTMLORDERDETAIL,{**data})
+        
+            
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
@@ -736,7 +749,7 @@ def Orders(request, filtered=None):
 
     if not filtered:
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.exclude(estado_id=5).order_by('-fecha')
+            pedidos = Pedido.objects.exclude(estado_id__in=[5, 6]).order_by('-fecha')
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -749,13 +762,15 @@ def Orders(request, filtered=None):
     elif filtered == "historial": 
         data['history'] = True
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.filter(estado_id=5).order_by('-fecha')
+            pedidos = Pedido.objects.filter(estado_id__in=[5, 6]).order_by('-fecha')
             if form.is_valid():
                 id = form.cleaned_data.get('id')
                 vendedor = form.cleaned_data.get('vendedor')
                 cliente = form.cleaned_data.get('cliente')
                 fecha = form.cleaned_data.get('fecha')
                 completado_fecha = form.cleaned_data.get('completado_fecha')
+                estado_final = form.cleaned_data.get('estado_final')
+                consecutivo = form.cleaned_data.get('consecutivo')
                 data['isAdmin'] = True
                 if id:
                     pedidos = pedidos.filter(id=id)
@@ -767,6 +782,10 @@ def Orders(request, filtered=None):
                     pedidos = pedidos.filter(fecha__date=fecha)
                 if completado_fecha:
                     pedidos = pedidos.filter(completado_hora__date=completado_fecha)
+                if estado_final:
+                    pedidos = pedidos.filter(estado=estado_final)
+                if consecutivo:
+                    pedidos = pedidos.filter(consecutivo=consecutivo)
 
         elif user.tipo_usuario_id == 3:  # Empacador
             handler_empaquetacion = HandlerEmpaquetacion.objects.filter(empacador=user)

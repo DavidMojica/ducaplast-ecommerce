@@ -1,5 +1,5 @@
 from django import forms
-from .models import HandlerReparto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
+from .models import Estados, HandlerReparto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
 
 class FiltrarRecibos(forms.ModelForm):
@@ -22,6 +22,21 @@ class FiltrarRecibos(forms.ModelForm):
         widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         required=False,
         input_formats=['%Y-%m-%d'],
+    )
+    
+    estado_final = forms.ModelChoiceField(
+        label='Estado final',
+        queryset=Estados.objects.filter(id__in=[5,6]),
+        empty_label= 'Ambos (Recibido y cancelado)',
+        required=False,
+        widget=forms.Select(attrs={'class':'form-select'})
+    )
+    
+    consecutivo = forms.IntegerField(
+        label="Consecutivo del pedido",
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Consecutivo del pedido'}),
     )
 
     class Meta:
@@ -46,6 +61,7 @@ class FiltrarRecibos(forms.ModelForm):
         self.fields['cliente'].empty_label = 'Cualquiera'
         self.fields['cliente'].required = False
         self.fields['cliente'].queryset = Clientes.objects.all()
+        
 
 #Crear o modificar un producto
 class ProductoForm(forms.ModelForm):
@@ -108,10 +124,6 @@ class SeleccionarRepartidor(forms.Form):
         required=True,
         widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consecutivo'})
     )
-
-
-
-    
 
 class DetallesPedido(forms.Form):
     cliente = forms.ModelChoiceField(
@@ -307,7 +319,6 @@ class RegistroUsuariosFormAdmin(forms.ModelForm):
     class Meta:
         model = Usuarios
         fields = ('first_name', 'last_name', 'username', 'password', 'usarDocumentoComoPassword', 'tipo_usuario')
-  
   
 class InicioSesionForm(forms.Form):
     documento = forms.CharField(
