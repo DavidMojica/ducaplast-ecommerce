@@ -92,7 +92,7 @@ class Pedido(models.Model):
     def get_status_color(self):
         if self.estado_id == 0:
             return 'bg-danger'
-        elif self.estado_id in [1,2] or self.estado_id == 5:
+        elif self.estado_id in [1,2]:
             return 'bg-warning'
         elif self.estado_id in [3,4]:
             return 'bg-primary'

@@ -604,25 +604,24 @@ def OrderDetail(request, order):
             if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if not pedido.estado_id >= 4:
+                    if user.tipo_usuario_id in adminIds:
+                        data['isAdmin'] = True
                     if form.is_valid():
-                        pedido.estado_id = 4
                         pedido.despachador_reparto = user
                         pedido.despacho_hora = timezone.now()
                         consecutivo = form.cleaned_data['consecutivo'].strip()
+                        
+                        data['form'] = SeleccionarRepartidor()
                         
                         if consecutivo:
                             if not Pedido.objects.filter(consecutivo=consecutivo).exists():
                                 pedido.consecutivo = consecutivo    
                             else:
-                                return render(request, HTMLORDERDETAIL,{
-                                'success': False,
-                                'msg': "El consecutivo que ingresó ya existe."
-                            }) 
+                                data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
+                                return render(request, HTMLORDERDETAIL,{**data})
                         else:
-                            return render(request, HTMLORDERDETAIL,{
-                            'success': False,
-                            'msg': "El campo consecutivo no puede quedar vacío"
-                        }) 
+                            data['msg_secondary'] = "El campo consecutivo no puede quedar vacío"
+                            return render(request, HTMLORDERDETAIL,{**data}) 
                         
                         repartidor = form.cleaned_data['repartidor']
                         repartidor_primario = get_object_or_404(Usuarios, pk=repartidor.id)
@@ -647,12 +646,12 @@ def OrderDetail(request, order):
                             'success': False,
                             'msg': "El repartidor principal no puede quedar vacíos"
                         }) 
+                        pedido.estado_id = 4
                         pedido.save()
                     else:
-                        return render(request, HTMLORDERDETAIL,{
-                            'success': False,
-                            'msg': ERROR_2
-                        }) 
+                        data['success']=False
+                        data['msg'] = ERROR_13
+                        return render(request,HTMLORDERDETAIL,{**data})
                 else:
                     issue = ERROR_19
             elif 'modificarRepartidor' in request.POST:
