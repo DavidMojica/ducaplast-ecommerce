@@ -2,11 +2,14 @@ const btnModificarCantidad = document.getElementById('btnModificarCantidad');
 let productosActualizados = {};
 const repartidor = document.getElementById('repartidor');
 const repartidorSecundario = document.getElementById('repartidorSecundario');
+const consecutivo = document.getElementById('consecutivo');
 
 
-const validarRepartidores = form => {
+const validarDespachadorForm = form => {
     if (repartidor.value === repartidorSecundario.value) 
         createToastNotify(1, "Error", "No puede seleccionar al mismo repartidor en ambos campos.");
+    else if (consecutivo.value.trim() == 0)
+        createToastNotify(1, "Error", "El campo de consecutivo no puede estar vacío");
     else form.submit();
 }
 
@@ -14,7 +17,7 @@ try{
     const modificarRepartidor = document.getElementById('modificarRepartidor');
     modificarRepartidor.addEventListener('submit', e => {
         e.preventDefault();
-        validarRepartidores(modificarRepartidor);
+        validarDespachadorForm(modificarRepartidor);
     });
 } catch {}
 
@@ -22,7 +25,7 @@ try {
     const confirmarRepartidor = document.getElementById('confirmarRepartidor');
     confirmarRepartidor.addEventListener('submit', e=>{
         e.preventDefault();
-        validarRepartidores(confirmarRepartidor);
+        validarDespachadorForm(confirmarRepartidor);
     });
 } catch {}
 

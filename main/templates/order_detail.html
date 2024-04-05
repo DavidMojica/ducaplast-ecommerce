@@ -11,7 +11,10 @@
 <main class="container mt-4">
     {% if success %}
     <section class="row">
-        <section class="col-md-6">
+        {% if msg_secondary %}
+            <section class="alert alert-danger" role="alert">{{msg_secondary}}</section>
+        {% endif %}
+            <section class="col-md-6">
             <!-- Información general -->
             <article class="card mb-3">
                 <section class="card-header">
@@ -245,7 +248,7 @@
                         <h5>Este pedido está listo para ser repartido</h5>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Seleccionar repartidor</button>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Gestionar despacho</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalAsignador" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
@@ -261,12 +264,16 @@
                                                     <strong>{{form.repartidor.label}}</strong>
                                                     {{form.repartidor}}
                                                 </fieldset>
-                                                <fieldset class="text-start">
+                                                <fieldset class="text-start mb-2">
                                                     <strong>{{form.repartidorSecundario.label}}</strong>
                                                     {{form.repartidorSecundario}}
                                                 </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>{{form.consecutivo.label}}</strong>
+                                                    {{form.consecutivo}}
+                                                </fieldset>
                                                 <input type="hidden" name="confirmarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor(es)</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3">Confirmar despacho</button>                             
                                             </form> 
                                         </section>
                                         <section class="modal-footer">
@@ -278,8 +285,13 @@
                         {% endif %}
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
+                        <h6>Consecutivo: {%if pedido.consecutivo%} <span class="badge bg-info">{{pedido.consecutivo}}</span> {% else %} Sin consecutivo {% endif %}</h6>
                         <p>Despachador: {{pedido.despachador_reparto}} <br>
-                        Hora de despacho: <span class="badge bg-info">{{pedido.despacho_hora}}</span></p>
+                        Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
+                        {% if pedido.despacho_modificado_hora %}
+                            Este pedido fue modificado - <span class="badge bg-warning">{{pedido.despacho_modificado_hora}}</span>
+                        {% endif %}
+                        </p>
                         <h5>Repartidor(es) elegido(s)</h5>
                         <ul class="list-group list-group-flush">
                             {% for r in repartidoresActivos %}
@@ -313,6 +325,10 @@
                                                 <fieldset class="text-start">
                                                     <strong>Modificar repartidor secundario</strong>
                                                     {{form.repartidorSecundario}}
+                                                </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Consecutivo: </strong>
+                                                    {{form.consecutivo}}
                                                 </fieldset>
                                                 <input type="hidden" name="modificarRepartidor">
                                                 <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
