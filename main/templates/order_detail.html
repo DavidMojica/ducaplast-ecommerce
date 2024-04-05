@@ -11,6 +11,9 @@
 <main class="container mt-4">
     {% if success %}
     <section class="row">
+        {% if msg_secondary %}
+            <section class="alert alert-danger" role="alert">{{msg_secondary}}</section>
+        {% endif %}
         <section class="col-md-6">
             <!-- Información general -->
             <article class="card mb-3">
@@ -245,7 +248,7 @@
                         <h5>Este pedido está listo para ser repartido</h5>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Seleccionar repartidor</button>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAsignador">Gestionar despacho</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalAsignador" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
@@ -261,12 +264,16 @@
                                                     <strong>{{form.repartidor.label}}</strong>
                                                     {{form.repartidor}}
                                                 </fieldset>
-                                                <fieldset class="text-start">
+                                                <fieldset class="text-start mb-2">
                                                     <strong>{{form.repartidorSecundario.label}}</strong>
                                                     {{form.repartidorSecundario}}
                                                 </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>{{form.consecutivo.label}}</strong>
+                                                    {{form.consecutivo}}
+                                                </fieldset>
                                                 <input type="hidden" name="confirmarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Confirmar repartidor(es)</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3">Confirmar despacho</button>                             
                                             </form> 
                                         </section>
                                         <section class="modal-footer">
@@ -278,8 +285,13 @@
                         {% endif %}
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
+                        <h6>Consecutivo: {%if pedido.consecutivo%} <span class="badge bg-info">{{pedido.consecutivo}}</span> {% else %} Sin consecutivo {% endif %}</h6>
                         <p>Despachador: {{pedido.despachador_reparto}} <br>
-                        Hora de despacho: <span class="badge bg-info">{{pedido.despacho_hora}}</span></p>
+                        Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
+                        {% if pedido.despacho_modificado_hora %}
+                            Este pedido fue modificado - <span class="badge bg-warning">{{pedido.despacho_modificado_hora}}</span>
+                        {% endif %}
+                        </p>
                         <h5>Repartidor(es) elegido(s)</h5>
                         <ul class="list-group list-group-flush">
                             {% for r in repartidoresActivos %}
@@ -314,6 +326,10 @@
                                                     <strong>Modificar repartidor secundario</strong>
                                                     {{form.repartidorSecundario}}
                                                 </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Consecutivo: </strong>
+                                                    {{form.consecutivo}}
+                                                </fieldset>
                                                 <input type="hidden" name="modificarRepartidor">
                                                 <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
                                             </form> 
@@ -337,15 +353,20 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </section>
                                     <section class="modal-body">
-                                        <p>Antes de marcar el pedido como completo, asegúrese de haber recogido el dinero en efectivo de este pedido.</p>
+                                        <p>¿Este pedido fue dado a crédito o ya fue pagado?</p>
                                     </section>
                                     <section class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                        <form action="" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="credito">
+                                            <button type="submit" class="btn btn-warning">En crédito</button>
+                                        </form>
                                         <form action="" method="POST" id="completarPedido">
                                             {% csrf_token %}
                                             <input type="hidden" name="completarPedido">
-                                            <button type="submit" class="btn btn-success">Sí, lo recibí</button>                             
-                                        </form> 
+                                            <button type="submit" class="btn btn-success">Pagado</button>                             
+                                        </form>  
                                     </section>
                                 </article>
                             </article>
@@ -368,11 +389,69 @@
                 <article class="card-body">
                     {% if pedido.estado.id < 5 %}
                         <h5>Este pedido no aún no se ha completado</h5>
-                    {% elif pedido.estado.id == 5 %}
-                        <h5>Este pedido ya fue completado. <br>
-                        Marcado como completado por:</h5>
-                        <p class="card-text">{{pedido.completado_por}}</p>
-                        <p class="card-text">Hora de completación: <span class="badge bg-info">{{pedido.completado_hora}}</span></p>
+                    {% elif pedido.estado.id == 5 or pedido.estado.id == 6 %}
+                        {% if isAdmin %}
+                            {% if pedido.estado.id == 5 %}
+                                <h5>Este pedido está en crédito</h5>
+                                <hr>
+                                <p>
+                                    Marcó a crédito: {{ pedido.credito_por }} <br>
+                                    Fecha crédito: <span class="badge bg-warning">{{ pedido.credito_hora }}</span> 
+                                </p>
+                                <!-- trigger -->
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalPedidoPagado">Marcar como pagado</button>
+                                <!-- modal -->
+                                <section class="modal fade" id="modalPedidoPagado" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                    <article class="modal-dialog modal-dialog-centered">
+                                        <article class="modal-content">
+                                            <section class="modal-header">
+                                                <h5 class="modal-title">Completar pedido</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </section>
+                                            <section class="modal-body">
+                                                <p>¿El crédito ya fue pagado?</p>
+                                            </section>
+                                            <section class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                <form action="" method="POST" id="completarPedido">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="completarPedido">
+                                                    <button type="submit" class="btn btn-success">Pagado</button>                             
+                                                </form>  
+                                            </section>
+                                        </article>
+                                    </article>
+                                </section>
+                            {% elif pedido.estado.id == 6%}
+                                {% if pedido.credito_por %}
+                                    <h5>Este pedido estuvo en crédito pero ya fue cancelado.</h5>
+                                    <h6>Crédito</h6>
+                                    <p>
+                                        Marcó a crédito: {{ pedido.credito_por }} <br>
+                                        Fecha crédito: <span class="badge bg-warning">{{ pedido.credito_hora }}</span> 
+                                    </p>
+                                {% else %}
+                                    <h5>Este pedido NO estuvo en crédito</h5>
+                                {% endif %}
+                                <h6>Pago</h6>
+                                <p class="card-text">
+                                    Marcó como completado: {{ pedido.completado_por }} <br>
+                                    Hora de completación: <span class="badge bg-info">{{ pedido.completado_hora }}</span>
+                                </p>
+                            {% endif %}
+                        {% else %}
+                            <h5>Este pedido ya fue completado. <br>
+                                Marcado como completado por:</h5>
+                            <p class="card-text">
+                                {% if pedido.completado_por %}
+                                    {{ pedido.completado_por }} <br>
+                                    <p class="card-text">Hora de completación: <span class="badge bg-info">{{ pedido.completado_hora }}</span></p>
+                                {% else %}
+                                    {{pedido.credito_por}}
+                                    <p class="card-text">Hora de completación: <span class="badge bg-info">{{ pedido.credito_hora }}</span></p>
+                                {% endif %}
+                            </p>
+                        {% endif %}
                     {% endif %}
                 </article>
             </section>

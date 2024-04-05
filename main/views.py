@@ -340,6 +340,10 @@ def Charts(request):
 #super -- TEST N/S
 @login_required
 def ProductDetails(request, productid=None):
+    label_marker = "Añadir"
+    if productid:
+        label_marker = "Editar"
+
     req_user = get_object_or_404(Usuarios, pk=request.user.id)
     if req_user.tipo_usuario_id in adminIds:
         producto = Producto.objects.get(pk=productid)
@@ -350,7 +354,7 @@ def ProductDetails(request, productid=None):
                 return redirect('productos') # Redirecciona a la vista de productos
         else:
             form = ProductoForm(instance=producto)
-        return render(request, HTMLPRODUCTODETAIL, {'form': form})
+        return render(request, HTMLPRODUCTODETAIL, {'form': form, 'label_marker': label_marker})
     else:
         return redirect('orders')
 
@@ -513,6 +517,20 @@ def OrderDetail(request, order):
     repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
     
+    print(f"estado {pedido.estado_id}")
+    print(f"uid {user.tipo_usuario_id}")
+    #GET   
+    data = {
+        'success': True,
+        'pedido': pedido,
+        'cliente': cliente,
+        'productos': productos,
+        'user': user,
+        'empacadoresActivos': empacadores_activos,
+        'repartidoresActivos': repartidores_activos,
+        'isAdmin': False
+    }
+    
     #Post
     if request.method == 'POST':
         #----------------TAREAS DE EMPAQUETACION, ESTADO 0 PARA 1----------------#
@@ -588,15 +606,28 @@ def OrderDetail(request, order):
                     issue = ERROR_17
 
         #----------------TAREAS DE DESPACHO, ESTADO 3----------------#
-        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4]: # Despachadores
+        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4,5]: # Despachadores
             if 'confirmarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
-                print("confirmar")
                 if not pedido.estado_id >= 4:
+                    if user.tipo_usuario_id in adminIds:
+                        data['isAdmin'] = True
                     if form.is_valid():
-                        pedido.estado_id = 4
                         pedido.despachador_reparto = user
                         pedido.despacho_hora = timezone.now()
+                        consecutivo = form.cleaned_data['consecutivo'].strip()
+                        
+                        data['form'] = SeleccionarRepartidor()
+                        
+                        if consecutivo:
+                            if not Pedido.objects.filter(consecutivo=consecutivo).exists():
+                                pedido.consecutivo = consecutivo    
+                            else:
+                                data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
+                                return render(request, HTMLORDERDETAIL,{**data})
+                        else:
+                            data['msg_secondary'] = "El campo consecutivo no puede quedar vacío"
+                            return render(request, HTMLORDERDETAIL,{**data}) 
                         
                         repartidor = form.cleaned_data['repartidor']
                         repartidor_primario = get_object_or_404(Usuarios, pk=repartidor.id)
@@ -619,75 +650,78 @@ def OrderDetail(request, order):
                         else:
                             return render(request, HTMLORDERDETAIL,{
                             'success': False,
-                            'msg': "El repartidor principal no puede quedar vacío."
+                            'msg': "El repartidor principal no puede quedar vacíos"
                         }) 
+                        pedido.estado_id = 4
                         pedido.save()
                     else:
-                        return render(request, HTMLORDERDETAIL,{
-                            'success': False,
-                            'msg': ERROR_2
-                        }) 
+                        data['success']=False
+                        data['msg'] = ERROR_13
+                        return render(request,HTMLORDERDETAIL,{**data})
                 else:
                     issue = ERROR_19
             elif 'modificarRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if form.is_valid():
-                    pedido.despacho_modificado_hora = timezone.now()
                     repartidor_principal_nuevo = form.cleaned_data['repartidor'] 
                     repartidor_secundario_nuevo = form.cleaned_data['repartidorSecundario'] 
+                    nuevo_consecutivo = form.cleaned_data['consecutivo']
+                    data['form'] = SeleccionarRepartidor(pedido=pedido)
                     
-                    if repartidor_principal_nuevo and repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id:
+                    if nuevo_consecutivo:
+                        if pedido.consecutivo == nuevo_consecutivo or not Pedido.objects.filter(consecutivo=nuevo_consecutivo).exists():
+                                pedido.consecutivo = nuevo_consecutivo    
+                        else:
+                            data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
+                            return render(request, HTMLORDERDETAIL,{**data})
+                    else:
+                            data['msg_secondary'] = "El campo consecutivo no puede quedar vacío"
+                            return render(request, HTMLORDERDETAIL,{**data}) 
+                                                
+                    if repartidor_principal_nuevo :
                         rol_primario = get_object_or_404(RolReparto, pk=0)
-                        handler_primario, _ = HandlerReparto.objects.get_or_create(pedido=pedido, rol=rol_primario)
+                        handler_primario, _ = HandlerReparto.objects.get_or_create(pedido=pedido,repartidor=repartidor_principal_nuevo, rol=rol_primario)
                         handler_primario.repartidor = repartidor_principal_nuevo
                         handler_primario.save()
-                        
-                        # Eliminar otros handlers primarios si existen
                         HandlerReparto.objects.filter(pedido=pedido, rol__pk=0).exclude(id=handler_primario.id).delete()
-
-                    if repartidor_secundario_nuevo and repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id:
-                        rol_secundario = get_object_or_404(RolReparto, pk=1)
-                        handler_secundario, _ = HandlerReparto.objects.get_or_create(pedido=pedido, rol=rol_secundario)
-                        handler_secundario.repartidor = repartidor_secundario_nuevo
-                        handler_secundario.save()
-                        
-                        # Eliminar otros handlers secundarios si existen
-                        HandlerReparto.objects.filter(pedido=pedido, rol__pk=1).exclude(id=handler_secundario.id).delete()
-
-                            
-
+                        print(repartidor_secundario_nuevo)
+                        if repartidor_secundario_nuevo:
+                            if repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id:
+                                rol_secundario = get_object_or_404(RolReparto, pk=1)
+                                handler_secundario, _ = HandlerReparto.objects.get_or_create(pedido=pedido,repartidor=repartidor_secundario_nuevo, rol=rol_secundario)
+                                handler_secundario.repartidor = repartidor_secundario_nuevo
+                                handler_secundario.save()
+                                HandlerReparto.objects.filter(pedido=pedido, rol__pk=1).exclude(id=handler_secundario.id).delete()
+                    
+                    pedido.despacho_modificado_hora = timezone.now()
                     pedido.save()
-            else:
-                return render(request,HTMLORDERDETAIL,{
-                    'success':False,
-                    'msg': ERROR_13
-                })
-        #----------------TAREAS DE COMPLETACIÓN, ESTADO 4 PARA 5----------------#
-        elif user.tipo_usuario_id in adminIds and pedido.estado_id == 4:
-            if 'completarPedido' in request.POST:
+            #---------Completacion-----#
+            elif 'credito' in request.POST:
                 if not pedido.estado_id >= 5:
                     pedido.estado_id = 5
+                    pedido.credito_por = user
+                    pedido.credito_hora = timezone.now()
+                    pedido.save()
+            elif 'completarPedido' in request.POST:
+                if not pedido.estado_id >= 6:
+                    pedido.estado_id = 6
                     pedido.actualizar_dinero_generado_cliente()
                     pedido.completado_por = user
                     pedido.completado_hora = timezone.now()
                     pedido.save()
+            else:
+                data['success']=False
+                data['msg'] = ERROR_13
+                return render(request,HTMLORDERDETAIL,{**data})
+        
+            
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
                 'msg': ERROR_13
             })
          
-    #GET   
-    data = {
-        'success': True,
-        'pedido': pedido,
-        'cliente': cliente,
-        'productos': productos,
-        'user': user,
-        'empacadoresActivos': empacadores_activos,
-        'repartidoresActivos': repartidores_activos,
-        'isAdmin': False
-    }
+    
         
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
@@ -715,7 +749,7 @@ def Orders(request, filtered=None):
 
     if not filtered:
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.exclude(estado_id=5).order_by('-fecha')
+            pedidos = Pedido.objects.exclude(estado_id__in=[5, 6]).order_by('-fecha')
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -728,13 +762,15 @@ def Orders(request, filtered=None):
     elif filtered == "historial": 
         data['history'] = True
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.filter(estado_id=5).order_by('-fecha')
+            pedidos = Pedido.objects.filter(estado_id__in=[5, 6]).order_by('-fecha')
             if form.is_valid():
                 id = form.cleaned_data.get('id')
                 vendedor = form.cleaned_data.get('vendedor')
                 cliente = form.cleaned_data.get('cliente')
                 fecha = form.cleaned_data.get('fecha')
                 completado_fecha = form.cleaned_data.get('completado_fecha')
+                estado_final = form.cleaned_data.get('estado_final')
+                consecutivo = form.cleaned_data.get('consecutivo')
                 data['isAdmin'] = True
                 if id:
                     pedidos = pedidos.filter(id=id)
@@ -746,6 +782,10 @@ def Orders(request, filtered=None):
                     pedidos = pedidos.filter(fecha__date=fecha)
                 if completado_fecha:
                     pedidos = pedidos.filter(completado_hora__date=completado_fecha)
+                if estado_final:
+                    pedidos = pedidos.filter(estado=estado_final)
+                if consecutivo:
+                    pedidos = pedidos.filter(consecutivo=consecutivo)
 
         elif user.tipo_usuario_id == 3:  # Empacador
             handler_empaquetacion = HandlerEmpaquetacion.objects.filter(empacador=user)
