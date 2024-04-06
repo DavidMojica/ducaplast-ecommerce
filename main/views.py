@@ -210,6 +210,7 @@ def filtrar_productos(request):
         nombre = form.cleaned_data.get('nombre')
         ordenar = form.cleaned_data.get('ordenar')
         disponibles = form.cleaned_data.get('disponibles')
+        tipo = form.cleaned_data.get('tipo')
         
         # Extraer los datos
         if ordenar:
@@ -236,6 +237,9 @@ def filtrar_productos(request):
         # Modulo disponibles
         if disponibles:
             productos = productos.filter(cantidad__gt=0)
+    
+        if tipo:
+            productos = productos.filter(tipo=tipo)
     
     return productos
 #-----------------------------------------------------------------------#
