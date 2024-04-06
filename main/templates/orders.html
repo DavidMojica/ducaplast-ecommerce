@@ -154,6 +154,10 @@
                                         <aside class="col text-center">
                                             <p>
                                                 <strong>Cliente:</strong> {{p.cliente}} <br>
+                                                {% for pp in p.productospedido_set.all %}
+                                                    <span class="badge bg-success">{{ pp.producto.tipo }}</span>  
+                                                {% endfor %}
+                        
                                                 {% if isAdmin %}
                                                     <strong>Valor pedido:</strong> ${{p.valor}}
                                                 {% endif %}

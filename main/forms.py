@@ -235,7 +235,7 @@ class FiltrarProductos(forms.Form):
     
     tipo = forms.ModelChoiceField(
         label="Tipo de producto",
-        queryset=TipoProducto.objects.all(),
+        queryset=TipoProducto.objects.all().order_by('id'),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'}),
         empty_label="Todos"
