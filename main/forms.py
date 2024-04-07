@@ -1,5 +1,5 @@
 from django import forms
-from .models import Estados, HandlerReparto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
+from .models import Estados, HandlerReparto, TipoProducto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
 
 class FiltrarRecibos(forms.ModelForm):
@@ -62,7 +62,6 @@ class FiltrarRecibos(forms.ModelForm):
         self.fields['cliente'].required = False
         self.fields['cliente'].queryset = Clientes.objects.all()
         
-
 #Crear o modificar un producto
 class ProductoForm(forms.ModelForm):
     class Meta:
@@ -232,6 +231,14 @@ class FiltrarProductos(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'}),
         initial='0',
+    )
+    
+    tipo = forms.ModelChoiceField(
+        label="Tipo de producto",
+        queryset=TipoProducto.objects.all().order_by('id'),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Todos"
     )
     
 class RegistroUsuariosForm(forms.ModelForm):

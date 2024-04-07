@@ -3,6 +3,7 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/orders.css' %}">
+<script src="{% static 'javascript/orders.js' %}"defer></script>
 <section class="gradient-custom">
     <main class="">
         {% if history and isAdmin %}
@@ -154,6 +155,12 @@
                                         <aside class="col text-center">
                                             <p>
                                                 <strong>Cliente:</strong> {{p.cliente}} <br>
+                                                <section class="tags_container">
+                                                    {% for pp in p.productospedido_set.all %}
+                                                        <span class="badge bg-success tag">{{ pp.producto.tipo.get_bodega }}</span> <br>
+                                                    {% endfor %}
+                                                </section>
+                        
                                                 {% if isAdmin %}
                                                     <strong>Valor pedido:</strong> ${{p.valor}}
                                                 {% endif %}

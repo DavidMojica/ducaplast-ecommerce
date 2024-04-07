@@ -72,15 +72,15 @@ finally:
 #---------------------------------------------------------------------------------------------------------------
 #Cargar tabla
 #--------------------------------------------------------------------------------------------------------------- 
-def cargarTablaProductos(connection, cursor, contador, descripcion, referencia_fabrica ,precio):
+def cargarTablaProductos(connection, cursor, contador, descripcion, referencia_fabrica ,precio, tipo_id):
     print(f"Cargando producto... -> {descripcion} registro #{contador+1}")
     cantidad = 0
     try:
-        command = '''INSERT INTO main_producto(descripcion, referencia_fabrica, precio, cantidad) VALUES(%s, %s, %s, %s)'''
-        cursor.execute(command, (descripcion, referencia_fabrica, precio, cantidad))
+        command = '''INSERT INTO main_producto(descripcion, referencia_fabrica, precio, cantidad, tipo_id) VALUES(%s, %s, %s, %s, %s)'''
+        cursor.execute(command, (descripcion, referencia_fabrica, precio, cantidad, tipo_id))
         connection.commit()
     except(Exception) as error:
-        print(f"Error cargando la tabla: {error}, {contador}, {descripcion}, {referencia_fabrica}, {precio}")
+        print(f"Error cargando la tabla: {error}, {contador}, {descripcion}, {referencia_fabrica}, {precio}, {tipo_id}")
 
 #---------------------------------------------------------------------------------------------------------------
 #Limpieza de tablas 
@@ -94,7 +94,7 @@ cursor.execute(command)
 #Abrir el archivo CSV de los datos
 #---------------------------------------------------------------------------------------------------------------
 try:
-    archivo = "C:\\Users\\swan5\\Desktop\\universidad\\projects\\works\\Ducaplast\\extras\\productosETL\\productos_final.csv"
+    archivo = "C:\\Users\\swan5\\Desktop\\universidad\\projects\\works\\Ducaplast\\extras\\productosETL\\actualizado.csv"
     with io.open(archivo, encoding=('utf-8')) as File:
         reader = csv.reader(File, delimiter='|', quotechar=(','), quoting=csv.QUOTE_MINIMAL)
         contador = 0
@@ -103,16 +103,32 @@ try:
             descripcion = row[0].strip()
             referencia_fabrica = row[1].strip()
             precio = row[2].strip()
-            if precio.endswith('.0'):
-                precio = precio[:-2]  # Eliminar los dos últimos caracteres
-
+            tipo = row[3].strip()
+            
+            if precio != '':
+                if precio.endswith('.0'):
+                    precio = precio[:-2]  # Eliminar los dos últimos caracteres
+            else:
+                precio = 0
+            
+            if tipo != '':
+                if tipo.endswith('.0'):
+                    tipo = tipo[:-2]
+            else:
+                tipo = 2
+            
             
             #Verificar espacios vacíos
-            if descripcion == "" or referencia_fabrica == "" or precio == "":
+            if not descripcion and not referencia_fabrica:
                 datos_vacios.append(f"Datos vacíos en fila {registro+1} (excel)")
                 data_vacia += 1
+                if referencia_fabrica == "":
+                    referencia_fabrica = descripcion
             else:
                 #Verificar que el precio no sea 0
+                if not referencia_fabrica:
+                    referencia_fabrica = descripcion
+                
                 if precio == 0 or precio == "0":
                     precios_0.append(f"PRECAUCION: El precio es 0 en fila {registro+1} (excel) - {contador+1} (base de datos)")
                     precios_en_0 += 1
@@ -130,7 +146,7 @@ try:
                     datos_extranos.append(f"CUIDADO: La referencia de fabrica es un numero. Fila {registro+1} (Excel) - {contador+1} (base de datos)")
                     referencias_extranas += 1
                     
-                cargarTablaProductos(connection, cursor, contador, descripcion, referencia_fabrica, precio)
+                cargarTablaProductos(connection, cursor, contador, descripcion, referencia_fabrica, precio, tipo)
                 contador += 1
 
             registro += 1
