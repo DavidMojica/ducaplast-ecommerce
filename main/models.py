@@ -47,6 +47,16 @@ class TipoProducto(models.Model):
     id = models.IntegerField(primary_key=True)
     description = models.CharField(max_length=25)
     
+    def get_bodega(self):
+        if self.id == 0:
+            return "Productos de bodega 1"
+        elif self.id == 1:
+            return "Productos de bodega 2"
+        elif self.id == 2:
+            return "Productos varios"
+        else:
+            return "Productos sin tipo"
+    
     def __str__(self):
         return self.description 
 
