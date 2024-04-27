@@ -891,6 +891,11 @@ def Registro(request):
                     #Desactivar el acceso si el usuario es tipo repartidor
                     user.is_active = tipo_usuario.id != TIPOREPARTIDOR
                     event = SUCCESS_4 if not user.is_active else SUCCESS_1
+                    #Dar super usuario si es admin o gerente
+                    if tipo_usuario.id in adminIds:
+                        user.is_superuser = True
+                        user.is_staff = True
+                    
                     user.save()
                     
                     data['documento'] = f"Usuario login: {documento}"
