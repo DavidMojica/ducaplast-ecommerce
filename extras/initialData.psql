@@ -23,3 +23,17 @@ insert into main_tipoproducto (id, description) values(2, 'Varios');
 
 insert into main_rolreparto(id, description) values(0, 'Principal');
 insert into main_rolreparto(id, description) values(1, 'Ayudante');
+
+--Deploy queries
+
+delete from main_productospedido;
+delete from main_handlerreparto;
+delete from main_handlerempaquetacion;
+delete from main_pedido;
+delete from main_clientes;
+delete from main_usuarios where id != [id];
+update main_usuarios SET id = 1 where id = [id];
+
+ALTER SEQUENCE main_usuarios_id_seq RESTART WITH 2;
+ALTER SEQUENCE main_clientes_id_seq RESTART WITH 1;
+ALTER SEQUENCE main_pedido_id_seq RESTART WITH 1;

@@ -1,7 +1,7 @@
 let option;
 let chart1, chart2, chart3, chart4;
 
-const domain = "http://127.0.0.1:8000/"
+const domain = "https://ducaplast-ecommerce.onrender.com/"
 
 //Example charts
 const getOptionChart1 = async () =>{

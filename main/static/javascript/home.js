@@ -24,5 +24,12 @@ const validarFormulario = () =>{
 }
 
 passhelper.addEventListener('click', ()=>{
-    createToastNotify(2, "Información", "Comuniquele a un administrador para que le reinicie la contraseña. Otorguele el ID de usuario o su nombre.")
+    spanEvento.classList.remove('bg-danger');
+    spanEvento.classList.add('bg-info');
+    spanEvento.textContent = "Comuniquele a un administrador para que le reinicie la contraseña. Otorguele el ID de usuario o su nombre.";
+    setTimeout(() => {
+        spanEvento.classList.remove('bg-info');
+        spanEvento.classList.add('bg-danger');
+        spanEvento.textContent = "";
+    }, 10000);
 });
