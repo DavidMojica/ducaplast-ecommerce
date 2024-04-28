@@ -813,7 +813,7 @@ def Orders(request, filtered=None):
 
 @unloginRequired
 def Home(request):
-    newForm = InicioSesionForm()
+    data = {'form': InicioSesionForm()}
     if request.method == 'POST':
         form = InicioSesionForm(request.POST)
         if form.is_valid():
@@ -839,10 +839,10 @@ def Home(request):
                 return redirect(reverse('orders')) 
             else:
                 logout(request)
-                return render(request, HTMLHOME, {'form': newForm,'error': ERROR_5})
+                data['error'] = 'error_5'
         else:
-            return render(request, HTMLHOME,{'form':newForm, 'error': ERROR_2})
-    return render(request, HTMLHOME, {'form': newForm})
+            data['error': ERROR_2]
+    return render(request, HTMLHOME, {**data})
 #N/A
 @login_required
 def Logout(request):

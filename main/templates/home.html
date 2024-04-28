@@ -13,8 +13,6 @@
     <!-- fa fa-icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="{% static 'javascript/home.js' %}" defer></script>
-    <link rel="stylesheet" href="{% static 'styles/ToastNotify.css' %}">
-    <script src="{% static 'javascript/ToastNotify.js' %}" defer></script>
     <link rel="shortcut icon" href="{% static 'favicon.png' %}" type="image/x-icon">
 </head>
 <body class="bg-grid">
@@ -25,7 +23,7 @@
             {{form.documento}}
             {{form.password}}
             <input type="submit" value="Ingresar" class="btn btn-primary">
-            <span class="badge bg-danger" id="spanEvento">{{error}}</span>
+            <span class="badge bg-danger text-wrap" id="spanEvento">{{error}}</span>
             <p class="text-primary mx-auto text-bold passhelper" id="passhelper">¿Olvidó la contraseña?</p>
         
           </form>
