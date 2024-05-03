@@ -30,8 +30,6 @@ try {
 } catch {}
 
 
-
-
 let ban = true;
 $(btnModificarCantidad).on('click', function(e){
     e.preventDefault();

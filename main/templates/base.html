@@ -9,6 +9,7 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <link rel="stylesheet" href="{% static 'styles/bg-grid.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/base.css' %}">
     <!-- fa fa -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="shortcut icon" href="{% static 'favicon.png' %}" type="image/x-icon">
@@ -55,7 +56,7 @@
                 </ul>
                 <article class="text-end">
                     <a href="/editar_cuenta"><button class="btn btn-outline-light me-2">Editar cuenta</button></a>
-                    <a href="/logout"><button class="btn btn-warning">Cerrar sesion</button></a>
+                    <a href="/logout"><button class="btn btn-warning text-white">Cerrar sesion</button></a>
                 </article>
             </section>
         </section>
@@ -71,26 +72,20 @@
     <footer class="bg-body-tertiary text-center text-lg-start bg-dark text-white">
         <section class="container p-4">
           <article class="row">
-            <article class="col-lg-6 col-md-12 mb-4 mb-md-0"> 
-              <h5 class="text-uppercase">DUCAPLAST</h5>   
-              <p>
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste atque ea quis
-                molestias. Fugiat pariatur maxime quis culpa corporis vitae repudiandae aliquam
-                voluptatem veniam, est atque cumque eum delectus sint!
-              </p>
+            <article class="col-lg-6 col-md-12 mb-4 mb-md-0 text-center"> 
+                <img src="{% static 'global/logo_footer.png' %}" id="logo_footer" alt="">
             </article>
-            <article class="col-lg-6 col-md-12 mb-4 mb-md-0">
-              <h5 class="text-uppercase">HORARIOS...</h5>
-              <p>
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste atque ea quis
-                molestias. Fugiat pariatur maxime quis culpa corporis vitae repudiandae aliquam
-                voluptatem veniam, est atque cumque eum delectus sint!
-              </p>
+            <article class="col-lg-6 col-md-12 mb-4 mb-md-0 text-center">
+              <p class="fw-bold">Horario de atención: 8am - 6pm</p>
+              <p class="fw-bold"><i class="fa fa-map-marker" aria-hidden="true"></i> Calle 54 N56A 53</p>
+              <p class="fw-bold">Email: ducaplast@gmail.com</p>
+              <p class="fw-bold">Teléfono: 604 444 5072</p>
+              <p class="fw-bold">Celular: 317 428 8920</p>
             </article>
           </article>
         </section>
         <section class="text-center p-3 bg" style="background-color: rgba(0, 0, 0, 0.05);">
-          <p>© 2024 Copyright</p>
+          <p>© 2024 Ducaplast Copyright</p>
         </section>
     </footer>
     

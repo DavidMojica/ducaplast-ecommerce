@@ -8,20 +8,21 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{% static 'javascript/catalogo.js' %}" defer></script>
 <script src="{% static 'javascript/cart_handler_catalogo.js' %}" defer></script>
+<link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <main>
     <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base my-5">
         <form action="" method="GET" class="text-center filter-form">
             <h2 class="text-primary font-weight-bold">Filtrar productos</h2>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                <span class="badge bg-info badge-md text-wrap">{{form.nombre.label_tag}}</span>
                 {{form.nombre}}
             </article>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                <span class="badge bg-info badge-md text-wrap">{{form.id.label_tag}}</span>
                 {{form.id}}
             </article>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.ordenar.label_tag}}</span>
+                <span class="badge bg-info badge-md text-wrap">{{form.ordenar.label_tag}}</span>
                 {{form.ordenar}}
             </article>
             <!-- <article class=" mb-3">
@@ -29,7 +30,7 @@
                 {{form.disponibles}}
             </article> -->
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.tipo.label_tag}}</span>
+                <span class="badge bg-info badge-md text-wrap">{{form.tipo.label_tag}}</span>
                 {{form.tipo}}
             </article>
             <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-arrow-right"></i></button>
@@ -98,7 +99,7 @@
                                                 {% csrf_token %}
                                                 <span class="badge mb-2 {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %}">{% if p.id|stringformat:'s' in carrito %} Producto ya añadido {% else %} Cantidad {% endif %}</span> <br>
                                                 <input type="number" name="" id="" min="1" value="1" class="cantidad form-control">
-                                                <button class="add btn btn-sm {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %} my-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="1">{% if p.id|stringformat:'s' in carrito %} Actualizar cantidad {% else %} Agregar al carrito {% endif %}</button>
+                                                <button class="add btn btn-sm text-white {% if p.id|stringformat:'s' in carrito %} btn-warning {% else %} btn-success {% endif %} my-2 cart-handler" data-producto-id="{{ p.id }}" data-carthandler-url="{% url 'carthandler' %}" data-action="1">{% if p.id|stringformat:'s' in carrito %} Actualizar cantidad {% else %} Agregar al carrito {% endif %}</button>
                                                 {% if p.id|stringformat:'s' in carrito %}
                                                     <button type="button" class="eliminate btn btn-primary btn-sm  cart-handler" data-producto-id="{{p.id}}" data-carthandler-url="{% url 'carthandler' %}" data-action="2" title="Eliminar item" style="display: inline;">
                                                         <i class="fa fa-trash"></i>

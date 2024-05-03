@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <main>
     {% if msg %}
         <section class="alert alert-{{type}}" role="alert">{{msg}}</section>
@@ -9,15 +11,15 @@
         <form action="" class="text-center filter-form" method="GET">
             <h2 class="text-primary font-weight-bold">Filtrar usuarios</h2>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                <span class="badge bg-info text-wrap badge-md">{{form.nombre.label_tag}}</span>
                 {{form.nombre}}
             </article>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                <span class="badge bg-info text-wrap badge-md">{{form.id.label_tag}}</span>
                 {{form.id}}
             </article>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.tipo_usuario.label_tag}}</span>
+                <span class="badge bg-info text-wrap badge-md">{{form.tipo_usuario.label_tag}}</span>
                 {{form.tipo_usuario}}
             </article>
             <button type="submit" class="btn btn-primary col-md-5">Buscar <i class="fa fa-search"></i></button>
@@ -99,7 +101,7 @@
                                         <span class="badge bg-secondary">{{u.tipo_usuario}}</span>
                                     </article>
                                     <article class="col-md-3">
-                                        <a href="{% url 'user_detail' userid=u.id %}" class="btn btn-warning">Modificar</a>
+                                        <a href="{% url 'user_detail' userid=u.id %}" class="btn btn-warning text-white">Modificar</a>
     
                                         {% if u.is_active %}
                                             <!-- trigger -->

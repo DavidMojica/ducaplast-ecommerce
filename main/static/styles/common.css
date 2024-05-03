@@ -18,3 +18,7 @@ main{
 .bg-gray{
     background-color: #424242;
 }
+
+.badge-md{
+    width: 125px;
+}
