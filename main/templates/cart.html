@@ -21,7 +21,7 @@
                   <h5 class="mb-0" id="productos_cantidad">Carro - {{cantidad_productos}} item(s)</h5>
                   <form action="" method="POST">
                     {% csrf_token %}
-                    <button type="button" class="btn btn-warning btn-sm cart-handler" data-producto-id="0" data-carthandler-url="{% url 'carthandler' %}" data-action="3" title="Limpiar completamente el carrito">Eliminar todo</button>
+                    <button type="button" class="btn btn-warning btn-sm cart-handler text-white" data-producto-id="0" data-carthandler-url="{% url 'carthandler' %}" data-action="3" title="Limpiar completamente el carrito">Eliminar todo</button>
                   </form>
                 </section>
                 <section class="card-body">

@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <main>
     {% if msg %}
         <section class="alert alert-{{type}}" role="alert">{{msg}}</section>
@@ -9,11 +11,11 @@
         <form action="" class="text-center filter-form" method="GET">
             <h2 class="text-primary font-weight-bold">Filtrar clientes</h2>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.nombre.label_tag}}</span>
+                <span class="badge bg-info badge-md text-wrap">{{form.nombre.label_tag}}</span>
                 {{form.nombre}}
             </article>
             <article class="input-group mb-3">
-                <span class="badge bg-info">{{form.id.label_tag}}</span>
+                <span class="badge bg-info badge-md text-wrap">{{form.id.label_tag}}</span>
                 {{form.id}}
             </article>
             <button type="submit" class="btn btn-primary col-md-5">Buscar <i class="fa fa-search"></i></button>
@@ -92,7 +94,7 @@
                                     </article>
 
                                     <article class="col-md-4">
-                                        <a href="{% url 'client_detail' clientid=c.id %}" class="btn btn-warning">Modificar</a>
+                                        <a href="{% url 'client_detail' clientid=c.id %}" class="btn btn-warning text-white">Modificar</a>
                                         <!-- trigger -->
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalDelete-{{c.id}}" data-backdrop="false">Borrar</button>
                                         <!-- modal -->
