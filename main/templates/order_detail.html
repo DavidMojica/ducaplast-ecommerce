@@ -474,7 +474,7 @@
                         <tbody>
                             {% for p in productos %}
                                 <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 2 %}producto_listado{% endif %}">
-                                    <td>
+                                    <td class="nombre_producto">
                                         {% if p.cantidad > 0 %}
                                             {{ p.producto.descripcion }}
                                         {% else %}

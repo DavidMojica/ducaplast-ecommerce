@@ -33,7 +33,9 @@ try{
     const productos_listados = document.querySelectorAll('.producto_listado');
     productos_listados.forEach(producto =>{
         producto.addEventListener('click', ()=>{
-            console.log("aa");
+            const nombre_producto = producto.querySelector('.nombre_producto');
+            nombre_producto.style.textDecoration = nombre_producto.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+            
         });
     });
 } catch {}
