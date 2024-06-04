@@ -464,7 +464,8 @@
                         <thead>
                             <tr>
                                 <th scope="col">Producto</th>
-                                <th scope="col">Cantidad</th>´
+                                <th scope="col">Cantidad</th>
+                                <th scope="col">Tipo Cantidad</th>
                                 {% if pedido.estado_id == 1 %}
                                     <th scope="col">Acción</th>
                                 {% endif %}
@@ -472,7 +473,7 @@
                         </thead>
                         <tbody>
                             {% for p in productos %}
-                                <tr id="p-{{p.producto_id}}">
+                                <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 2 %}producto_listado{% endif %}">
                                     <td>
                                         {% if p.cantidad > 0 %}
                                             {{ p.producto.descripcion }}
@@ -480,6 +481,7 @@
                                             <strike>{{ p.producto.descripcion }}</strike>
                                         {% endif %}
                                     </td>
+                                    
                                     {% if user.tipo_usuario_id == 3 or isAdmin  %}
                                         {% if pedido.estado_id == 1 %}
                                             {% if p.cantidad > 0 %}
@@ -492,7 +494,8 @@
                                                     <strong>Producto agotado</strong>
                                                 </td>
                                             {% endif%}
-                                            <td>
+                                            <td>{{p.tipo_cantidad}}</td>
+                                            <td>   
                                                 {% if p.cantidad > 0 %}
                                                     <!-- trigger -->
                                                     <button type="button" class="btn btn-danger btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
@@ -548,6 +551,9 @@
                                         {% endif %}
                                     {% else %}
                                         <td>{{ p.cantidad }}</td>
+                                    {% endif %}
+                                    {% if pedido.estado_id != 1 %}
+                                        <td>{{p.tipo_cantidad}}</td>
                                     {% endif %}
                                 </tr>
                             {% endfor %}

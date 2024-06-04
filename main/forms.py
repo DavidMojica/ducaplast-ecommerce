@@ -2,6 +2,13 @@ from django import forms
 from .models import Estados, HandlerReparto, TipoProducto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
 
+class CatalogoUnidades(forms.ModelForm):
+    unidades = forms.IntegerField(
+        min_value=1,
+        widget=forms.NumberInput(attrs={'class': 'cantidad form-control', 'value': 1})
+        
+    )
+
 class FiltrarRecibos(forms.ModelForm):
     id = forms.IntegerField(
         label="Codigo del pedido",

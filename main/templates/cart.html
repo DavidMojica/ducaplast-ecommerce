@@ -54,8 +54,17 @@
                                     <button class="btn btn-primary px-3 ms-2 h-50 stepUp">
                                         <i class="fa fa-plus"></i>
                                     </button>
-                                </section>
-                                <p class=""><strong><span></span></strong></p>
+                                  </section>
+                                  <p class=""><strong><span></span></strong></p>
+                                  <select name="quantity_type" id="" class="form-select product_quantity_type w-50 m-auto">
+                                    {% for tipo in tipo_cantidad %}
+                                      <option value="{{tipo.id}}" {% if p.tipo_cantidad == tipo.id %} selected {% endif %}>
+                                        {{tipo.description}}
+                                      </option>
+                                    {% endfor %}
+                                  </select>
+
+                                  
                                 <!-- <p class=""><strong>Total artículo: $<span>{{p.total_producto_str}}</span> </strong></p> -->
                                 <!-- <span class="badge bg-danger mt-0">Unidades restantes: 5</span> -->
                             </section>

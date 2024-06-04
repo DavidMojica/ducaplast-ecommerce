@@ -58,13 +58,20 @@ const val_cliente_registro = () =>{
 //     }
 // }
 
-const updateProductQuantity = (element, id, quantity) => {
+const updateProduct = (element, id, quantity) => {
     if (!isNaN(quantity) && quantity > 0){
-        Productos[id] = quantity;
+        Productos[id]['cantidad'] = quantity;
         element.textContent = "";
     }else {
         element.textContent = "Cantidad no válida, el producto se borrará si se confirma la venta.";
         delete Productos[id];
+    }
+}
+
+const updateQuantityType = (id, quantity_type) =>{
+    if (!isNaN(quantity_type)){
+        Productos[id]['tipo_cantidad'] = quantity_type;
+        console.log(Productos);
     }
 }
 
@@ -105,27 +112,32 @@ document.querySelectorAll('.product_quantity').forEach(input => {
     // totalProductos += price*input.value;
     const stepDown = input.parentElement.querySelector('button:first-child');
     const stepUp = input.parentElement.querySelector('button:last-child');
+    const product_quantity_type = input.parentElement.nextElementSibling.nextElementSibling;
     //Init
-    Productos[id] = parseInt(input.value);
-
-
+    Productos[id] = {'cantidad': parseInt(input.value), 'tipo_cantidad': parseInt(product_quantity_type.value)};
     input.addEventListener('input', function() {
         // updateProductPrice(priceElement, price, parseInt(this.value), id);
-        updateProductQuantity(priceElement, id, parseInt(this.value));
+        updateProduct(priceElement, id, parseInt(this.value));
         console.log(Productos);
     });
 
     stepDown.addEventListener('click', e =>{
         input.stepDown();
-        updateProductQuantity(priceElement, id, parseInt(input.value));
+        updateProduct(priceElement, id, parseInt(input.value));
         // updateProductPrice(priceElement, price, parseInt(input.value), id);
-        console.log(Productos);
     });
+
     stepUp.addEventListener('click', e =>{
         input.stepUp();
-        updateProductQuantity(priceElement, id, parseInt(input.value));
+        updateProduct(priceElement, id, parseInt(input.value));
         // updateProductPrice(priceElement, price, parseInt(input.value), id);
-        console.log(Productos);
+    });
+});
+
+document.querySelectorAll('.product_quantity_type').forEach(input =>{
+    const id = input.closest('article').querySelector('.code').textContent;
+    input.addEventListener('change', ()=>{
+        updateQuantityType(id, parseInt(input.value));
     });
 });
 

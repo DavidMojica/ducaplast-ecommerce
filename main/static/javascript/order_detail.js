@@ -29,6 +29,14 @@ try {
     });
 } catch {}
 
+try{
+    const productos_listados = document.querySelectorAll('.producto_listado');
+    productos_listados.forEach(producto =>{
+        producto.addEventListener('click', ()=>{
+            console.log("aa");
+        });
+    });
+} catch {}
 
 let ban = true;
 $(btnModificarCantidad).on('click', function(e){

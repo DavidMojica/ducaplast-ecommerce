@@ -9,7 +9,7 @@ from django.db.models import FloatField, Count, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm,RegistroUsuariosFormAdmin ,InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
-from .models import Estados, RolReparto, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion, HandlerReparto
+from .models import TipoCantidad, Estados, RolReparto, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion, HandlerReparto
 
 import re, json
 
@@ -970,12 +970,15 @@ def CartHandler(request):
             try:
                 producto = Producto.objects.get(pk=producto_id)
                 cantidad = int(request.POST.get('cantidad', 1)) 
+                tipo_cantidad = int(request.POST.get('tipo_cantidad', 0))
                 total_producto = int(cantidad) * int(producto.precio)
+                
                 carrito[producto_id] = {
                     'descripcion': producto.descripcion,
                     'precio': producto.precio,
                     'referencia_fabrica': producto.referencia_fabrica,
                     'cantidad': cantidad,
+                    'tipo_cantidad': tipo_cantidad,
                     'total_producto': total_producto,
                 }
                 event = "Producto añadido"
@@ -1023,6 +1026,7 @@ def Catalogo(request):
     
     data = {'productos': productos_paginados,
             'carrito': request.session.get('carritoVenta', {}),
+            'tipo_cantidad': TipoCantidad.objects.all(),
             'form': form }
     return render(request, HTMLCATALOGO,{**data})
               
@@ -1047,6 +1051,7 @@ def Cart(request):
             'form': form,
             'event': '',
             'success':False,
+            'tipo_cantidad': TipoCantidad.objects.all()
             }
     
     if "confirmar_venta" in request.POST:
@@ -1066,14 +1071,15 @@ def Cart(request):
             cliente = get_object_or_404(Clientes, pk=cliente)   
             estado = get_object_or_404(Estados, pk=0)
             #Actualizar carrito mientras se comrpueba la existencia de los productos solicitados
-            for producto_id, cantidad in productos_dict.items():
+            for producto_id, producto in productos_dict.items():
                 if producto_id in carrito:
                     producto_real = get_object_or_404(Producto, pk=producto_id)
                     carrito[producto_id] = {
                         'precio': producto_real.precio,
                         'cantidad_existencias': producto_real.cantidad,
-                        'cantidad': cantidad,
-                        'total_producto': int(cantidad) * int(producto_real.precio)
+                        'cantidad': producto['cantidad'],
+                        'tipo_cantidad': producto['tipo_cantidad'],
+                        'total_producto': int(producto['cantidad']) * int(producto_real.precio)
                     }
                 else: 
                     return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
@@ -1090,12 +1096,13 @@ def Cart(request):
             nuevo_pedido.save()
             
             #Añadir productos al pedido
-            for producto_id, cantidad in productos_dict.items():
+            for producto_id, producto in productos_dict.items():
                 verificar_producto = get_object_or_404(Producto, pk=producto_id)
                 producto_pedido = ProductosPedido(
                     producto = verificar_producto,
                     pedido = nuevo_pedido,
-                    cantidad=cantidad
+                    cantidad=producto['cantidad'],
+                    tipo_cantidad = get_object_or_404(TipoCantidad, pk=producto['tipo_cantidad'])
                 )
                 producto_pedido.save()
             
@@ -1115,6 +1122,7 @@ def Cart(request):
         else:
             data['event'] = "Nombre o direccion inválida"
             return render(request, HTMLCARRITO, data)
+    
     return render(request, HTMLCARRITO, data)
 
 #-----------------------------------------------------------------------#

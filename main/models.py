@@ -60,6 +60,13 @@ class TipoProducto(models.Model):
     def __str__(self):
         return self.description 
 
+class TipoCantidad(models.Model):
+    id = models.IntegerField(primary_key=True)
+    description = models.CharField(max_length=25)
+    
+    def __str__(self):
+        return self.description
+
 class RolReparto(models.Model):
     id = models.IntegerField(primary_key=True)
     description = models.CharField(max_length=25)
@@ -139,7 +146,8 @@ class Producto(models.Model):
 class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
-    cantidad = models.IntegerField(default=1)   
+    cantidad = models.IntegerField(default=1)
+    tipo_cantidad = models.ForeignKey(TipoCantidad, on_delete=models.CASCADE, null=True, blank=True)   
     
 class HandlerEmpaquetacion(models.Model):
     empacador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
