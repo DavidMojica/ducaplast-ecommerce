@@ -31,6 +31,8 @@ insert into main_tipocantidad(id, description) values (2, 'Paquete(s)');
 insert into main_tipocantidad(id, description) values (3, 'Paca(s)');
 
 
+insert into main_tipoconsecutivo(id, description) values (0, '');
+
 --Deploy queries
 
 delete from main_productospedido;

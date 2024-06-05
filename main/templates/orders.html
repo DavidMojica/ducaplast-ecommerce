@@ -5,7 +5,7 @@
 <script src="{% static 'javascript/orders.js' %}"defer></script>
 <section class="gradient-custom">
     <main class="">
-        {% if history and isAdmin %}
+        {% if history and isAdmin or user.tipo_usuario_id == 5 %}
         <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base" >
             <form action="" method="GET" class="text-center filter-form row">
                 <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
@@ -128,8 +128,16 @@
                         <!-- Pedido -->
                         <a href="{% url 'order_detail' order=p.id %}" class="text-decoration-none text-white">
                             <article class="card bg-gray">
-                                <header class="card-header bg-primary text-white">
-                                    <h4>Pedido #{{p.id}} {% if history and isAdmin %}- {% if p.consecutivo %}Consecutivo:  {{p.consecutivo}} {% else %} Sin consecutivo {% endif %}{% endif %}</h4>
+                                <header class="card-header bg-primary text-white d-flex justify-content-between">
+                                    <h4>Pedido #{{p.id}} {% if history and isAdmin or user.tipo_usuario_id == 5 %}- {% if p.consecutivo %}Consecutivo:  {{p.consecutivo}} {% else %} Sin consecutivo {% endif %}{% endif %}</h4>
+                                    <form action="" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_pedido">
+                                        <input type="hidden" name="pedido_id" value="{{p.id}}">
+                                        <button type="submit" class="eliminate btn btn-danger btn-sm cart-handler">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </header>
                                 <section class="card-body">
                                     <section class="row">

@@ -60,6 +60,13 @@ class TipoProducto(models.Model):
     def __str__(self):
         return self.description 
 
+class TipoConsecutivo(models.Model):
+    id = models.IntegerField(primary_key=True)
+    description = models.CharField(max_length=25)
+    
+    def __str__(self):
+        return self.description
+    
 class TipoCantidad(models.Model):
     id = models.IntegerField(primary_key=True)
     description = models.CharField(max_length=25)

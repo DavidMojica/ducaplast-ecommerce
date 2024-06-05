@@ -183,7 +183,7 @@ class FiltrarUsuarios(forms.Form):
     )
     tipo_usuario = forms.ModelChoiceField(
         label="Tipo de usuario",
-        queryset=TipoUsuario.objects.all(),
+        queryset=TipoUsuario.objects.all().order_by('id'),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
         empty_label="Todos",
         required=False
@@ -277,7 +277,7 @@ class RegistroUsuariosForm(forms.ModelForm):
     
     tipo_usuario=forms.ModelChoiceField(
         label="Tipo de usuario",
-        queryset=TipoUsuario.objects.all(),
+        queryset=TipoUsuario.objects.all().order_by('id'),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
         empty_label="Seleccione tipo de usuario..."
     )
@@ -320,7 +320,7 @@ class RegistroUsuariosFormAdmin(forms.ModelForm):
     
     tipo_usuario=forms.ModelChoiceField(
         label="Tipo de usuario",
-        queryset=TipoUsuario.objects.exclude(id__in=[0, 1]),
+        queryset=TipoUsuario.objects.exclude(id__in=[0, 1]).order_by('id'),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
         empty_label="Seleccione tipo de usuario..."
     )

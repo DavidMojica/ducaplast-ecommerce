@@ -751,6 +751,12 @@ def Orders(request, filtered=None):
     pedidos = []
     data= {'user': user, 'history': False, 'form':form, 'isAdmin':False}
 
+    if request.method == 'POST':
+        if 'delete_pedido' in request.POST:
+            pedido_id = request.POST.get('pedido_id')
+            pedido = get_object_or_404(Pedido, pk=pedido_id)
+            pedido.delete()
+
     if not filtered:
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.exclude(estado_id__in=[5, 6]).order_by('-fecha')
