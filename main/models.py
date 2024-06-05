@@ -60,6 +60,20 @@ class TipoProducto(models.Model):
     def __str__(self):
         return self.description 
 
+class TipoConsecutivo(models.Model):
+    id = models.IntegerField(primary_key=True)
+    description = models.CharField(max_length=25)
+    
+    def __str__(self):
+        return self.description
+    
+class TipoCantidad(models.Model):
+    id = models.IntegerField(primary_key=True)
+    description = models.CharField(max_length=25)
+    
+    def __str__(self):
+        return self.description
+
 class RolReparto(models.Model):
     id = models.IntegerField(primary_key=True)
     description = models.CharField(max_length=25)
@@ -88,6 +102,7 @@ class Pedido(models.Model):
     completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="completado_por")
     completado_hora = models.DateTimeField(null=True, blank=True)
     consecutivo = models.CharField(max_length=20, null=True, unique=True)    
+    tipo_consecutivo = models.ForeignKey(TipoConsecutivo, on_delete=models.CASCADE, null=True, blank=True)
     
     def get_status_tiempo(self):
         if self.completado_por:
@@ -108,6 +123,8 @@ class Pedido(models.Model):
             return 'bg-warning'
         elif self.estado_id in [3,4]:
             return 'bg-primary'
+        elif self.estado_id == 5:
+            return 'bg-pink'
         else:
             return 'bg-success'
     
@@ -139,7 +156,8 @@ class Producto(models.Model):
 class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
-    cantidad = models.IntegerField(default=1)   
+    cantidad = models.IntegerField(default=1)
+    tipo_cantidad = models.ForeignKey(TipoCantidad, on_delete=models.CASCADE, null=True, blank=True)   
     
 class HandlerEmpaquetacion(models.Model):
     empacador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)

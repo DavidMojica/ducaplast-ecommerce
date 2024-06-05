@@ -271,8 +271,14 @@
                                                     <strong>{{form.consecutivo.label}}</strong>
                                                     {{form.consecutivo}}
                                                 </fieldset>
-                                                <input type="hidden" name="confirmarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Confirmar despacho</button>                             
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>{{form.tipo_consecutivo.label}}</strong>
+                                                    {{form.tipo_consecutivo}}
+                                                </fieldset>
+                                                <input type="hidden" name="confirmarRepartidor" id="confirmarRepartidorInput">
+                                                <input type="hidden" name="pendienteRepartidor" id="marcarPendienteInput">
+                                                <button type="submit" class="btn btn-warning mt-3 text-white" onclick="setAction('pendiente')"> Marcar como pendiente</button>
+                                                <button type="submit" class="btn btn-success mt-3 text-white" onclick="setAction('confirmarDespacho')">Confirmar despacho</button>                             
                                             </form> 
                                         </section>
                                         <section class="modal-footer">
@@ -282,9 +288,14 @@
                                 </article>
                             </section>
                         {% endif %}
-                    {% elif pedido.estado.id == 4 %}
-                        <h5>Este pedido está siendo repartido</h5>
-                        <h6>Consecutivo: {%if pedido.consecutivo%} <span class="badge bg-info">{{pedido.consecutivo}}</span> {% else %} Sin consecutivo {% endif %}</h6>
+                    {% elif pedido.estado.id == 5 or pedido.estado.id == 4 %}
+                        {% if pedido.estado.id == 4 %}
+                            <h5>Este pedido está pendiente</h5>
+                        {% elif pedido.estado.id == 5 %}
+                            <h5>Este pedido está siendo repartido</h5>
+                        {% endif %}
+                        <h6>Consecutivo: {%if pedido.consecutivo %} <span class="badge bg-info">{{pedido.consecutivo}} </span> {% else %} Sin consecutivo {% endif %}</h6>
+                        <h6>Tipo de consecutivo: {% if pedido.tipo_consecutivo %} <span class="badge bg-info">{{pedido.tipo_consecutivo}}</span> {% else %} Sin tipo de consecutivo {% endif %}</h6>
                         <p>Despachador: {{pedido.despachador_reparto}} <br>
                         Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
                         {% if pedido.despacho_modificado_hora %}
@@ -300,11 +311,10 @@
                                 </p>
                             </li>
                             {% endfor %}
-
                         </ul>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalDespachadorModificar">Modificar repartidor</button>
+                            <button class="btn btn-warning text-white" data-bs-toggle="modal" data-bs-target="#modalDespachadorModificar">Modificar repartidor</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalDespachadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
@@ -315,7 +325,7 @@
                                         </section>
                                         <section class="modal-body">
                                             <p>Modificar al repartidor</p>
-                                            <form action="" method="POST" id="modificarRepartidor" class="text-end">
+                                            <form action="" method="POST" class="text-end">
                                                 {% csrf_token %}
                                                 <fieldset class="text-start mb-2">
                                                     <strong>Modificar repartidor principal</strong>
@@ -329,9 +339,13 @@
                                                     <strong>Consecutivo: </strong>
                                                     {{form.consecutivo}}
                                                 </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Tipo consecutivo </strong>
+                                                    {{form.tipo_consecutivo}}
+                                                </fieldset>
                                                 <input type="hidden" name="modificarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
-                                            </form> 
+                                                <button type="submit" class="btn btn-warning mt-3 text-white">Guardar modificacion</button>             
+                                            </form>   
                                         </section>
                                         <section class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
@@ -339,12 +353,55 @@
                                     </article>
                                 </article>
                             </section>
+                            {% if pedido.estado_id == 4 %}
+                            <!-- Trigger -->
+                            <button class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#modalMarcarDespachado">Marcar como despachado</button>
+                            <!-- modal -->
+                            <section class="modal fade" id="modalMarcarDespachado" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                <article class="modal-dialog modal-dialog-centered">
+                                    <article class="modal-content">
+                                        <section class="modal-header">
+                                            <h5 class="modal-title">Marcar como despachado</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </section>
+                                        <section class="modal-body">
+                                            <p>Modifica y confirma los datos</p>
+                                            <form action="" method="POST" class="text-end">
+                                                {% csrf_token %}
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Modificar repartidor principal</strong>
+                                                    {{form.repartidor}}
+                                                </fieldset>
+                                                <fieldset class="text-start">
+                                                    <strong>Modificar repartidor secundario</strong>
+                                                    {{form.repartidorSecundario}}
+                                                </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Consecutivo: </strong>
+                                                    {{form.consecutivo}}
+                                                </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Tipo consecutivo </strong>
+                                                    {{form.tipo_consecutivo}}
+                                                </fieldset>
+                                                <input type="hidden" name="confirmarRepartidor" value="true">
+                                                <button type="submit" class="btn btn-success mt-3 text-white">Marcar como despachado</button>
+                                            </form> 
+            
+                                        </section>
+                                        <section class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                        </section>
+                                    </article>
+                                </article>
+                            </section>
+                            {% endif %}
                         {% endif %} 
                         {% if isAdmin %}
                         <!-- trigger -->
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCompletarPedido">Completar pedido</button>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCompletarPedido1">Completar pedido</button>
                         <!-- modal -->
-                        <section class="modal fade" id="modalCompletarPedido" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                        <section class="modal fade" id="modalCompletarPedido1" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                             <article class="modal-dialog modal-dialog-centered">
                                 <article class="modal-content">
                                     <section class="modal-header">
@@ -376,7 +433,24 @@
                         <span class="badge bg-danger">{{issue5}}</span>
                     {% else %}
                     <h5>Este pedido fue repartido por:</h5>
-                    <p>{{pedido.repartido_por}}</p>
+                    <h6>Consecutivo: {%if pedido.consecutivo %} <span class="badge bg-info">{{pedido.consecutivo}} </span> {% else %} Sin consecutivo {% endif %}</h6>
+                    <h6>Tipo de consecutivo: {% if pedido.tipo_consecutivo %} <span class="badge bg-info">{{pedido.tipo_consecutivo}}</span> {% else %} Sin tipo de consecutivo {% endif %}</h6>
+                    <p>Despachador: {{pedido.despachador_reparto}} <br>
+                    Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
+                    {% if pedido.despacho_modificado_hora %}
+                        Este pedido fue modificado - <span class="badge bg-warning">{{pedido.despacho_modificado_hora}}</span>
+                    {% endif %}
+                    </p>
+                    <h5>Repartidor(es) elegido(s)</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for r in repartidoresActivos %}
+                        <li class="list-group-item">
+                            <p>{{r.repartidor.first_name}} {{r.repartidor.last_name}}
+                                Cod. Empleado {{r.repartidor.id}}
+                            </p>
+                        </li>
+                        {% endfor %}
+                    </ul>
                     {% endif %}
                 </article>
             </section>
@@ -386,11 +460,11 @@
                     <h5 class="card-title">Completación</h5>
                 </article>
                 <article class="card-body">
-                    {% if pedido.estado.id < 5 %}
+                    {% if pedido.estado.id < 6 %}
                         <h5>Este pedido no aún no se ha completado</h5>
-                    {% elif pedido.estado.id == 5 or pedido.estado.id == 6 %}
+                    {% elif pedido.estado.id == 6 or pedido.estado.id == 7 %}
                         {% if isAdmin %}
-                            {% if pedido.estado.id == 5 %}
+                            {% if pedido.estado.id == 6 %}
                                 <h5>Este pedido está en crédito</h5>
                                 <hr>
                                 <p>
@@ -398,9 +472,9 @@
                                     Fecha crédito: <span class="badge bg-warning">{{ pedido.credito_hora }}</span> 
                                 </p>
                                 <!-- trigger -->
-                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalPedidoPagado">Marcar como pagado</button>
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalPedidoPagado2">Marcar como pagado</button>
                                 <!-- modal -->
-                                <section class="modal fade" id="modalPedidoPagado" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                <section class="modal fade" id="modalPedidoPagado2" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                     <article class="modal-dialog modal-dialog-centered">
                                         <article class="modal-content">
                                             <section class="modal-header">
@@ -421,7 +495,7 @@
                                         </article>
                                     </article>
                                 </section>
-                            {% elif pedido.estado.id == 6%}
+                            {% elif pedido.estado.id == 7 %}
                                 {% if pedido.credito_por %}
                                     <h5>Este pedido estuvo en crédito pero ya fue cancelado.</h5>
                                     <h6>Crédito</h6>
@@ -464,7 +538,8 @@
                         <thead>
                             <tr>
                                 <th scope="col">Producto</th>
-                                <th scope="col">Cantidad</th>´
+                                <th scope="col">Cantidad</th>
+                                <th scope="col">Tipo Cantidad</th>
                                 {% if pedido.estado_id == 1 %}
                                     <th scope="col">Acción</th>
                                 {% endif %}
@@ -472,14 +547,15 @@
                         </thead>
                         <tbody>
                             {% for p in productos %}
-                                <tr id="p-{{p.producto_id}}">
-                                    <td>
+                                <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 2 %}producto_listado{% endif %}">
+                                    <td class="nombre_producto">
                                         {% if p.cantidad > 0 %}
                                             {{ p.producto.descripcion }}
                                         {% else %}
                                             <strike>{{ p.producto.descripcion }}</strike>
                                         {% endif %}
                                     </td>
+                                    
                                     {% if user.tipo_usuario_id == 3 or isAdmin  %}
                                         {% if pedido.estado_id == 1 %}
                                             {% if p.cantidad > 0 %}
@@ -492,7 +568,8 @@
                                                     <strong>Producto agotado</strong>
                                                 </td>
                                             {% endif%}
-                                            <td>
+                                            <td>{{p.tipo_cantidad}}</td>
+                                            <td>   
                                                 {% if p.cantidad > 0 %}
                                                     <!-- trigger -->
                                                     <button type="button" class="btn btn-danger btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
@@ -548,6 +625,9 @@
                                         {% endif %}
                                     {% else %}
                                         <td>{{ p.cantidad }}</td>
+                                    {% endif %}
+                                    {% if pedido.estado_id != 1 %}
+                                        <td>{{p.tipo_cantidad}}</td>
                                     {% endif %}
                                 </tr>
                             {% endfor %}

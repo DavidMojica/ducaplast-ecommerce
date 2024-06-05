@@ -12,9 +12,10 @@ insert into main_estados (id, description) values(0, 'Para empacar');
 insert into main_estados (id, description) values(1, 'Siendo empacado');
 insert into main_estados (id, description) values(2, 'En facturacion');
 insert into main_estados (id, description) values(3, 'Pendiente de despacho');
-insert into main_estados (id, description) values(4, 'En reparto');
-insert into main_estados (id, description) values(5, 'Recibido');
-insert into main_estados (id, description) values(6, 'Cancelado');
+insert into main_estados (id, description) values(4, 'Pendiente');
+insert into main_estados (id, description) values(5, 'En reparto');
+insert into main_estados (id, description) values(6, 'Recibido');
+insert into main_estados (id, description) values(7, 'Cancelado');
 --select * from main_estados
 insert into main_tipoproducto (id, description) values(0, 'Desechables');
 insert into main_tipoproducto (id, description) values(1, 'Bolsas');
@@ -23,6 +24,18 @@ insert into main_tipoproducto (id, description) values(2, 'Varios');
 
 insert into main_rolreparto(id, description) values(0, 'Principal');
 insert into main_rolreparto(id, description) values(1, 'Ayudante');
+
+--select * from main_tipocantidad
+insert into main_tipocantidad(id, description) values (0, 'Unidad(es)');
+insert into main_tipocantidad(id, description) values (1, 'Caja(s)');
+insert into main_tipocantidad(id, description) values (2, 'Paquete(s)');
+insert into main_tipocantidad(id, description) values (3, 'Paca(s)');
+
+
+insert into main_tipoconsecutivo(id, description) values (0, 'AE');
+insert into main_tipoconsecutivo(id, description) values (1, 'FE');
+insert into main_tipoconsecutivo(id, description) values (2, 'Cotización');
+insert into main_tipoconsecutivo(id, description) values (3, 'Remisión');
 
 --Deploy queries
 

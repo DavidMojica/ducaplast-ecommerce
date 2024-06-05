@@ -2,3 +2,7 @@
     width: 248px;
     border-radius: 1em 2em;
 }
+
+.bg-pink{
+    background-color: palevioletred;
+}

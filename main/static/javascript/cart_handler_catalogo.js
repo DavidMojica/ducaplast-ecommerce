@@ -7,10 +7,11 @@ $(document).ready(()=> {
         e.preventDefault();
         let producto_id = $(this).data('producto-id');
         let cantidad = $(this).siblings('.cantidad').val();
+        let tipo_cantidad = $(this).siblings('.tipo_cantidad').val();
         let url = $(this).data('carthandler-url');
         let action = $(this).data('action');
         let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
-        //Validar desde el servidor: cantidad nula o 0, regex numero.
+        console.log(tipo_cantidad);
 
         if (cantidad.trim() == "" || cantidad <= 0 || !regexNumeros(cantidad)) createToastNotify(1, "Error, cantidad no válida.", "Por favor ingrese una cantidad de producto válida.");
         else{
@@ -21,6 +22,7 @@ $(document).ready(()=> {
                     'action': action,
                     'producto_id': producto_id,
                     'cantidad': cantidad,
+                    'tipo_cantidad': tipo_cantidad,
                     'csrfmiddlewaretoken': csfrtoken
                 },
                 dataType: 'json',

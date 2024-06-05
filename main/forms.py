@@ -1,6 +1,13 @@
 from django import forms
-from .models import Estados, HandlerReparto, TipoProducto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
+from .models import TipoConsecutivo, Estados, HandlerReparto, TipoProducto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
+
+class CatalogoUnidades(forms.ModelForm):
+    unidades = forms.IntegerField(
+        min_value=1,
+        widget=forms.NumberInput(attrs={'class': 'cantidad form-control', 'value': 1})
+        
+    )
 
 class FiltrarRecibos(forms.ModelForm):
     id = forms.IntegerField(
@@ -38,6 +45,14 @@ class FiltrarRecibos(forms.ModelForm):
         min_value=0,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Consecutivo del pedido'}),
     )
+    
+    tipo_consecutivo = forms.ModelChoiceField(
+        label='Tipo de consecutivo',
+        required=False,
+        queryset=TipoConsecutivo.objects.all(),
+        empty_label='Todos',
+        widget=forms.Select(attrs={'class': 'form-select', 'name': 'tipo_consecutivo', 'id':'tipo_consecutivo'}),
+    )
 
     class Meta:
         model = Pedido
@@ -64,14 +79,22 @@ class FiltrarRecibos(forms.ModelForm):
         
 #Crear o modificar un producto
 class ProductoForm(forms.ModelForm):
+    tipo = forms.ModelChoiceField(
+        queryset=TipoProducto.objects.all(),
+        required=True,
+        empty_label='Tipo del producto',
+        widget=forms.Select(attrs={'class': 'form-select', 'name': 'tipo'}),
+    )
+    
     class Meta:
         model = Producto
-        fields = ['descripcion', 'referencia_fabrica', 'precio', 'cantidad']
+        fields = ['descripcion', 'referencia_fabrica', 'precio', 'cantidad', 'tipo']
         labels = {
             'descripcion': 'Descripción',
             'referencia_fabrica': 'Referencia de fábrica',
             'precio': 'Precio',
             'cantidad': 'Cantidad',
+            'tipo':'Tipo de producto'
         }
         widgets = {
             'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
@@ -94,20 +117,21 @@ class SeleccionarRepartidor(forms.Form):
                 self.fields['repartidor'].queryset = repartidores_queryset
                 self.fields['repartidor'].initial = repartidor_asignado.pk  
                 
-                
                 self.fields['repartidorSecundario'].queryset = repartidores_queryset
                 
                 repartidor_secundario_asignado = HandlerReparto.objects.filter(pedido=pedido).exclude(repartidor=repartidor_asignado).first()
                 if repartidor_secundario_asignado:
                     self.fields['repartidorSecundario'].initial = repartidor_secundario_asignado.repartidor.pk
+                
             self.fields['consecutivo'].initial = pedido.consecutivo
+            self.fields['tipo_consecutivo'].initial = pedido.tipo_consecutivo
             
     repartidor = forms.ModelChoiceField(
         label="Por favor asigne el repartidor que se encargará de esta entrega.",
         widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor', 'name': 'repartidor', 'id':'repartidor'}),
         queryset=Usuarios.objects.filter(tipo_usuario_id=6),
         empty_label="Seleccione repartidor (Obligatorio)",
-        required=True
+        required=False
     )
     
     repartidorSecundario = forms.ModelChoiceField(
@@ -121,7 +145,15 @@ class SeleccionarRepartidor(forms.Form):
     consecutivo = forms.CharField(
         label="Consecutivo del pedido:",
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consecutivo'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consecutivo', 'placeholder': '123456'}),
+    )
+
+    tipo_consecutivo = forms.ModelChoiceField(
+        label="Tipo consecutivo",
+        widget=forms.Select(attrs={'class':'form-select', 'name':'tipo_consecutivo', 'id':'tipo_consecutivo'}),
+        queryset=TipoConsecutivo.objects.all(),
+        empty_label="Seleccione el tipo de consecutivo",
+        required=True
     )
 
 class DetallesPedido(forms.Form):
@@ -176,7 +208,7 @@ class FiltrarUsuarios(forms.Form):
     )
     tipo_usuario = forms.ModelChoiceField(
         label="Tipo de usuario",
-        queryset=TipoUsuario.objects.all(),
+        queryset=TipoUsuario.objects.all().order_by('id'),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
         empty_label="Todos",
         required=False
@@ -270,7 +302,7 @@ class RegistroUsuariosForm(forms.ModelForm):
     
     tipo_usuario=forms.ModelChoiceField(
         label="Tipo de usuario",
-        queryset=TipoUsuario.objects.all(),
+        queryset=TipoUsuario.objects.all().order_by('id'),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
         empty_label="Seleccione tipo de usuario..."
     )
@@ -313,7 +345,7 @@ class RegistroUsuariosFormAdmin(forms.ModelForm):
     
     tipo_usuario=forms.ModelChoiceField(
         label="Tipo de usuario",
-        queryset=TipoUsuario.objects.exclude(id__in=[0, 1]),
+        queryset=TipoUsuario.objects.exclude(id__in=[0, 1]).order_by('id'),
         widget=forms.Select(attrs={'class': 'form-select', 'id': 'tipoUsuario'}),
         empty_label="Seleccione tipo de usuario..."
     )
