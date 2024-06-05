@@ -1,5 +1,5 @@
 from django import forms
-from .models import Estados, HandlerReparto, TipoProducto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
+from .models import TipoConsecutivo, Estados, HandlerReparto, TipoProducto, TipoUsuario, Usuarios, Clientes, Producto, Pedido
 from django.db import models
 
 class CatalogoUnidades(forms.ModelForm):
@@ -44,6 +44,14 @@ class FiltrarRecibos(forms.ModelForm):
         required=False,
         min_value=0,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Consecutivo del pedido'}),
+    )
+    
+    tipo_consecutivo = forms.ModelChoiceField(
+        label='Tipo de consecutivo',
+        required=False,
+        queryset=TipoConsecutivo.objects.all(),
+        empty_label='Todos',
+        widget=forms.Select(attrs={'class': 'form-select', 'name': 'tipo_consecutivo', 'id':'tipo_consecutivo'}),
     )
 
     class Meta:
@@ -101,12 +109,15 @@ class SeleccionarRepartidor(forms.Form):
                 self.fields['repartidor'].queryset = repartidores_queryset
                 self.fields['repartidor'].initial = repartidor_asignado.pk  
                 
-                
                 self.fields['repartidorSecundario'].queryset = repartidores_queryset
                 
                 repartidor_secundario_asignado = HandlerReparto.objects.filter(pedido=pedido).exclude(repartidor=repartidor_asignado).first()
                 if repartidor_secundario_asignado:
                     self.fields['repartidorSecundario'].initial = repartidor_secundario_asignado.repartidor.pk
+                
+                self.fields['tipo_consecutivo'].initial = pedido.tipo_consecutivo
+                
+                
             self.fields['consecutivo'].initial = pedido.consecutivo
             
     repartidor = forms.ModelChoiceField(
@@ -128,7 +139,15 @@ class SeleccionarRepartidor(forms.Form):
     consecutivo = forms.CharField(
         label="Consecutivo del pedido:",
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consecutivo'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consecutivo', 'placeholder': '123456'}),
+    )
+
+    tipo_consecutivo = forms.ModelChoiceField(
+        label="Tipo consecutivo",
+        widget=forms.Select(attrs={'class':'form-select', 'name':'tipo_consecutivo', 'id':'tipo_consecutivo'}),
+        queryset=TipoConsecutivo.objects.all(),
+        empty_label="Seleccione el tipo de consecutivo",
+        required=True
     )
 
 class DetallesPedido(forms.Form):

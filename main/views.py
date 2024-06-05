@@ -9,7 +9,7 @@ from django.db.models import FloatField, Count, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .forms import FiltrarUsuarios,ModificarCliente, FiltrarCliente,FiltrarRecibos, ProductoForm, RegistroUsuariosForm,RegistroUsuariosFormAdmin ,InicioSesionForm, FiltrarProductos, DetallesPedido, SeleccionarRepartidor, TipoUsuario
-from .models import TipoCantidad, Estados, RolReparto, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion, HandlerReparto
+from .models import TipoCantidad, Estados, RolReparto, TipoConsecutivo, Usuarios, Producto, Clientes, Pedido, ProductosPedido, HandlerEmpaquetacion, HandlerReparto
 
 import re, json
 
@@ -521,8 +521,6 @@ def OrderDetail(request, order):
     repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
     
-    print(f"estado {pedido.estado_id}")
-    print(f"uid {user.tipo_usuario_id}")
     #GET   
     data = {
         'success': True,
@@ -621,11 +619,13 @@ def OrderDetail(request, order):
                         pedido.despacho_hora = timezone.now()
                         consecutivo = form.cleaned_data['consecutivo'].strip()
                         
+                        
                         data['form'] = SeleccionarRepartidor()
                         
                         if consecutivo:
                             if not Pedido.objects.filter(consecutivo=consecutivo).exists():
                                 pedido.consecutivo = consecutivo    
+                                pedido.tipo_consecutivo = form.cleaned_data['tipo_consecutivo']
                             else:
                                 data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
                                 return render(request, HTMLORDERDETAIL,{**data})
@@ -635,6 +635,8 @@ def OrderDetail(request, order):
                         
                         repartidor = form.cleaned_data['repartidor']
                         repartidor_primario = get_object_or_404(Usuarios, pk=repartidor.id)
+                        
+                        
                         
                         if repartidor_primario:
                             rol_primario = get_object_or_404(RolReparto, pk=0)
@@ -670,6 +672,7 @@ def OrderDetail(request, order):
                     repartidor_principal_nuevo = form.cleaned_data['repartidor'] 
                     repartidor_secundario_nuevo = form.cleaned_data['repartidorSecundario'] 
                     nuevo_consecutivo = form.cleaned_data['consecutivo']
+                    tipo_consecutivo = form.cleaned_data['tipo_consecutivo']
                     data['form'] = SeleccionarRepartidor(pedido=pedido)
                     
                     if nuevo_consecutivo:
@@ -688,7 +691,6 @@ def OrderDetail(request, order):
                         handler_primario.repartidor = repartidor_principal_nuevo
                         handler_primario.save()
                         HandlerReparto.objects.filter(pedido=pedido, rol__pk=0).exclude(id=handler_primario.id).delete()
-                        print(repartidor_secundario_nuevo)
                         if repartidor_secundario_nuevo:
                             if repartidor_principal_nuevo.id != repartidor_secundario_nuevo.id:
                                 rol_secundario = get_object_or_404(RolReparto, pk=1)
@@ -697,6 +699,7 @@ def OrderDetail(request, order):
                                 handler_secundario.save()
                                 HandlerReparto.objects.filter(pedido=pedido, rol__pk=1).exclude(id=handler_secundario.id).delete()
                     
+                    pedido.tipo_consecutivo = tipo_consecutivo
                     pedido.despacho_modificado_hora = timezone.now()
                     pedido.save()
             #---------Completacion-----#
@@ -781,6 +784,7 @@ def Orders(request, filtered=None):
                 completado_fecha = form.cleaned_data.get('completado_fecha')
                 estado_final = form.cleaned_data.get('estado_final')
                 consecutivo = form.cleaned_data.get('consecutivo')
+                tipo_consecutivo = form.cleaned_data.get('tipo_consecutivo')
                 data['isAdmin'] = True
                 if id:
                     pedidos = pedidos.filter(id=id)
@@ -796,6 +800,8 @@ def Orders(request, filtered=None):
                     pedidos = pedidos.filter(estado=estado_final)
                 if consecutivo:
                     pedidos = pedidos.filter(consecutivo=consecutivo)
+                if tipo_consecutivo:
+                    pedidos = pedidos.filter(tipo_consecutivo=tipo_consecutivo)
 
         elif user.tipo_usuario_id == 3:  # Empacador
             handler_empaquetacion = HandlerEmpaquetacion.objects.filter(empacador=user)

@@ -31,7 +31,10 @@ insert into main_tipocantidad(id, description) values (2, 'Paquete(s)');
 insert into main_tipocantidad(id, description) values (3, 'Paca(s)');
 
 
-insert into main_tipoconsecutivo(id, description) values (0, '');
+insert into main_tipoconsecutivo(id, description) values (0, 'AE');
+insert into main_tipoconsecutivo(id, description) values (1, 'FE');
+insert into main_tipoconsecutivo(id, description) values (2, 'Cotización');
+insert into main_tipoconsecutivo(id, description) values (3, 'Remisión');
 
 --Deploy queries
 

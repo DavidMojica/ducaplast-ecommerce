@@ -10,7 +10,7 @@
             <form action="" method="GET" class="text-center filter-form row">
                 <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
                 
-                <fieldset class="mb-3 col-md-10 m-auto">
+                <fieldset class="mb-3 col-md-6">
                     <legend class="badge bg-info text-white p-1">{{form.id.label_tag}}</legend>
                     {{form.id}}
                 </fieldset>
@@ -44,6 +44,12 @@
                     <legend class="badge bg-info text-white p-1">{{form.consecutivo.label_tag}}</legend>
                     {{form.consecutivo}}
                 </fieldset>
+
+                <fieldset class="mb-3 col-md-6">
+                    <legend class="badge bg-info text-white p-1">{{form.tipo_consecutivo.label_tag}}</legend>
+                    {{form.tipo_consecutivo}}
+                </fieldset>
+
                 <button type="submit" class="btn btn-primary col-md-5 m-auto">Filtrar <i class="fa fa-search"></i></button>
             </form>
         </section>
@@ -129,7 +135,7 @@
                         <a href="{% url 'order_detail' order=p.id %}" class="text-decoration-none text-white">
                             <article class="card bg-gray">
                                 <header class="card-header bg-primary text-white d-flex justify-content-between">
-                                    <h4>Pedido #{{p.id}} {% if history and isAdmin or user.tipo_usuario_id == 5 %}- {% if p.consecutivo %}Consecutivo:  {{p.consecutivo}} {% else %} Sin consecutivo {% endif %}{% endif %}</h4>
+                                    <h4>Pedido #{{p.id}} {% if isAdmin or user.tipo_usuario_id == 5 %}- {% if p.consecutivo %}Consecutivo:  {{p.consecutivo}} {% if p.tipo_consecutivo %}- {{p.tipo_consecutivo}} {% else %} Sin tipo de consecutivo {% endif %} {% else %} Sin consecutivo {% endif %}{% endif %}</h4>
                                     <form action="" method="POST">
                                         {% csrf_token %}
                                         <input type="hidden" name="delete_pedido">

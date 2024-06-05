@@ -271,8 +271,12 @@
                                                     <strong>{{form.consecutivo.label}}</strong>
                                                     {{form.consecutivo}}
                                                 </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>{{form.tipo_consecutivo.label}}</strong>
+                                                    {{form.tipo_consecutivo}}
+                                                </fieldset>
                                                 <input type="hidden" name="confirmarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Confirmar despacho</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3 text-white">Confirmar despacho</button>                             
                                             </form> 
                                         </section>
                                         <section class="modal-footer">
@@ -284,7 +288,7 @@
                         {% endif %}
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
-                        <h6>Consecutivo: {%if pedido.consecutivo%} <span class="badge bg-info">{{pedido.consecutivo}}</span> {% else %} Sin consecutivo {% endif %}</h6>
+                        <h6>Consecutivo: {%if pedido.consecutivo %} <span class="badge bg-info">{{pedido.consecutivo}} </span> {% else %} Sin consecutivo {% endif %}</h6>
                         <p>Despachador: {{pedido.despachador_reparto}} <br>
                         Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
                         {% if pedido.despacho_modificado_hora %}
@@ -304,7 +308,7 @@
                         </ul>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalDespachadorModificar">Modificar repartidor</button>
+                            <button class="btn btn-warning text-white" data-bs-toggle="modal" data-bs-target="#modalDespachadorModificar">Modificar repartidor</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalDespachadorModificar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
@@ -329,8 +333,12 @@
                                                     <strong>Consecutivo: </strong>
                                                     {{form.consecutivo}}
                                                 </fieldset>
+                                                <fieldset class="text-start mb-2">
+                                                    <strong>Tipo consecutivo </strong>
+                                                    {{form.tipo_consecutivo}}
+                                                </fieldset>
                                                 <input type="hidden" name="modificarRepartidor">
-                                                <button type="submit" class="btn btn-warning mt-3">Guardar modificacion</button>                             
+                                                <button type="submit" class="btn btn-warning mt-3 text-white">Guardar modificacion</button>                             
                                             </form> 
                                         </section>
                                         <section class="modal-footer">
