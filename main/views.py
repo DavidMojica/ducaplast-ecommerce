@@ -609,58 +609,67 @@ def OrderDetail(request, order):
 
         #----------------TAREAS DE DESPACHO, ESTADO 3----------------#
         elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4,5]: # Despachadores
-            if 'confirmarRepartidor' in request.POST:
+            if 'confirmarRepartidor' in request.POST or 'pendienteRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
-                if not pedido.estado_id >= 4:
+                if not pedido.estado_id >= 5:
                     if user.tipo_usuario_id in adminIds:
                         data['isAdmin'] = True
+                    print("benja0")
                     if form.is_valid():
+                        print("benja1")
                         pedido.despachador_reparto = user
                         pedido.despacho_hora = timezone.now()
                         consecutivo = form.cleaned_data['consecutivo'].strip()
                         
-                        
                         data['form'] = SeleccionarRepartidor()
                         
                         if consecutivo:
-                            if not Pedido.objects.filter(consecutivo=consecutivo).exists():
-                                pedido.consecutivo = consecutivo    
-                                pedido.tipo_consecutivo = form.cleaned_data['tipo_consecutivo']
-                            else:
-                                data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
-                                return render(request, HTMLORDERDETAIL,{**data})
+                            current_consecutivo = pedido.consecutivo
+                            if consecutivo != current_consecutivo:
+                                if not Pedido.objects.filter(consecutivo=consecutivo).exists():
+                                    pedido.consecutivo = consecutivo    
+                                    pedido.tipo_consecutivo = form.cleaned_data['tipo_consecutivo']
+                                else:
+                                    data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
+                                    return render(request, HTMLORDERDETAIL,{**data})
                         else:
                             data['msg_secondary'] = "El campo consecutivo no puede quedar vacío"
                             return render(request, HTMLORDERDETAIL,{**data}) 
                         
-                        repartidor = form.cleaned_data['repartidor']
-                        repartidor_primario = get_object_or_404(Usuarios, pk=repartidor.id)
-                        
-                        
-                        
-                        if repartidor_primario:
-                            rol_primario = get_object_or_404(RolReparto, pk=0)
-                            handler_primario = HandlerReparto(repartidor=repartidor_primario, pedido=pedido, rol=rol_primario)
-                            handler_primario.save()
-                            
-                            repartidor_secundario = form.cleaned_data.get('repartidorSecundario')
-                            if repartidor_secundario:
-                                
-                                if repartidor.id != repartidor_secundario.id:
-                                    repartidor_secundario = get_object_or_404(Usuarios, pk=repartidor_secundario.id)
+                        if 'confirmarRepartidor' in request.POST:
+                            repartidor = form.cleaned_data['repartidor']
+                            if repartidor:
+                                repartidor_primario = get_object_or_404(Usuarios, pk=repartidor.id)
+                                print("benja2")
+                                if repartidor_primario:
+                                    print("benja3")
+                                    rol_primario = get_object_or_404(RolReparto, pk=0)
+                                    handler_primario = HandlerReparto(repartidor=repartidor_primario, pedido=pedido, rol=rol_primario)
+                                    handler_primario.save()
+                                    pedido.estado_id = 5
+                                    pedido.save()
+                                    repartidor_secundario = form.cleaned_data.get('repartidorSecundario')
                                     if repartidor_secundario:
-                                        rol_secundario = get_object_or_404(RolReparto, pk=1)
-                                        handler_secundario = HandlerReparto(repartidor=repartidor_secundario, pedido=pedido, rol=rol_secundario)
-                                        handler_secundario.save()
-                        
-                        else:
-                            return render(request, HTMLORDERDETAIL,{
-                            'success': False,
-                            'msg': "El repartidor principal no puede quedar vacíos"
-                        }) 
-                        pedido.estado_id = 4
+                                        
+                                        if repartidor.id != repartidor_secundario.id:
+                                            repartidor_secundario = get_object_or_404(Usuarios, pk=repartidor_secundario.id)
+                                            if repartidor_secundario:
+                                                rol_secundario = get_object_or_404(RolReparto, pk=1)
+                                                handler_secundario = HandlerReparto(repartidor=repartidor_secundario, pedido=pedido, rol=rol_secundario)
+                                                handler_secundario.save()
+                                
+                            else:
+                                return render(request, HTMLORDERDETAIL,{
+                                'success': False,
+                                'msg': "El repartidor principal no puede quedar vacío"
+                            }) 
+                            
+                        elif 'pendienteRepartidor' in request.POST:
+                            pedido.estado_id = 4
+                            
                         pedido.save()
                     else:
+                        print(form.errors)
                         data['success']=False
                         data['msg'] = ERROR_13
                         return render(request,HTMLORDERDETAIL,{**data})
@@ -702,16 +711,18 @@ def OrderDetail(request, order):
                     pedido.tipo_consecutivo = tipo_consecutivo
                     pedido.despacho_modificado_hora = timezone.now()
                     pedido.save()
+
+                
             #---------Completacion-----#
             elif 'credito' in request.POST:
-                if not pedido.estado_id >= 5:
-                    pedido.estado_id = 5
+                if not pedido.estado_id >= 6:
+                    pedido.estado_id = 6
                     pedido.credito_por = user
                     pedido.credito_hora = timezone.now()
                     pedido.save()
             elif 'completarPedido' in request.POST:
-                if not pedido.estado_id >= 6:
-                    pedido.estado_id = 6
+                if not pedido.estado_id >= 7:
+                    pedido.estado_id = 7
                     pedido.actualizar_dinero_generado_cliente()
                     pedido.completado_por = user
                     pedido.completado_hora = timezone.now()

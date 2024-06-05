@@ -123,17 +123,15 @@ class SeleccionarRepartidor(forms.Form):
                 if repartidor_secundario_asignado:
                     self.fields['repartidorSecundario'].initial = repartidor_secundario_asignado.repartidor.pk
                 
-                self.fields['tipo_consecutivo'].initial = pedido.tipo_consecutivo
-                
-                
             self.fields['consecutivo'].initial = pedido.consecutivo
+            self.fields['tipo_consecutivo'].initial = pedido.tipo_consecutivo
             
     repartidor = forms.ModelChoiceField(
         label="Por favor asigne el repartidor que se encargará de esta entrega.",
         widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Seleccione repartidor', 'name': 'repartidor', 'id':'repartidor'}),
         queryset=Usuarios.objects.filter(tipo_usuario_id=6),
         empty_label="Seleccione repartidor (Obligatorio)",
-        required=True
+        required=False
     )
     
     repartidorSecundario = forms.ModelChoiceField(

@@ -6,11 +6,17 @@ const consecutivo = document.getElementById('consecutivo');
 
 
 const validarDespachadorForm = form => {
-    if (repartidor.value === repartidorSecundario.value) 
-        createToastNotify(1, "Error", "No puede seleccionar al mismo repartidor en ambos campos.");
-    else if (consecutivo.value.trim() == 0)
-        createToastNotify(1, "Error", "El campo de consecutivo no puede estar vacío");
-    else form.submit();
+    if (repartidor.value != ''){
+        if (repartidor.value === repartidorSecundario.value) 
+            createToastNotify(1, "Error", "No puede seleccionar al mismo repartidor en ambos campos.");
+        else if (consecutivo.value.trim() == 0)
+            createToastNotify(1, "Error", "El campo de consecutivo no puede estar vacío");
+        else form.submit();
+    } else {
+        if (consecutivo.value.trim() == 0)
+            createToastNotify(1, "Error", "El campo de consecutivo no puede estar vacío");
+        else form.submit();
+    }
 }
 
 try{
@@ -82,3 +88,13 @@ $(btnModificarCantidad).on('click', function(e){
         createToastNotify(1, "Error en cantidad", "La cantidad de los productos debe de ser mayor a 0. Si no necesita los productos, borrelos.")
     }
 });
+
+function setAction(action) {
+    if (action === 'confirmarDespacho') {
+        document.getElementById('confirmarRepartidorInput').disabled = false;
+        document.getElementById('marcarPendienteInput').disabled = true;
+    } else if (action === 'pendiente') {
+        document.getElementById('confirmarRepartidorInput').disabled = true;
+        document.getElementById('marcarPendienteInput').disabled = false;
+    }
+}
