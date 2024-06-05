@@ -79,14 +79,22 @@ class FiltrarRecibos(forms.ModelForm):
         
 #Crear o modificar un producto
 class ProductoForm(forms.ModelForm):
+    tipo = forms.ModelChoiceField(
+        queryset=TipoProducto.objects.all(),
+        required=True,
+        empty_label='Tipo del producto',
+        widget=forms.Select(attrs={'class': 'form-select', 'name': 'tipo'}),
+    )
+    
     class Meta:
         model = Producto
-        fields = ['descripcion', 'referencia_fabrica', 'precio', 'cantidad']
+        fields = ['descripcion', 'referencia_fabrica', 'precio', 'cantidad', 'tipo']
         labels = {
             'descripcion': 'Descripción',
             'referencia_fabrica': 'Referencia de fábrica',
             'precio': 'Precio',
             'cantidad': 'Cantidad',
+            'tipo':'Tipo de producto'
         }
         widgets = {
             'descripcion': forms.TextInput(attrs={'class': 'form-control'}),

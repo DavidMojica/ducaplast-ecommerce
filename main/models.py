@@ -123,6 +123,8 @@ class Pedido(models.Model):
             return 'bg-warning'
         elif self.estado_id in [3,4]:
             return 'bg-primary'
+        elif self.estado_id == 5:
+            return 'bg-pink'
         else:
             return 'bg-success'
     

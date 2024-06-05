@@ -289,6 +289,7 @@
                     {% elif pedido.estado.id == 4 %}
                         <h5>Este pedido está siendo repartido</h5>
                         <h6>Consecutivo: {%if pedido.consecutivo %} <span class="badge bg-info">{{pedido.consecutivo}} </span> {% else %} Sin consecutivo {% endif %}</h6>
+                        <h6>Tipo de consecutivo: {% if pedido.tipo_consecutivo %} <span class="badge bg-info">{{pedido.tipo_consecutivo}}</span> {% else %} Sin tipo de consecutivo {% endif %}</h6>
                         <p>Despachador: {{pedido.despachador_reparto}} <br>
                         Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
                         {% if pedido.despacho_modificado_hora %}
@@ -304,7 +305,6 @@
                                 </p>
                             </li>
                             {% endfor %}
-
                         </ul>
                         {% if user.tipo_usuario_id == 5 or isAdmin %}
                             <!-- trigger -->
@@ -384,7 +384,24 @@
                         <span class="badge bg-danger">{{issue5}}</span>
                     {% else %}
                     <h5>Este pedido fue repartido por:</h5>
-                    <p>{{pedido.repartido_por}}</p>
+                    <h6>Consecutivo: {%if pedido.consecutivo %} <span class="badge bg-info">{{pedido.consecutivo}} </span> {% else %} Sin consecutivo {% endif %}</h6>
+                    <h6>Tipo de consecutivo: {% if pedido.tipo_consecutivo %} <span class="badge bg-info">{{pedido.tipo_consecutivo}}</span> {% else %} Sin tipo de consecutivo {% endif %}</h6>
+                    <p>Despachador: {{pedido.despachador_reparto}} <br>
+                    Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
+                    {% if pedido.despacho_modificado_hora %}
+                        Este pedido fue modificado - <span class="badge bg-warning">{{pedido.despacho_modificado_hora}}</span>
+                    {% endif %}
+                    </p>
+                    <h5>Repartidor(es) elegido(s)</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for r in repartidoresActivos %}
+                        <li class="list-group-item">
+                            <p>{{r.repartidor.first_name}} {{r.repartidor.last_name}}
+                                Cod. Empleado {{r.repartidor.id}}
+                            </p>
+                        </li>
+                        {% endfor %}
+                    </ul>
                     {% endif %}
                 </article>
             </section>
