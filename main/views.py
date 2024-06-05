@@ -535,6 +535,7 @@ def OrderDetail(request, order):
     
     #Post
     if request.method == 'POST':
+
         #----------------TAREAS DE EMPAQUETACION, ESTADO 0 PARA 1----------------#
         if user.tipo_usuario_id == 3 or user.tipo_usuario_id in adminIds and pedido.estado_id in [0,1]: #Empaquetador
             if "confirmar_empaque" in request.POST:
@@ -608,7 +609,7 @@ def OrderDetail(request, order):
                     issue = ERROR_17
 
         #----------------TAREAS DE DESPACHO, ESTADO 3----------------#
-        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4,5]: # Despachadores
+        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4,5,6]: # Despachadores
             if 'confirmarRepartidor' in request.POST or 'pendienteRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if not pedido.estado_id >= 5:
@@ -640,24 +641,22 @@ def OrderDetail(request, order):
                             repartidor = form.cleaned_data['repartidor']
                             if repartidor:
                                 repartidor_primario = get_object_or_404(Usuarios, pk=repartidor.id)
-                                print("benja2")
                                 if repartidor_primario:
-                                    print("benja3")
-                                    rol_primario = get_object_or_404(RolReparto, pk=0)
-                                    handler_primario = HandlerReparto(repartidor=repartidor_primario, pedido=pedido, rol=rol_primario)
-                                    handler_primario.save()
-                                    pedido.estado_id = 5
-                                    pedido.save()
-                                    repartidor_secundario = form.cleaned_data.get('repartidorSecundario')
-                                    if repartidor_secundario:
-                                        
-                                        if repartidor.id != repartidor_secundario.id:
-                                            repartidor_secundario = get_object_or_404(Usuarios, pk=repartidor_secundario.id)
-                                            if repartidor_secundario:
-                                                rol_secundario = get_object_or_404(RolReparto, pk=1)
-                                                handler_secundario = HandlerReparto(repartidor=repartidor_secundario, pedido=pedido, rol=rol_secundario)
-                                                handler_secundario.save()
+                                    if not HandlerReparto.objects.filter(repartidor=repartidor_primario, pedido=pedido).exists():
+                                        rol_primario = get_object_or_404(RolReparto, pk=0)
+                                        handler_primario = HandlerReparto(repartidor=repartidor_primario, pedido=pedido, rol=rol_primario)
+                                        handler_primario.save()
                                 
+                                repartidor_secundario = form.cleaned_data.get('repartidorSecundario')
+                                if repartidor_secundario:
+                                    if repartidor.id != repartidor_secundario.id:
+                                        repartidor_secundario = get_object_or_404(Usuarios, pk=repartidor_secundario.id)
+                                        if repartidor_secundario and not HandlerReparto.objects.filter(repartidor=repartidor_secundario, pedido=pedido).exists():
+                                            rol_secundario = get_object_or_404(RolReparto, pk=1)
+                                            handler_secundario = HandlerReparto(repartidor=repartidor_secundario, pedido=pedido, rol=rol_secundario)
+                                            handler_secundario.save()
+                                pedido.estado_id = 5
+                                pedido.save()    
                             else:
                                 return render(request, HTMLORDERDETAIL,{
                                 'success': False,
@@ -739,8 +738,6 @@ def OrderDetail(request, order):
                 'msg': ERROR_13
             })
          
-    
-        
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
         data['puede_ayudar'] = getPuedeAyudar(pedido, empacadores_activos, user)
@@ -773,7 +770,7 @@ def Orders(request, filtered=None):
 
     if not filtered:
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.exclude(estado_id__in=[5, 6]).order_by('-fecha')
+            pedidos = Pedido.objects.exclude(estado_id__in=[6, 7]).order_by('-fecha')
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -786,7 +783,7 @@ def Orders(request, filtered=None):
     elif filtered == "historial": 
         data['history'] = True
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.filter(estado_id__in=[5, 6]).order_by('-fecha')
+            pedidos = Pedido.objects.filter(estado_id__in=[6, 7]).order_by('-fecha')
             if form.is_valid():
                 id = form.cleaned_data.get('id')
                 vendedor = form.cleaned_data.get('vendedor')
