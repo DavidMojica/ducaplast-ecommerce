@@ -24,6 +24,13 @@
                 </li>
                 <li class="list-group-item">
                     <span class="badge bg-danger mb-1">
+                        <label for="username">Documento</label>
+                    </span> <br>
+                    <small class="text-muted">Con este dato se inicia sesión</small>
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Ingrese sus apellidos" value="{{user_modify.username}}">
+                </li>
+                <li class="list-group-item">
+                    <span class="badge bg-danger mb-1">
                         <label for="email">Correo electrónico</label>
                     </span>
                     <input type="text" name="email" id="email" class="form-control" placeholder="Ingrese su email" value="{{user_modify.email}}">

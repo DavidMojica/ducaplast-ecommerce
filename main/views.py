@@ -1,4 +1,5 @@
 import random
+from django.forms import ValidationError
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -428,12 +429,17 @@ def UserDetail(request, userid):
             elif 'acc_data' in request.POST:
                 nombre = request.POST.get('nombre').strip()
                 apellidos = request.POST.get('apellidos').strip()
+                username = request.POST.get('username').strip()
                 email = request.POST.get('email').strip()
                 tipo_usuario = request.POST.get('tipo_usuario')
+                
+                if Usuarios.objects.filter(username=username).exclude(pk=user_to_modify.pk).exists():
+                    raise ValidationError("El nombre de usuario ya está en uso.")
                 
                 tipo_instance = get_object_or_404(TipoUsuario, pk=tipo_usuario)
                 user_to_modify.first_name = nombre
                 user_to_modify.last_name = apellidos
+                user_to_modify.username = username
                 user_to_modify.email = email
                 user_to_modify.tipo_usuario = tipo_instance
                 user_to_modify.save()
@@ -710,8 +716,7 @@ def OrderDetail(request, order):
                     pedido.tipo_consecutivo = tipo_consecutivo
                     pedido.despacho_modificado_hora = timezone.now()
                     pedido.save()
-
-                
+  
             #---------Completacion-----#
             elif 'credito' in request.POST:
                 if not pedido.estado_id >= 6:
@@ -729,9 +734,7 @@ def OrderDetail(request, order):
             else:
                 data['success']=False
                 data['msg'] = ERROR_13
-                return render(request,HTMLORDERDETAIL,{**data})
-        
-            
+                return render(request,HTMLORDERDETAIL,{**data}) 
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
@@ -753,6 +756,36 @@ def OrderDetail(request, order):
         issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
         return render(request, HTMLORDERDETAIL, {**data, 'form': form, issue_key: issue})
 
+def filtrarPedidos(request, pedidos, form):
+    id = form.cleaned_data.get('id')
+    vendedor = form.cleaned_data.get('vendedor')
+    cliente = form.cleaned_data.get('cliente')
+    fecha = form.cleaned_data.get('fecha')
+    completado_fecha = form.cleaned_data.get('completado_fecha')
+    estado_final = form.cleaned_data.get('estado_final')
+    consecutivo = form.cleaned_data.get('consecutivo')
+    tipo_consecutivo = form.cleaned_data.get('tipo_consecutivo')
+    
+    if id:
+        pedidos = pedidos.filter(id=id)
+    if vendedor:
+        pedidos = pedidos.filter(vendedor=vendedor)
+    if cliente:
+        pedidos = pedidos.filter(cliente=cliente)
+    if fecha:
+        pedidos = pedidos.filter(fecha__date=fecha)
+    if completado_fecha:
+        pedidos = pedidos.filter(completado_hora__date=completado_fecha)
+    if estado_final:
+        pedidos = pedidos.filter(estado=estado_final)
+    if consecutivo:
+        pedidos = pedidos.filter(consecutivo=consecutivo)
+    if tipo_consecutivo:
+        pedidos = pedidos.filter(tipo_consecutivo_id=tipo_consecutivo)
+        
+    return pedidos
+    
+
 #N/S
 @login_required 
 def Orders(request, filtered=None):
@@ -771,6 +804,8 @@ def Orders(request, filtered=None):
     if not filtered:
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.exclude(estado_id__in=[6, 7]).order_by('-fecha')
+            if form.is_valid():
+                pedidos = filtrarPedidos(request, pedidos, form)
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -778,38 +813,17 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 4: #Facturador
             pedidos = Pedido.objects.filter(estado_id=2).order_by('-fecha')
         elif user.tipo_usuario_id == 5: #Despachador
-            pedidos = Pedido.objects.filter(estado_id=3).order_by('-fecha')
+            pedidos = Pedido.objects.filter(estado_id__in=[3, 4]).order_by('-fecha')
+            if form.is_valid():
+                pedidos = filtrarPedidos(request, pedidos, form)
 
     elif filtered == "historial": 
         data['history'] = True
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.filter(estado_id__in=[6, 7]).order_by('-fecha')
+            data['isAdmin'] = True
             if form.is_valid():
-                id = form.cleaned_data.get('id')
-                vendedor = form.cleaned_data.get('vendedor')
-                cliente = form.cleaned_data.get('cliente')
-                fecha = form.cleaned_data.get('fecha')
-                completado_fecha = form.cleaned_data.get('completado_fecha')
-                estado_final = form.cleaned_data.get('estado_final')
-                consecutivo = form.cleaned_data.get('consecutivo')
-                tipo_consecutivo = form.cleaned_data.get('tipo_consecutivo')
-                data['isAdmin'] = True
-                if id:
-                    pedidos = pedidos.filter(id=id)
-                if vendedor:
-                    pedidos = pedidos.filter(vendedor=vendedor)
-                if cliente:
-                    pedidos = pedidos.filter(cliente=cliente)
-                if fecha:
-                    pedidos = pedidos.filter(fecha__date=fecha)
-                if completado_fecha:
-                    pedidos = pedidos.filter(completado_hora__date=completado_fecha)
-                if estado_final:
-                    pedidos = pedidos.filter(estado=estado_final)
-                if consecutivo:
-                    pedidos = pedidos.filter(consecutivo=consecutivo)
-                if tipo_consecutivo:
-                    pedidos = pedidos.filter(tipo_consecutivo=tipo_consecutivo)
+                pedidos = filtrarPedidos(request, pedidos, form)
 
         elif user.tipo_usuario_id == 3:  # Empacador
             handler_empaquetacion = HandlerEmpaquetacion.objects.filter(empacador=user)
@@ -819,6 +833,9 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(facturado_por=user.id)
         elif user.tipo_usuario_id == 5:
             pedidos = Pedido.objects.filter(despachador_reparto_id=user.id)
+            
+            if form.is_valid():
+                pedidos = filtrarPedidos(request, pedidos, form)
    
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
