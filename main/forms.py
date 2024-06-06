@@ -145,7 +145,7 @@ class SeleccionarRepartidor(forms.Form):
     consecutivo = forms.CharField(
         label="Consecutivo del pedido:",
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consecutivo', 'placeholder': '123456'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'consecutivo', 'placeholder': '# Consecutivo'}),
     )
 
     tipo_consecutivo = forms.ModelChoiceField(

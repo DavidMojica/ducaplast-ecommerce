@@ -11,7 +11,7 @@ insert into main_tipousuario (id, description) values(6, 'Repartidor');
 insert into main_estados (id, description) values(0, 'Para empacar');
 insert into main_estados (id, description) values(1, 'Siendo empacado');
 insert into main_estados (id, description) values(2, 'En facturacion');
-insert into main_estados (id, description) values(3, 'Pendiente de despacho');
+insert into main_estados (id, description) values(3, 'Listo para despacho');
 insert into main_estados (id, description) values(4, 'Pendiente');
 insert into main_estados (id, description) values(5, 'En reparto');
 insert into main_estados (id, description) values(6, 'Recibido');

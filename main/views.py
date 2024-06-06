@@ -1,4 +1,5 @@
 import random
+from django.forms import ValidationError
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -40,7 +41,6 @@ HTMLUSERDETAIL = "user_detail.html"
 HTMLPRODUCTOS = "productos.html"
 HTMLPRODUCTODETAIL = "product_detail.html"
 HTMLPRODUCTOADD = "product_add.html"
-HTMLCHARTS = "charts.html"
 HTMLCLIENTES = "clientes.html"
 HTMLCLIENTEDETAIL = "client_detail.html"
 HTMLCLIENTEADD = "client_add.html"
@@ -121,7 +121,37 @@ def getCartPrice(request):
             producto['precio_str'] = numberWithPoints(producto['precio'])
             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
         return total_productos
+
+def filtrarPedidosOrders(request, pedidos, form):
+    id = form.cleaned_data.get('id')
+    vendedor = form.cleaned_data.get('vendedor')
+    cliente = form.cleaned_data.get('cliente')
+    fecha = form.cleaned_data.get('fecha')
+    completado_fecha = form.cleaned_data.get('completado_fecha')
+    estado_final = form.cleaned_data.get('estado_final')
+    consecutivo = form.cleaned_data.get('consecutivo')
+    tipo_consecutivo = form.cleaned_data.get('tipo_consecutivo')
     
+    if id:
+        pedidos = pedidos.filter(id=id)
+    if vendedor:
+        pedidos = pedidos.filter(vendedor=vendedor)
+    if cliente:
+        pedidos = pedidos.filter(cliente=cliente)
+    if fecha:
+        pedidos = pedidos.filter(fecha__date=fecha)
+    if completado_fecha:
+        pedidos = pedidos.filter(completado_hora__date=completado_fecha)
+    if estado_final:
+        pedidos = pedidos.filter(estado=estado_final)
+    if consecutivo:
+        pedidos = pedidos.filter(consecutivo=consecutivo)
+    if tipo_consecutivo:
+        pedidos = pedidos.filter(tipo_consecutivo_id=tipo_consecutivo)
+        
+    return pedidos
+  
+
 #Devuelve el precio actualizado con el IVA
 @login_required
 def calcular_total_actualizado(request):
@@ -333,16 +363,6 @@ def ClientesView(request):
     
 #super -- TEST N/S
 @login_required
-def Charts(request):
-    req_user = get_object_or_404(Usuarios, pk=request.user.id)
-    if req_user.tipo_usuario_id in adminIds:
-        data = {}   
-        return render(request, HTMLCHARTS, {**data})
-    else:
-        return redirect('orders')
-
-#super -- TEST N/S
-@login_required
 def ProductDetails(request, productid=None):
     label_marker = "Añadir"
     if productid:
@@ -428,12 +448,17 @@ def UserDetail(request, userid):
             elif 'acc_data' in request.POST:
                 nombre = request.POST.get('nombre').strip()
                 apellidos = request.POST.get('apellidos').strip()
+                username = request.POST.get('username').strip()
                 email = request.POST.get('email').strip()
                 tipo_usuario = request.POST.get('tipo_usuario')
+                
+                if Usuarios.objects.filter(username=username).exclude(pk=user_to_modify.pk).exists():
+                    raise ValidationError("El nombre de usuario ya está en uso.")
                 
                 tipo_instance = get_object_or_404(TipoUsuario, pk=tipo_usuario)
                 user_to_modify.first_name = nombre
                 user_to_modify.last_name = apellidos
+                user_to_modify.username = username
                 user_to_modify.email = email
                 user_to_modify.tipo_usuario = tipo_instance
                 user_to_modify.save()
@@ -710,8 +735,7 @@ def OrderDetail(request, order):
                     pedido.tipo_consecutivo = tipo_consecutivo
                     pedido.despacho_modificado_hora = timezone.now()
                     pedido.save()
-
-                
+  
             #---------Completacion-----#
             elif 'credito' in request.POST:
                 if not pedido.estado_id >= 6:
@@ -729,9 +753,7 @@ def OrderDetail(request, order):
             else:
                 data['success']=False
                 data['msg'] = ERROR_13
-                return render(request,HTMLORDERDETAIL,{**data})
-        
-            
+                return render(request,HTMLORDERDETAIL,{**data}) 
         else:
             return render(request, HTMLORDERDETAIL, {
                 'success': False,
@@ -752,6 +774,7 @@ def OrderDetail(request, order):
         form = SeleccionarRepartidor(pedido=pedido) if user.tipo_usuario_id == 5 else None
         issue_key = 'issue5' if user.tipo_usuario_id == 5 else 'issue4'
         return render(request, HTMLORDERDETAIL, {**data, 'form': form, issue_key: issue})
+  
 
 #N/S
 @login_required 
@@ -771,6 +794,8 @@ def Orders(request, filtered=None):
     if not filtered:
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.exclude(estado_id__in=[6, 7]).order_by('-fecha')
+            if form.is_valid():
+                pedidos = filtrarPedidosOrders(request, pedidos, form)
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -778,38 +803,17 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 4: #Facturador
             pedidos = Pedido.objects.filter(estado_id=2).order_by('-fecha')
         elif user.tipo_usuario_id == 5: #Despachador
-            pedidos = Pedido.objects.filter(estado_id=3).order_by('-fecha')
+            pedidos = Pedido.objects.filter(estado_id__in=[3, 4]).order_by('-fecha')
+            if form.is_valid():
+                pedidos = filtrarPedidosOrders(request, pedidos, form)
 
     elif filtered == "historial": 
         data['history'] = True
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.filter(estado_id__in=[6, 7]).order_by('-fecha')
+            data['isAdmin'] = True
             if form.is_valid():
-                id = form.cleaned_data.get('id')
-                vendedor = form.cleaned_data.get('vendedor')
-                cliente = form.cleaned_data.get('cliente')
-                fecha = form.cleaned_data.get('fecha')
-                completado_fecha = form.cleaned_data.get('completado_fecha')
-                estado_final = form.cleaned_data.get('estado_final')
-                consecutivo = form.cleaned_data.get('consecutivo')
-                tipo_consecutivo = form.cleaned_data.get('tipo_consecutivo')
-                data['isAdmin'] = True
-                if id:
-                    pedidos = pedidos.filter(id=id)
-                if vendedor:
-                    pedidos = pedidos.filter(vendedor=vendedor)
-                if cliente:
-                    pedidos = pedidos.filter(cliente=cliente)
-                if fecha:
-                    pedidos = pedidos.filter(fecha__date=fecha)
-                if completado_fecha:
-                    pedidos = pedidos.filter(completado_hora__date=completado_fecha)
-                if estado_final:
-                    pedidos = pedidos.filter(estado=estado_final)
-                if consecutivo:
-                    pedidos = pedidos.filter(consecutivo=consecutivo)
-                if tipo_consecutivo:
-                    pedidos = pedidos.filter(tipo_consecutivo=tipo_consecutivo)
+                pedidos = filtrarPedidosOrders(request, pedidos, form)
 
         elif user.tipo_usuario_id == 3:  # Empacador
             handler_empaquetacion = HandlerEmpaquetacion.objects.filter(empacador=user)
@@ -819,6 +823,9 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(facturado_por=user.id)
         elif user.tipo_usuario_id == 5:
             pedidos = Pedido.objects.filter(despachador_reparto_id=user.id)
+            
+            if form.is_valid():
+                pedidos = filtrarPedidosOrders(request, pedidos, form)
    
     paginator = Paginator(pedidos, PEDIDOS_POR_PAGINA)
     page_number = request.GET.get('page', 1)
@@ -1144,231 +1151,3 @@ def Cart(request):
             return render(request, HTMLCARRITO, data)
     
     return render(request, HTMLCARRITO, data)
-
-#-----------------------------------------------------------------------#
-#--------------------------API's de los gráficos------------------------#
-#-----------------------------------------------------------------------#
-#Chart1 - Clientes más frecuentes
-def get_chart_1(_request):
-    top_clientes_ventas = Clientes.objects.annotate(num_pedidos=Count('pedido')).order_by('-num_pedidos')[:8]
-    data = []
-    for cliente in top_clientes_ventas:
-        data.append({'value':cliente.dinero_generado, 'name': f"{cliente.nombre} ID: {cliente.id}"})
-        
-    chart = {
-        'title': {
-            'text': 'Clientes más frecuentes',
-            'subtext': "Top 8",
-            'x': 'center',
-        },
-        'tooltip': {
-            'show': True,
-            'trigger': 'item',
-            'triggerOn':'mousemove|click'
-        },
-        'legend': {
-            'top': 'bottom'
-        },
-        'series': [
-          {
-            'name': 'Clientes más frecuentes',
-                'type': 'pie',
-                'radius': [40, 160],
-                'center': ['50%', '50%'],
-                'roseType': 'area',
-                'itemStyle': {
-                'borderRadius': 8
-            },
-            'data': data
-          }
-        ]
-      }
-    
-    return JsonResponse(chart)
-
-#Chart2 - Dias mas concurridos
-def get_chart_2(_request):
-    pedidos_semana = Pedido.objects.all()
-    pedidos_por_dia = [0,0,0,0,0,0,0] 
-    for pedido in pedidos_semana:
-        dia_semana = pedido.fecha.weekday()
-        pedidos_por_dia[dia_semana] += 1
-    
-    pos_max = pedidos_por_dia.index(max(pedidos_por_dia))
-    pos_min = pedidos_por_dia.index(min(pedidos_por_dia))
-    
-    pedidos_por_dia[pos_max] = {
-        'value': pedidos_por_dia[pos_max],
-        'itemStyle': {
-        'color': '#a90000'
-        }
-    }
-    pedidos_por_dia[pos_min] = {
-        'value': pedidos_por_dia[pos_min],
-        'itemStyle': {
-        'color': '#00913f'
-        }
-    }
-    
-    chart = {
-      'title': {
-        'text': 'Días más concurridos',
-        'subtext': "Venta en los días de la semana",
-        'x': 'center',
-      },
-      'tooltip': {
-            'show': True,
-            'trigger': 'axis',
-            'triggerOn':'mousemove|click'
-        },
-        'xAxis': {
-          'type': 'category',
-          'data': ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-        },
-        'yAxis': {
-          'type': 'value'
-        },
-        'series': [
-          {
-            'data': pedidos_por_dia,
-            'type': 'bar',
-            'showBackground': True,
-            'backgroundStyle': {
-            'color': 'rgba(180, 180, 180, 0.2)'
-            }
-          }
-        ]
-    }
-    
-    return JsonResponse(chart)
-
-#Chart3 - Ingresos por mes
-def get_chart_3(_request):
-    anios = list(Pedido.objects.values_list('fecha__year', flat=True).distinct())
-    data = []
-    for año in anios:
-        pedidos_año = Pedido.objects.filter(fecha__year=año)
-        ingresos_por_mes = [0] * 12  
-        for pedido in pedidos_año:
-            mes_pedido = pedido.fecha.month
-            monto_pedido = pedido.valor  
-            ingresos_por_mes[mes_pedido - 1] += monto_pedido  
-        data.append({
-            'name': str(año),
-            'type': 'line',
-            'stack': str(año),
-            'data': ingresos_por_mes
-        })
-    chart = {
-            'title': {
-                'text': 'Ingresos por mes',
-                'subtext': 'Se generará un año nuevo cuando se detecte un pedido en dicho momento'
-            },
-            'tooltip': {
-                'trigger': 'axis'
-            },
-            'legend': {
-                'data': anios.sort(),
-                'top': '5%', 'right': '5%'
-            },
-            'grid': {
-                'left': '3%',
-                'right': '4%',
-                'bottom': '3%',
-                'containLabel': True
-            },
-            'xAxis': {
-                'type': 'category',
-                'boundaryGap': False,
-                'data': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            },
-            'yAxis': {
-                'type': 'value'
-            },
-            'series': data
-        }
-    
-    return JsonResponse(chart, safe=False)
-
-#Chart4 - Productos que más se venden
-def get_chart_4(_request):
-    top_productos = ProductosPedido.objects.values('producto__descripcion').annotate(total_vendido=Sum('cantidad')).order_by('-total_vendido')[:20]
-    dataAxis = []
-    data = []
-    for producto_info in top_productos:
-        producto = producto_info['producto__descripcion']
-        total_vendido = producto_info['total_vendido']
-        dataAxis.append(producto)
-        data.append(total_vendido)
-    yMax = max(data)
-    dataShadow = []
-    for i in range(len(data)):
-        dataShadow.append(yMax)
-    chart = {
-            'title': {
-                'text': 'Productos que más se venden',
-                'subtext': 'Top 20 (Puede hacer zoom con la rueda del mouse)'
-            },
-            'xAxis': {
-                'data': dataAxis,
-                'axisLabel': {
-                    'inside': True,
-                    'textStyle': {
-                        'color': '#000'
-                    }
-                },
-                'axisTick': {
-                    'show': False
-                },
-                'axisLine': {
-                    'show': False
-                },
-                'z': 10
-            },
-            'yAxis': {
-                'axisLine': {
-                    'show': False
-                },
-                'axisTick': {
-                    'show': False
-                },
-                'axisLabel': {
-                    'textStyle': {
-                        'color': '#000'
-                    }
-                }
-            },
-            'tooltip': {
-                'trigger': 'axis'
-            },
-            'dataZoom': [
-                {
-                    'type': 'inside'
-                }
-            ],
-            'series': [
-                { 
-                    'type': 'bar',
-                    'itemStyle': {
-                        'color': 'rgba(0,0,0,0.05)'
-                    },
-                    'barGap': '-100%',
-                    'barCategoryGap': '40%',
-                    'data': dataShadow,
-                    'animation': True
-                },
-                {
-                    'type': 'bar',
-                    'itemStyle': {
-                        'color': "#438bc7"
-                    },
-                    'emphasis': {
-                        'itemStyle': {
-                            'color': "#438bc7"
-                        }
-                    },
-                    'data': data
-                }
-            ]
-        }
-    return JsonResponse(chart)
