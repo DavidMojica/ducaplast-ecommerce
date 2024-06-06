@@ -35,13 +35,7 @@ urlpatterns = [
     path('productos/', views.Productos, name ="productos"),
     path('product_detail/<int:productid>',views.ProductDetails, name="product_detail"),
     path('product_add/', views.ProductAdd, name="product_add"),
-    path('charts/', views.Charts, name="charts"),
     path('clientes/', views.ClientesView, name="clientes"),
     path('client_detail/<int:clientid>', views.ClientDetail, name='client_detail'),
     path('client_add/', views.ClientAdd, name='client_add'),
-    #API's de los charts
-    path('get_chart_1/', views.get_chart_1, name="get_chart_1"),
-    path('get_chart_2/', views.get_chart_2, name="get_chart_2"),
-    path('get_chart_3/', views.get_chart_3, name="get_chart_3"),
-    path('get_chart_4/', views.get_chart_4, name="get_chart_4"),
 ]
