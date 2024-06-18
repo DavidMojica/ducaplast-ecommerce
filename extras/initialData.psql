@@ -25,11 +25,12 @@ insert into main_tipoproducto (id, description) values(2, 'Varios');
 insert into main_rolreparto(id, description) values(0, 'Principal');
 insert into main_rolreparto(id, description) values(1, 'Ayudante');
 
---select * from main_tipocantidad
+
 insert into main_tipocantidad(id, description) values (0, 'Unidad(es)');
 insert into main_tipocantidad(id, description) values (1, 'Caja(s)');
 insert into main_tipocantidad(id, description) values (2, 'Paquete(s)');
 insert into main_tipocantidad(id, description) values (3, 'Paca(s)');
+--select * from main_tipocantidad
 
 
 insert into main_tipoconsecutivo(id, description) values (0, 'AE');
