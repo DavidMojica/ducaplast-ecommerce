@@ -541,7 +541,6 @@ def OrderDetail(request, order):
     issue = ""
     pedido = get_object_or_404(Pedido, pk=order)
     cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
-    productos = ProductosPedido.objects.filter(pedido_id=order)
     empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido)
     repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
@@ -551,18 +550,25 @@ def OrderDetail(request, order):
         'success': True,
         'pedido': pedido,
         'cliente': cliente,
-        'productos': productos,
         'user': user,
         'empacadoresActivos': empacadores_activos,
         'repartidoresActivos': repartidores_activos,
         'isAdmin': False
     }
-    
+    #--Procesamiento de productos--#
+    if pedido.estado_id in [0, 1]:
+        data['productos_bodega_1'] = ProductosPedido.objects.filter(pedido_id=order, producto__tipo__id=1)
+        data['productos_bodega_2'] = ProductosPedido.objects.filter(pedido_id=order, producto__tipo__id__in=[0, 2])
+        data['productos'] = ProductosPedido.objects.filter(pedido_id=order)
+    else: 
+        data['productos'] = ProductosPedido.objects.filter(pedido_id=order)
+        
     #Post
     if request.method == 'POST':
 
         #----------------TAREAS DE EMPAQUETACION, ESTADO 0 PARA 1----------------#
         if user.tipo_usuario_id == 3 or user.tipo_usuario_id in adminIds and pedido.estado_id in [0,1]: #Empaquetador
+            
             if "confirmar_empaque" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
@@ -640,7 +646,6 @@ def OrderDetail(request, order):
                 if not pedido.estado_id >= 5:
                     if user.tipo_usuario_id in adminIds:
                         data['isAdmin'] = True
-                    print("benja0")
                     if form.is_valid():
                         print("benja1")
                         pedido.despachador_reparto = user
@@ -760,6 +765,7 @@ def OrderDetail(request, order):
                 'msg': ERROR_13
             })
          
+    
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
         data['puede_ayudar'] = getPuedeAyudar(pedido, empacadores_activos, user)
@@ -769,6 +775,7 @@ def OrderDetail(request, order):
         return render(request, HTMLORDERDETAIL, {**data}) if pedido.vendedor_id == user.id else render(request, HTMLORDERDETAIL, {'success': False, 'msg': ERROR_13})
     elif user.tipo_usuario_id == 3: #Empacadores
         data['puede_ayudar'] = getPuedeAyudar(pedido, empacadores_activos, user)
+        
         return render(request, HTMLORDERDETAIL, {**data, 'issue3':issue})
     elif user.tipo_usuario_id in [4,5]: #Facturadores - despachadores
         form = SeleccionarRepartidor(pedido=pedido) if user.tipo_usuario_id == 5 else None

@@ -194,7 +194,7 @@
                                                 <strong>Cliente:</strong> {{p.cliente}} <br>
                                                 <section class="tags_container">
                                                     {% for pp in p.productospedido_set.all %}
-                                                        <span class="badge bg-success tag">{{ pp.producto.tipo.get_bodega }}</span> <br>
+                                                        <span class="badge bg-success tag">{{ pp.producto.tipo.get_bodega_str }}</span> <br>
                                                     {% endfor %}
                                                 </section>
                         

@@ -1,4 +1,3 @@
-const btnModificarCantidad = document.getElementById('btnModificarCantidad');
 let productosActualizados = {};
 const repartidor = document.getElementById('repartidor');
 const repartidorSecundario = document.getElementById('repartidorSecundario');
@@ -72,38 +71,46 @@ try{
 } catch {}
 
 // Formulario de empaque
-try{
-    const empaqueForm = document.getElementById('empaqueForm');
-    empaqueForm.addEventListener('submit', e=>{
-        e.preventDefault();
-        /* Estructura visionada:
-        {
-            id_producto: 2,
-            paquete: '++',
-            peso: '35 neto'
-        }
+// try{
+//     const empaqueForm = document.getElementById('empaqueForm');
+//     empaqueForm.addEventListener('submit', e=>{
+//         e.preventDefault();
+//         /* Estructura visionada:
+//         {
+//             id_producto: 2,
+//             paquete: '++',
+//             peso: '35 neto'
+//         }
         
-        */
-    });
-} catch {}
+//         */
+//     });
+// } catch {}
 
 
 let ban = true;
-$(btnModificarCantidad).on('click', function(e){
+$('.btnModificarCantidad').on('click', function(e) {
     e.preventDefault();
     
-    const modificarCantidad = document.querySelectorAll('.modificarCantidad');
+    const modificarCantidad = document.querySelectorAll('.modificarCantidadTd');
     modificarCantidad.forEach((fila)=>{
-        cantidad = fila.querySelector('input[type="number"]').value;
-        productosActualizados[parseInt(fila.querySelector('input[type="hidden"]').value)] = cantidad;
-        if (cantidad <= 0) ban = false;
-    });
+        const modificarCantidadInputs = fila.querySelectorAll('.modificarCantidadInputs');
+        modificarCantidadInputs.forEach(inputContainer => {
+            const cantidad = inputContainer.querySelector('input[type="number"]').value;
+            const productoId = parseInt(inputContainer.querySelector('input[type="hidden"]').value);
+            productosActualizados[productoId] = cantidad;
+            
+            if (cantidad <= 0) ban = false;
+        });
 
-    if (ban){
-        let url = $(this).attr('action');
-        let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+    });
+    console.log(productosActualizados);
+
+    if (ban) {
+        const url = $(this).attr('action');
+        const csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+
         $.ajax({
-            type:'POST',
+            type: 'POST',
             url: url,
             data: {
                 'action': 0,
@@ -113,21 +120,21 @@ $(btnModificarCantidad).on('click', function(e){
             },
             dataType: 'json',
             success: data => {
-                if (data.success){
-                    createToastNotify(0,"Hecho","Cantidad modificada correctamente")
+                if (data.success) {
+                    createToastNotify(0, "Hecho", "Cantidad modificada correctamente");
+                } else {
+                    createToastNotify(1, "Error", data.msg);
                 }
-                else createToastNotify(1, "Error", data.msg);
             },
-            error: (jqxhr, log,log2)=> {
-                console.log(jqxhr)
+            error: (jqxhr, log, log2) => {
+                console.log(jqxhr);
                 console.log(log);
                 console.log(log2);
                 createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
             }
         });
-    }
-    else {
-        createToastNotify(1, "Error en cantidad", "La cantidad de los productos debe de ser mayor a 0. Si no necesita los productos, borrelos.")
+    } else {
+        createToastNotify(1, "Error en cantidad", "La cantidad de los productos debe de ser mayor a 0. Si no necesita los productos, bórralos.");
     }
 });
 
