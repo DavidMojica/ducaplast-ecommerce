@@ -12,6 +12,7 @@ const form_venta = document.getElementById('form_venta');
 
 let totalProductos = 0;
 const Productos = {};
+const ProductosParaEliminar = {};
 const nota = document.getElementById('nota');
 const cliente = document.getElementById('cliente');
 
@@ -33,38 +34,14 @@ const val_cliente_registro = () =>{
     return "0";
 }
 
-
-// const updateGlobalPrice = () => {
-//     totalProductos = 0;
-//     document.querySelectorAll('.product_quantity').forEach(input => {
-//         const priceElement = input.parentElement.nextElementSibling.querySelector('span');
-//         const price = (parseFloat(priceElement.textContent.replace('$', '').replace('.', '')))/input.value;
-//         totalProductos += price*input.value;
-//     }) 
-//     total_productos.textContent = addDecimal(totalProductos);
-//     iva.textContent = addDecimal(totalProductos*0.19);
-//     totalVenta.textContent = addDecimal(totalProductos + totalProductos*0.19);
-// }
-
-// const updateProductPrice = (element, price, quantity, id) => {
-//     if (!isNaN(quantity) && quantity > 0){
-//         const object_price = price*quantity;
-//         element.textContent = object_price;
-//         Productos[id] = quantity;
-//         updateGlobalPrice();
-//     } else {
-//         element.textContent = "Cantidad no válida, el producto se borrará si se confirma la venta.";
-//         delete Productos[id];
-//     }
-// }
-
 const updateProduct = (element, id, quantity) => {
     if (!isNaN(quantity) && quantity > 0){
         Productos[id]['cantidad'] = quantity;
         element.textContent = "";
+        delete ProductosParaEliminar[id];
     }else {
         element.textContent = "Cantidad no válida, el producto se borrará si se confirma la venta.";
-        delete Productos[id];
+        ProductosParaEliminar[id] = true;
     }
 }
 
@@ -117,7 +94,8 @@ document.querySelectorAll('.product_quantity').forEach(input => {
     Productos[id] = {'cantidad': parseInt(input.value), 'tipo_cantidad': parseInt(product_quantity_type.value)};
     input.addEventListener('input', function() {
         // updateProductPrice(priceElement, price, parseInt(this.value), id);
-        updateProduct(priceElement, id, parseInt(this.value));
+        console.log(Productos);
+        updateProduct(priceElement, id, parseInt(input.value));
         console.log(Productos);
     });
 
@@ -148,6 +126,11 @@ try{
             $(document).ready(()=>{
                 let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
                 let url = $(this).attr('action');
+
+                for (let id in ProductosParaEliminar){
+                    if (ProductosParaEliminar[id]) delete Productos[id];
+                }
+
                 $.ajax({
                     type: 'POST',
                     url: url,
