@@ -93,17 +93,19 @@ $('.btnModificarCantidad').on('click', function(e) {
     
     const modificarCantidad = document.querySelectorAll('.modificarCantidadTd');
     modificarCantidad.forEach((fila)=>{
-        const modificarCantidadInputs = fila.querySelectorAll('.modificarCantidadInputs');
-        modificarCantidadInputs.forEach(inputContainer => {
-            const cantidad = inputContainer.querySelector('input[type="number"]').value;
-            const productoId = parseInt(inputContainer.querySelector('input[type="hidden"]').value);
-            productosActualizados[productoId] = cantidad;
-            
-            if (cantidad <= 0) ban = false;
-        });
+        const productoId = parseInt(fila.querySelector('input[type="hidden"]').value);
+        const cantidad = parseInt(fila.getElementsByClassName('cantidadProducto')[0].value);
+        const paquete = fila.getElementsByClassName('paqueteProducto')[0].value;
+        const peso = fila.getElementsByClassName('pesoProducto')[0].value;
 
+        productosActualizados[productoId] = {
+            'cantidad': cantidad,
+            'paquete': paquete,
+            'peso': peso
+        };
+
+        if (cantidad <= 0) ban = false;
     });
-    console.log(productosActualizados);
 
     if (ban) {
         const url = $(this).attr('action');

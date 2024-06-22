@@ -152,15 +152,6 @@ def filtrarPedidosOrders(request, pedidos, form):
     return pedidos
   
 
-#Devuelve el precio actualizado con el IVA
-@login_required
-def calcular_total_actualizado(request):
-    carrito = request.session.get('carrito', {})
-    total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-    iva_actualizado = total_productos_actualizado * 0.19
-    total_actualizado = round(total_productos_actualizado + iva_actualizado)
-    return total_actualizado
-
 @login_required
 def ayudar_a_empacar(request, user, pedido):
     handler = HandlerEmpaquetacion(empacador = user, pedido = pedido)
@@ -206,27 +197,29 @@ def loadCart(request, pedido, initial=True):
         }
     request.session['carrito'] = carrito
     if not initial:
-        pedido.valor = calcular_total_actualizado(request)
         pedido.save()
     return carrito
 
 def updateCart(request, pedido, productos_modificados):
     carrito = {}
     productos_en_pedido = ProductosPedido.objects.filter(pedido=pedido)
-    for producto_id, cantidad in productos_modificados.items():
+    for producto_id, detalles in productos_modificados.items():
         producto_real = get_object_or_404(Producto, pk=producto_id)
+        cantidad = detalles['cantidad']
+        paquete = detalles['paquete']
+        peso = detalles['peso']
         carrito[int(producto_id)] = {
-            'precio': producto_real.precio,
-            'cantidad_existencias': producto_real.cantidad,
             'cantidad': cantidad,
-            'total_producto': int(cantidad) * int(producto_real.precio)
+            'paquete':paquete,
+            'peso':peso
         }
         producto_en_pedido = productos_en_pedido.get(producto=producto_real)
         producto_en_pedido.cantidad = cantidad
-        producto_en_pedido.total_producto = int(cantidad) * producto_real.precio
+        producto_en_pedido.paquete = paquete
+        producto_en_pedido.peso = peso
         producto_en_pedido.save()
+        
     request.session['carrito'] = carrito
-    pedido.valor = calcular_total_actualizado(request)
     pedido.save()
     return carrito
 
@@ -588,9 +581,7 @@ def OrderDetail(request, order):
                 empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if empacadores_activos.filter(empacador_id=user.id).exists():
-                        total_actualizado = calcular_total_actualizado(request)
                         pedido.estado_id = 2
-                        pedido.valor = total_actualizado
                         pedido.empacado_hora = timezone.now()
                         pedido.save()
                     else:
@@ -608,21 +599,15 @@ def OrderDetail(request, order):
                     return JsonResponse({'success': False, 'msg': ERROR_21})
                 
                 carrito = updateCart(request,pedido,productosModificados)
-                total_actualizado = calcular_total_actualizado(request)
-                print(total_actualizado)
-                return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
+                return JsonResponse({'success': True})
             elif 'productoAgotado' in request.POST:
                 producto_id = int(request.POST.get('producto_id'))
                 actualizarCantidad(request, pedido, producto_id, cantidad=0)
                 carrito = loadCart(request, pedido, False)
-                total_actualizado = calcular_total_actualizado(request)  
-                print(total_actualizado)
             elif 'productoNoAgotado' in request.POST:
                 producto_id = int(request.POST.get('producto_id'))
                 actualizarCantidad(request, pedido, producto_id, cantidad=1)
                 carrito = loadCart(request, pedido, False)
-                total_actualizado = calcular_total_actualizado(request)  
-                print(total_actualizado)
             elif 'notaEmpacador' in request.POST:
                 notaPedido = request.POST.get('notaPedido')
                 pedido.notaEmpacador = notaPedido.strip()
