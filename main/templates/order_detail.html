@@ -25,9 +25,6 @@
                     <p class="card-text">
                         Cliente: <strong>{{cliente}}</strong> <br>
                         Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
-                        {% if isAdmin  %}
-                            Valor pedido: <strong  class="price">${{pedido.valor}}</strong> <br>
-                        {% endif %}
                         Vendedor: <strong>{{pedido.vendedor}}</strong>
                     </p>
                     <p class="card-text">Estado del pedido:
@@ -133,7 +130,7 @@
                                         </section>
                                         <section class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                            <form action="" method="POST">
+                                            <form action="" method="POST" id="empaqueForm">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="completarEmpaque">
                                                 <button type="submit" class="btn btn-success">Sí, está empacado</button>
@@ -547,7 +544,7 @@
                         </thead>
                         <tbody>
                             {% for p in productos %}
-                                <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 2 %}producto_listado{% endif %}">
+                                <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 1 or pedido.estado_id == 2 %}producto_listado{% endif %}">
                                     <td class="nombre_producto">
                                         {% if p.cantidad > 0 %}
                                             {{ p.producto.descripcion }}
@@ -559,21 +556,33 @@
                                     {% if user.tipo_usuario_id == 3 or isAdmin  %}
                                         {% if pedido.estado_id == 1 %}
                                             {% if p.cantidad > 0 %}
-                                                <td class="modificarCantidad">
+                                                <td class="modificarCantidad text-center">
+                                                    <fieldset>
                                                         <input type="hidden" name="" value="{{p.producto_id}}">
-                                                        <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
+                                                        <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control" placeholder="Cantidad (obligatorio)">
+                                                    </fieldset>
+                                                    <fieldset class="my-2">
+                                                        <input type="hidden" name="" value="{{p.producto_id}}">
+                                                        <input type="text" name="" id="" value="" placeholder="Paquete (Opcional)" class="form-control strikeable_field">
+                                                    </fieldset>
+                                                    <fieldset>
+                                                        <input type="hidden" name="" value="{{p.producto_id}}">
+                                                        <input type="text" name="" id="" placeholder="Peso (Opcional)" class="form-control strikeable_field">
+                                                    </fieldset>
                                                 </td>
                                             {% else %}
                                                 <td>
                                                     <strong>Producto agotado</strong>
                                                 </td>
                                             {% endif%}
-                                            <td>{{p.tipo_cantidad}}</td>
+                                            <td>
+                                                {{p.tipo_cantidad}}
+                                            </td>
                                             <td>   
                                                 {% if p.cantidad > 0 %}
                                                     <!-- trigger -->
                                                     <button type="button" class="btn btn-danger btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
-                                                        Marcar como agotado
+                                                        Producto agotado
                                                     </button>
                                                     <!-- modal -->
                                                     <section class="modal fade" id="modalProductoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
@@ -634,11 +643,6 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                {% if isAdmin %}
-                                    <td>
-                                        <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
-                                    </td>
-                                {% endif %}
                                 {% if user.tipo_usuario_id == 3 or isAdmin %}
                                     {% if pedido.estado_id == 1 %}
                                         <td></td>
@@ -652,25 +656,28 @@
                                     {% endif %}
                                 {% endif %}
                             </tr>
-                            {% if user.tipo_usuario_id == 3 or isAdmin %}
-                                {% if pedido.estado_id == 1  %} 
-                                    <tr>
-                                        <td><p class="text-bold">Nota al pedido. No es obligatorio.</p></td>
-                                        <td class="text-center">
-                                            <form action="" method="post" id="notaEmpacador">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="notaEmpacador" id="notaEmpacador">
-                                                <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaEmpacador and pedido.notaEmpacador is not None %} {{pedido.notaEmpacador}} {% endif %}</textarea>
-                                                <button type="submit" class="btn btn-success">Guardar nota</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            {% endif %}
+                            
                         </tfoot>
                     </table>
                 </section>
+
             </article>
+            <!-- Notas del pedido -->
+            {% if user.tipo_usuario_id == 3 or isAdmin %}
+                {% if pedido.estado_id == 1  %} 
+                    <section class="card my-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Nota al pedido. No es obligatorio.</h5>
+                            <form action="" method="post" id="notaEmpacador">
+                                {% csrf_token %}
+                                <input type="hidden" name="notaEmpacador" id="notaEmpacador">
+                                <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaEmpacador and pedido.notaEmpacador is not None %} {{pedido.notaEmpacador}} {% endif %}</textarea>
+                                <button type="submit" class="btn btn-success">Guardar nota</button>
+                            </form>
+                        </article>
+                    </section>
+                {% endif %}
+            {% endif %}
         </aside>
     </section>
     {% else %}

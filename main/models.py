@@ -157,8 +157,10 @@ class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)
-    tipo_cantidad = models.ForeignKey(TipoCantidad, on_delete=models.CASCADE, null=True, blank=True)   
-    
+    tipo_cantidad = models.ForeignKey(TipoCantidad, on_delete=models.CASCADE, null=True, blank=True)
+    paquete = models.CharField(max_length=20, default='', null=True, blank=True)
+    peso = models.CharField(max_length=100, default='', null=True, blank=True)
+
 class HandlerEmpaquetacion(models.Model):
     empacador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE) 
