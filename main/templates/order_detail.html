@@ -25,9 +25,6 @@
                     <p class="card-text">
                         Cliente: <strong>{{cliente}}</strong> <br>
                         Dirección de entrega: <strong>{{cliente.direccion}}</strong><br>
-                        {% if isAdmin  %}
-                            Valor pedido: <strong  class="price">${{pedido.valor}}</strong> <br>
-                        {% endif %}
                         Vendedor: <strong>{{pedido.vendedor}}</strong>
                     </p>
                     <p class="card-text">Estado del pedido:
@@ -133,7 +130,7 @@
                                         </section>
                                         <section class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                            <form action="" method="POST">
+                                            <form action="" method="POST" id="empaqueForm">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="completarEmpaque">
                                                 <button type="submit" class="btn btn-success">Sí, está empacado</button>
@@ -531,146 +528,316 @@
         </section>
         <!-- Productos va aquí -->
         <aside class="col-md-6">
-            <article class="card">
-                <section class="card-body">
-                    <h5 class="card-title">Productos en el pedido:</h5>
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th scope="col">Producto</th>
-                                <th scope="col">Cantidad</th>
-                                <th scope="col">Tipo Cantidad</th>
-                                {% if pedido.estado_id == 1 %}
-                                    <th scope="col">Acción</th>
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in productos %}
-                                <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 2 %}producto_listado{% endif %}">
-                                    <td class="nombre_producto">
-                                        {% if p.cantidad > 0 %}
-                                            {{ p.producto.descripcion }}
-                                        {% else %}
-                                            <strike>{{ p.producto.descripcion }}</strike>
-                                        {% endif %}
-                                    </td>
-                                    
-                                    {% if user.tipo_usuario_id == 3 or isAdmin  %}
+            <!-- Filtrar por bodegas si esta en empaquetacion -->
+            {% if pedido.estado.id == 0 or pedido.estado.id == 1 %}
+                <!-- Productos de bodega 1 -->
+                {% if productos_bodega_1 %}
+                    <article class="card">
+                        <section class="card-body">
+                            <h5 class="card-title">Productos de bodega 1</h5>
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">Cantidad</th>
+                                        <th scope="col">Tipo Cantidad</th>
                                         {% if pedido.estado_id == 1 %}
-                                            {% if p.cantidad > 0 %}
-                                                <td class="modificarCantidad">
-                                                        <input type="hidden" name="" value="{{p.producto_id}}">
-                                                        <input type="number" name="" id="" value="{{ p.cantidad }}" class="form-control">
-                                                </td>
-                                            {% else %}
-                                                <td>
-                                                    <strong>Producto agotado</strong>
-                                                </td>
-                                            {% endif%}
-                                            <td>{{p.tipo_cantidad}}</td>
-                                            <td>   
+                                            <th scope="col">Acción</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in productos_bodega_1 %}
+                                        <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 1 or pedido.estado_id == 2 %}producto_listado{% endif %}">
+                                            <td class="nombre_producto">
                                                 {% if p.cantidad > 0 %}
-                                                    <!-- trigger -->
-                                                    <button type="button" class="btn btn-danger btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
-                                                        Marcar como agotado
-                                                    </button>
-                                                    <!-- modal -->
-                                                    <section class="modal fade" id="modalProductoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                                                        <article class="modal-dialog modal-dialog-centered">
-                                                        <article class="modal-content">
-                                                            <section class="modal-header">
-                                                            <h5 class="modal-title">Marcar como agotado</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </section>
-                                                            <section class="modal-body">
-                                                            <p>Al hacer click en confirmar, usted confirma que {{p.producto.descripcion}} no tiene existencias en ninguna de las bodegas.</p>
-                                                            <form action="" method="POST" id="modificarCantidad">
-                                                                {% csrf_token %}
-                                                                <input type="hidden" name="productoAgotado">
-                                                                <input type="hidden" name="producto_id" value="{{p.producto_id}}">
-                                                                <button type="submit" class="btn btn-danger mt-4 delete-item">Confirmar</button>                             
-                                                            </form> 
-                                                            </section>
-                                                        </article>
-                                                        </article>
-                                                    </section>
+                                                    {{ p.producto.descripcion }}
                                                 {% else %}
-                                                    <button type="button" class="btn btn-success btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoNoAgotado-{{p.producto_id}}">
-                                                        Marcar como existente
-                                                    </button>
-                                                    <section class="modal fade" id="modalProductoNoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                                                        <article class="modal-dialog modal-dialog-centered">
-                                                        <article class="modal-content">
-                                                            <section class="modal-header">
-                                                            <h5 class="modal-title">Marcar como agotado</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </section>
-                                                            <section class="modal-body">
-                                                            <p>¿Encontraron más existencias de {{p.producto.descripcion}} ?</p>
-                                                            <form action="" method="POST" id="modificarCantidad">
-                                                                {% csrf_token %}
-                                                                <input type="hidden" name="productoNoAgotado">
-                                                                <input type="hidden" name="producto_id" value="{{p.producto_id}}">
-                                                                <button type="submit" class="btn btn-success mt-4 delete-item">Confirmar</button>                             
-                                                            </form> 
-                                                            </section>
-                                                        </article>
-                                                        </article>
-                                                    </section>
+                                                    <strike>{{ p.producto.descripcion }}</strike>
                                                 {% endif %}
                                             </td>
-                                        {% else %}
-                                            <td>{{ p.cantidad }}</td>
-                                        {% endif %}
-                                    {% else %}
-                                        <td>{{ p.cantidad }}</td>
-                                    {% endif %}
-                                    {% if pedido.estado_id != 1 %}
-                                        <td>{{p.tipo_cantidad}}</td>
-                                    {% endif %}
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                {% if isAdmin %}
-                                    <td>
-                                        <p>Valor: $<strong class="price">{{pedido.valor}}</strong></p>
-                                    </td>
-                                {% endif %}
-                                {% if user.tipo_usuario_id == 3 or isAdmin %}
-                                    {% if pedido.estado_id == 1 %}
-                                        <td></td>
-                                        <td class="text-center">
-                                            <form action="" method="POST" id="modificarCantidad">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="modificarCantidad">
-                                                <button type="submit" class="btn btn-sm btn-warning text-white" id="btnModificarCantidad">Actualizar cantidades</button>
-                                            </form>
-                                        </td>
-                                    {% endif %}
-                                {% endif %}
-                            </tr>
-                            {% if user.tipo_usuario_id == 3 or isAdmin %}
-                                {% if pedido.estado_id == 1  %} 
+                                            
+                                            {% if user.tipo_usuario_id == 3 or isAdmin  %}
+                                                {% if pedido.estado_id == 1 %}
+                                                    {% if p.cantidad > 0 %}
+                                                        <td class="modificarCantidadTd text-center">
+                                                            <input type="hidden" name="" value="{{p.producto_id}}">
+                                                            <input type="number" name="" id="" value="{{ p.cantidad }}" class="cantidadProducto form-control" placeholder="Cantidad (obligatorio)">
+                                                            <input type="text" name="" id="" value="{{p.paquete}}" placeholder="Paquete (Opcional)" class="paqueteProducto form-control strikeable_field my-2">
+                                                            <input type="text" name="" id="" value="{{p.peso}}" placeholder="Peso (Opcional)" class="pesoProducto form-control strikeable_field">
+                                                        </td>
+                                                    {% else %}
+                                                        <td>
+                                                            <strong>Producto agotado</strong>
+                                                        </td>
+                                                    {% endif%}
+                                                    <td>
+                                                        {{p.tipo_cantidad}}
+                                                    </td>
+                                                    <td>   
+                                                        {% if p.cantidad > 0 %}
+                                                            <!-- trigger -->
+                                                            <button type="button" class="btn btn-danger btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
+                                                                Producto agotado
+                                                            </button>
+                                                            <!-- modal -->
+                                                            <section class="modal fade" id="modalProductoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                                <article class="modal-dialog modal-dialog-centered">
+                                                                <article class="modal-content">
+                                                                    <section class="modal-header">
+                                                                    <h5 class="modal-title">Marcar como agotado</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </section>
+                                                                    <section class="modal-body">
+                                                                    <p>Al hacer click en confirmar, usted confirma que {{p.producto.descripcion}} no tiene existencias en ninguna de las bodegas.</p>
+                                                                    <form action="" method="POST" class="modificarCantidad">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="productoAgotado">
+                                                                        <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                                        <button type="submit" class="btn btn-danger mt-4 delete-item">Confirmar</button>                             
+                                                                    </form> 
+                                                                    </section>
+                                                                </article>
+                                                                </article>
+                                                            </section>
+                                                        {% else %}
+                                                            <button type="button" class="btn btn-success btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoNoAgotado-{{p.producto_id}}">
+                                                                Marcar como existente
+                                                            </button>
+                                                            <section class="modal fade" id="modalProductoNoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                                <article class="modal-dialog modal-dialog-centered">
+                                                                <article class="modal-content">
+                                                                    <section class="modal-header">
+                                                                    <h5 class="modal-title">Marcar como agotado</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </section>
+                                                                    <section class="modal-body">
+                                                                    <p>¿Encontraron más existencias de {{p.producto.descripcion}} ?</p>
+                                                                    <form action="" method="POST" id="modificarCantidad">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="productoNoAgotado">
+                                                                        <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                                        <button type="submit" class="btn btn-success mt-4 delete-item">Confirmar</button>                             
+                                                                    </form> 
+                                                                    </section>
+                                                                </article>
+                                                                </article>
+                                                            </section>
+                                                        {% endif %}
+                                                    </td>
+                                                {% else %}
+                                                    <td>{{ p.cantidad }}</td>
+                                                {% endif %}
+                                            {% else %}
+                                                <td>{{ p.cantidad }}</td>
+                                            {% endif %}
+                                            {% if pedido.estado_id != 1 %}
+                                                <td>{{p.tipo_cantidad}}</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
                                     <tr>
-                                        <td><p class="text-bold">Nota al pedido. No es obligatorio.</p></td>
-                                        <td class="text-center">
-                                            <form action="" method="post" id="notaEmpacador">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="notaEmpacador" id="notaEmpacador">
-                                                <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaEmpacador and pedido.notaEmpacador is not None %} {{pedido.notaEmpacador}} {% endif %}</textarea>
-                                                <button type="submit" class="btn btn-success">Guardar nota</button>
-                                            </form>
-                                        </td>
+                                        {% if user.tipo_usuario_id == 3 or isAdmin %}
+                                            {% if pedido.estado_id == 1 %}
+                                                <td></td>
+                                                <td class="text-center">
+                                                    <form action="" method="POST" id="modificarCantidad">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="modificarCantidad">
+                                                        <button type="submit" class="btnModificarCantidad btn btn-sm btn-warning text-white" >Actualizar cantidades</button>
+                                                    </form>
+                                                </td>
+                                            {% endif %}
+                                        {% endif %}
                                     </tr>
-                                {% endif %}
-                            {% endif %}
-                        </tfoot>
-                    </table>
-                </section>
-            </article>
+                                    
+                                </tfoot>
+                            </table>
+                        </section>
+
+                    </article>
+                {% endif %}
+                <!-- Productos de bodega 2 -->
+                {% if productos_bodega_2 %}
+                    <article class="card">
+                        <section class="card-body">
+                            <h5 class="card-title">Productos de bodega 2</h5>
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">Cantidad</th>
+                                        <th scope="col">Tipo Cantidad</th>
+                                        {% if pedido.estado_id == 1 %}
+                                            <th scope="col">Acción</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in productos_bodega_2 %}
+                                        <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 1 or pedido.estado_id == 2 %}producto_listado{% endif %}">
+                                            <td class="nombre_producto">
+                                                {% if p.cantidad > 0 %}
+                                                    {{ p.producto.descripcion }}
+                                                {% else %}
+                                                    <strike>{{ p.producto.descripcion }}</strike>
+                                                {% endif %}
+                                            </td>
+                                            
+                                            {% if user.tipo_usuario_id == 3 or isAdmin  %}
+                                                {% if pedido.estado_id == 1 %}
+                                                    {% if p.cantidad > 0 %}
+                                                        <td class="modificarCantidadTd text-center">
+                                                            <input type="hidden" name="" value="{{p.producto_id}}">
+                                                            <input type="number" name="" id="" value="{{ p.cantidad }}" class="cantidadProducto form-control" placeholder="Cantidad (obligatorio)">
+                                                            <input type="text" name="" id="" value="{{p.paquete}}" placeholder="Paquete (Opcional)" class="paqueteProducto form-control strikeable_field my-2">
+                                                            <input type="text" name="" id="" value="{{p.peso}}" placeholder="Peso (Opcional)" class="pesoProducto form-control strikeable_field">
+                                                        </td>
+                                                    {% else %}
+                                                        <td>
+                                                            <strong>Producto agotado</strong>
+                                                        </td>
+                                                    {% endif%}
+                                                    <td>
+                                                        {{p.tipo_cantidad}}
+                                                    </td>
+                                                    <td>   
+                                                        {% if p.cantidad > 0 %}
+                                                            <!-- trigger -->
+                                                            <button type="button" class="btn btn-danger btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoAgotado-{{p.producto_id}}">
+                                                                Producto agotado
+                                                            </button>
+                                                            <!-- modal -->
+                                                            <section class="modal fade" id="modalProductoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                                <article class="modal-dialog modal-dialog-centered">
+                                                                <article class="modal-content">
+                                                                    <section class="modal-header">
+                                                                    <h5 class="modal-title">Marcar como agotado</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </section>
+                                                                    <section class="modal-body">
+                                                                    <p>Al hacer click en confirmar, usted confirma que {{p.producto.descripcion}} no tiene existencias en ninguna de las bodegas.</p>
+                                                                    <form action="" method="POST" class="modificarCantidad">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="productoAgotado">
+                                                                        <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                                        <button type="submit" class="btn btn-danger mt-4 delete-item">Confirmar</button>                             
+                                                                    </form> 
+                                                                    </section>
+                                                                </article>
+                                                                </article>
+                                                            </section>
+                                                        {% else %}
+                                                            <button type="button" class="btn btn-success btn-sm me-1 mb-2 cart-handler" title="Indicar que este producto no tiene existencias" data-bs-toggle="modal" data-bs-target="#modalProductoNoAgotado-{{p.producto_id}}">
+                                                                Marcar como existente
+                                                            </button>
+                                                            <section class="modal fade" id="modalProductoNoAgotado-{{p.producto_id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                                                <article class="modal-dialog modal-dialog-centered">
+                                                                <article class="modal-content">
+                                                                    <section class="modal-header">
+                                                                    <h5 class="modal-title">Marcar como agotado</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </section>
+                                                                    <section class="modal-body">
+                                                                    <p>¿Encontraron más existencias de {{p.producto.descripcion}} ?</p>
+                                                                    <form action="" method="POST" id="modificarCantidad">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="productoNoAgotado">
+                                                                        <input type="hidden" name="producto_id" value="{{p.producto_id}}">
+                                                                        <button type="submit" class="btn btn-success mt-4 delete-item">Confirmar</button>                             
+                                                                    </form> 
+                                                                    </section>
+                                                                </article>
+                                                                </article>
+                                                            </section>
+                                                        {% endif %}
+                                                    </td>
+                                                {% else %}
+                                                    <td>{{ p.cantidad }}</td>
+                                                {% endif %}
+                                            {% else %}
+                                                <td>{{ p.cantidad }}</td>
+                                            {% endif %}
+                                            {% if pedido.estado_id != 1 %}
+                                                <td>{{p.tipo_cantidad}}</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        {% if user.tipo_usuario_id == 3 or isAdmin %}
+                                            {% if pedido.estado_id == 1 %}
+                                                <td></td>
+                                                <td class="text-center">
+                                                    <form action="" method="POST" id="modificarCantidad">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="modificarCantidad">
+                                                        <button type="submit" class="btnModificarCantidad btn btn-sm btn-warning text-white" >Guardar información</button>
+                                                    </form>
+                                                </td>
+                                            {% endif %}
+                                        {% endif %}
+                                    </tr>
+                                    
+                                </tfoot>
+                            </table>
+                        </section>
+
+                    </article>
+                {% endif %}
+            {% else %}
+            <!-- Productos en general -->
+                <article class="card my-4">
+                    <section class="card-body">
+                        <h5 class="card-title">Productos en el pedido:</h5>
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Producto</th>
+                                    <th scope="col">Cantidad</th>
+                                    <th scope="col">Tipo Cantidad</th>
+                                    <th scope="col">Peso</th>
+                                    <th scope="col">Paquete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in productos %}
+                                    <tr id="p-{{p.producto_id}}" class="{% if pedido.estado_id == 2 %}producto_listado{% endif %}">
+                                        <td class="nombre_producto">
+                                            {{ p.producto.descripcion }}
+                                        </td>
+                                        <td>{{ p.cantidad }}</td>
+                                        <td>{{p.tipo_cantidad}}</td>
+                                        <td>{{ p.peso }}</td>
+                                        <td>{{ p.paquete }}</td>
+                                            
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                    </section>
+                </article>
+            {% endif %}
+            <!-- Notas del pedido -->
+            {% if user.tipo_usuario_id == 3 or isAdmin %}
+                {% if pedido.estado_id == 1  %} 
+                    <section class="card my-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Nota al pedido. No es obligatorio.</h5>
+                            <form action="" method="post" id="notaEmpacador">
+                                {% csrf_token %}
+                                <input type="hidden" name="notaEmpacador" id="notaEmpacador">
+                                <textarea name="notaPedido" id="" cols="20" rows="2" class="form-control mb-2" placeholder="Escriba su nota aquí">{% if pedido.notaEmpacador and pedido.notaEmpacador is not None %} {{pedido.notaEmpacador}} {% endif %}</textarea>
+                                <button type="submit" class="btn btn-success">Guardar nota</button>
+                            </form>
+                        </article>
+                    </section>
+                {% endif %}
+            {% endif %}
         </aside>
     </section>
     {% else %}

@@ -152,15 +152,6 @@ def filtrarPedidosOrders(request, pedidos, form):
     return pedidos
   
 
-#Devuelve el precio actualizado con el IVA
-@login_required
-def calcular_total_actualizado(request):
-    carrito = request.session.get('carrito', {})
-    total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-    iva_actualizado = total_productos_actualizado * 0.19
-    total_actualizado = round(total_productos_actualizado + iva_actualizado)
-    return total_actualizado
-
 @login_required
 def ayudar_a_empacar(request, user, pedido):
     handler = HandlerEmpaquetacion(empacador = user, pedido = pedido)
@@ -206,27 +197,29 @@ def loadCart(request, pedido, initial=True):
         }
     request.session['carrito'] = carrito
     if not initial:
-        pedido.valor = calcular_total_actualizado(request)
         pedido.save()
     return carrito
 
 def updateCart(request, pedido, productos_modificados):
     carrito = {}
     productos_en_pedido = ProductosPedido.objects.filter(pedido=pedido)
-    for producto_id, cantidad in productos_modificados.items():
+    for producto_id, detalles in productos_modificados.items():
         producto_real = get_object_or_404(Producto, pk=producto_id)
+        cantidad = detalles['cantidad']
+        paquete = detalles['paquete']
+        peso = detalles['peso']
         carrito[int(producto_id)] = {
-            'precio': producto_real.precio,
-            'cantidad_existencias': producto_real.cantidad,
             'cantidad': cantidad,
-            'total_producto': int(cantidad) * int(producto_real.precio)
+            'paquete':paquete,
+            'peso':peso
         }
         producto_en_pedido = productos_en_pedido.get(producto=producto_real)
         producto_en_pedido.cantidad = cantidad
-        producto_en_pedido.total_producto = int(cantidad) * producto_real.precio
+        producto_en_pedido.paquete = paquete
+        producto_en_pedido.peso = peso
         producto_en_pedido.save()
+        
     request.session['carrito'] = carrito
-    pedido.valor = calcular_total_actualizado(request)
     pedido.save()
     return carrito
 
@@ -541,7 +534,6 @@ def OrderDetail(request, order):
     issue = ""
     pedido = get_object_or_404(Pedido, pk=order)
     cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
-    productos = ProductosPedido.objects.filter(pedido_id=order)
     empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido)
     repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
     carrito = loadCart(request, pedido)
@@ -551,18 +543,25 @@ def OrderDetail(request, order):
         'success': True,
         'pedido': pedido,
         'cliente': cliente,
-        'productos': productos,
         'user': user,
         'empacadoresActivos': empacadores_activos,
         'repartidoresActivos': repartidores_activos,
         'isAdmin': False
     }
-    
+    #--Procesamiento de productos--#
+    if pedido.estado_id in [0, 1]:
+        data['productos_bodega_1'] = ProductosPedido.objects.filter(pedido_id=order, producto__tipo__id=1)
+        data['productos_bodega_2'] = ProductosPedido.objects.filter(pedido_id=order, producto__tipo__id__in=[0, 2])
+        data['productos'] = ProductosPedido.objects.filter(pedido_id=order)
+    else: 
+        data['productos'] = ProductosPedido.objects.filter(pedido_id=order)
+        
     #Post
     if request.method == 'POST':
 
         #----------------TAREAS DE EMPAQUETACION, ESTADO 0 PARA 1----------------#
         if user.tipo_usuario_id == 3 or user.tipo_usuario_id in adminIds and pedido.estado_id in [0,1]: #Empaquetador
+            
             if "confirmar_empaque" in request.POST:
                 pedido.estado_id = 1
                 pedido.save()
@@ -582,9 +581,7 @@ def OrderDetail(request, order):
                 empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if empacadores_activos.filter(empacador_id=user.id).exists():
-                        total_actualizado = calcular_total_actualizado(request)
                         pedido.estado_id = 2
-                        pedido.valor = total_actualizado
                         pedido.empacado_hora = timezone.now()
                         pedido.save()
                     else:
@@ -602,21 +599,15 @@ def OrderDetail(request, order):
                     return JsonResponse({'success': False, 'msg': ERROR_21})
                 
                 carrito = updateCart(request,pedido,productosModificados)
-                total_actualizado = calcular_total_actualizado(request)
-                print(total_actualizado)
-                return JsonResponse({'success': True, 'total_actualizado': numberWithPoints(total_actualizado)})
+                return JsonResponse({'success': True})
             elif 'productoAgotado' in request.POST:
                 producto_id = int(request.POST.get('producto_id'))
                 actualizarCantidad(request, pedido, producto_id, cantidad=0)
                 carrito = loadCart(request, pedido, False)
-                total_actualizado = calcular_total_actualizado(request)  
-                print(total_actualizado)
             elif 'productoNoAgotado' in request.POST:
                 producto_id = int(request.POST.get('producto_id'))
                 actualizarCantidad(request, pedido, producto_id, cantidad=1)
                 carrito = loadCart(request, pedido, False)
-                total_actualizado = calcular_total_actualizado(request)  
-                print(total_actualizado)
             elif 'notaEmpacador' in request.POST:
                 notaPedido = request.POST.get('notaPedido')
                 pedido.notaEmpacador = notaPedido.strip()
@@ -640,7 +631,6 @@ def OrderDetail(request, order):
                 if not pedido.estado_id >= 5:
                     if user.tipo_usuario_id in adminIds:
                         data['isAdmin'] = True
-                    print("benja0")
                     if form.is_valid():
                         print("benja1")
                         pedido.despachador_reparto = user
@@ -760,6 +750,7 @@ def OrderDetail(request, order):
                 'msg': ERROR_13
             })
          
+    
     if user.tipo_usuario_id in adminIds: #Gerente - administrador
         data['isAdmin'] = True
         data['puede_ayudar'] = getPuedeAyudar(pedido, empacadores_activos, user)
@@ -769,6 +760,7 @@ def OrderDetail(request, order):
         return render(request, HTMLORDERDETAIL, {**data}) if pedido.vendedor_id == user.id else render(request, HTMLORDERDETAIL, {'success': False, 'msg': ERROR_13})
     elif user.tipo_usuario_id == 3: #Empacadores
         data['puede_ayudar'] = getPuedeAyudar(pedido, empacadores_activos, user)
+        
         return render(request, HTMLORDERDETAIL, {**data, 'issue3':issue})
     elif user.tipo_usuario_id in [4,5]: #Facturadores - despachadores
         form = SeleccionarRepartidor(pedido=pedido) if user.tipo_usuario_id == 5 else None

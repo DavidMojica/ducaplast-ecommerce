@@ -1,4 +1,3 @@
-const btnModificarCantidad = document.getElementById('btnModificarCantidad');
 let productosActualizados = {};
 const repartidor = document.getElementById('repartidor');
 const repartidorSecundario = document.getElementById('repartidorSecundario');
@@ -34,34 +33,87 @@ try {
         validarDespachadorForm(confirmarRepartidor);
     });
 } catch {}
-
+// Tachar productos
 try{
     const productos_listados = document.querySelectorAll('.producto_listado');
     productos_listados.forEach(producto =>{
         producto.addEventListener('click', ()=>{
-            const nombre_producto = producto.querySelector('.nombre_producto');
-            nombre_producto.style.textDecoration = nombre_producto.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+            const strikeable_fields = producto.querySelectorAll('.strikeable_field');
+            if (strikeable_fields) {
+                let ban_strike = true;
+                strikeable_fields.forEach(field =>{
+                    if (field.value.trim().length > 0) { ban_strike = false; }
+                })
+                if (ban_strike){
+                    const nombre_producto = producto.querySelector('.nombre_producto');
+                    nombre_producto.style.textDecoration = nombre_producto.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+                }
+            } else {
+                const nombre_producto = producto.querySelector('.nombre_producto');
+                nombre_producto.style.textDecoration = nombre_producto.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+            }
             
         });
     });
 } catch {}
 
+try{
+    const strikeable_fields = document.querySelectorAll('.strikeable_field');
+    strikeable_fields.forEach(field =>{
+        field.addEventListener('input', e=>{
+            const row = field.closest('tr');
+            if (row){
+                const nombre_producto = row.querySelector('.nombre_producto');
+                if (nombre_producto) nombre_producto.style.textDecoration = field.value.trim().length > 0 ? 'line-through' : 'none';
+            }
+        });
+    });
+} catch {}
+
+// Formulario de empaque
+// try{
+//     const empaqueForm = document.getElementById('empaqueForm');
+//     empaqueForm.addEventListener('submit', e=>{
+//         e.preventDefault();
+//         /* Estructura visionada:
+//         {
+//             id_producto: 2,
+//             paquete: '++',
+//             peso: '35 neto'
+//         }
+        
+//         */
+//     });
+// } catch {}
+
+
 let ban = true;
-$(btnModificarCantidad).on('click', function(e){
+$('.btnModificarCantidad').on('click', function(e) {
     e.preventDefault();
     
-    const modificarCantidad = document.querySelectorAll('.modificarCantidad');
+    const modificarCantidad = document.querySelectorAll('.modificarCantidadTd');
     modificarCantidad.forEach((fila)=>{
-        cantidad = fila.querySelector('input[type="number"]').value;
-        productosActualizados[parseInt(fila.querySelector('input[type="hidden"]').value)] = cantidad;
+        const productoId = parseInt(fila.querySelector('input[type="hidden"]').value);
+        const cantidad = parseInt(fila.getElementsByClassName('cantidadProducto')[0].value);
+        const paquete = fila.getElementsByClassName('paqueteProducto')[0].value;
+        const peso = fila.getElementsByClassName('pesoProducto')[0].value;
+
+        productosActualizados[productoId] = {
+            'cantidad': cantidad,
+            'paquete': paquete,
+            'peso': peso
+        };
+
+        console.log(productosActualizados);
         if (cantidad <= 0) ban = false;
     });
 
-    if (ban){
-        let url = $(this).attr('action');
-        let csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+    if (ban) {
+        const url = $(this).attr('action');
+        const csfrtoken = $('input[name="csrfmiddlewaretoken"]').val();
+
         $.ajax({
-            type:'POST',
+            type: 'POST',
             url: url,
             data: {
                 'action': 0,
@@ -71,21 +123,21 @@ $(btnModificarCantidad).on('click', function(e){
             },
             dataType: 'json',
             success: data => {
-                if (data.success){
-                    createToastNotify(0,"Hecho","Cantidad modificada correctamente")
+                if (data.success) {
+                    createToastNotify(0, "Hecho", "Cantidad/Paquete/Peso modificados correctamente");
+                } else {
+                    createToastNotify(1, "Error", data.msg);
                 }
-                else createToastNotify(1, "Error", data.msg);
             },
-            error: (jqxhr, log,log2)=> {
-                console.log(jqxhr)
+            error: (jqxhr, log, log2) => {
+                console.log(jqxhr);
                 console.log(log);
                 console.log(log2);
                 createToastNotify(1, "Error al procesar la solicitud.", "En el proceso de verificación de datos, algo salió mal.");
             }
         });
-    }
-    else {
-        createToastNotify(1, "Error en cantidad", "La cantidad de los productos debe de ser mayor a 0. Si no necesita los productos, borrelos.")
+    } else {
+        createToastNotify(1, "Error en cantidad", "La cantidad de los productos debe de ser mayor a 0. Si no necesita los productos, bórralos.");
     }
 });
 

@@ -47,16 +47,22 @@ class TipoProducto(models.Model):
     id = models.IntegerField(primary_key=True)
     description = models.CharField(max_length=25)
     
-    def get_bodega(self):
-        if self.id == 0: #Desechables
+    def get_bodega_str(self):
+        if self.id in [0, 2]: #Desechables, #Varios
             return "Productos de bodega 2"
         elif self.id == 1: #Bolsas
             return "Productos de bodega 1"
-        elif self.id == 2: #Varios
-            return "Productos varios"
         else:
             return "Productos sin tipo"
     
+    def get_bodega(self):
+        if self.id in [0, 2]: #Desechables, #Varios
+            return 2
+        elif self.id == 1: #Bolsas
+            return 1
+        else:
+            return 0
+        
     def __str__(self):
         return self.description 
 
@@ -157,8 +163,10 @@ class ProductosPedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)
-    tipo_cantidad = models.ForeignKey(TipoCantidad, on_delete=models.CASCADE, null=True, blank=True)   
-    
+    tipo_cantidad = models.ForeignKey(TipoCantidad, on_delete=models.CASCADE, null=True, blank=True)
+    paquete = models.CharField(max_length=20, default='', null=True, blank=True)
+    peso = models.CharField(max_length=100, default='', null=True, blank=True)
+
 class HandlerEmpaquetacion(models.Model):
     empacador = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE) 
