@@ -104,6 +104,7 @@ $('.btnModificarCantidad').on('click', function(e) {
             'peso': peso
         };
 
+        console.log(productosActualizados);
         if (cantidad <= 0) ban = false;
     });
 
@@ -123,7 +124,7 @@ $('.btnModificarCantidad').on('click', function(e) {
             dataType: 'json',
             success: data => {
                 if (data.success) {
-                    createToastNotify(0, "Hecho", "Cantidad modificada correctamente");
+                    createToastNotify(0, "Hecho", "Cantidad/Paquete/Peso modificados correctamente");
                 } else {
                     createToastNotify(1, "Error", data.msg);
                 }

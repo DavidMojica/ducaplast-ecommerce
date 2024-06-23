@@ -563,8 +563,8 @@
                                                         <td class="modificarCantidadTd text-center">
                                                             <input type="hidden" name="" value="{{p.producto_id}}">
                                                             <input type="number" name="" id="" value="{{ p.cantidad }}" class="cantidadProducto form-control" placeholder="Cantidad (obligatorio)">
-                                                            <input type="text" name="" id="" value="" placeholder="Paquete (Opcional)" class="paqueteProducto form-control strikeable_field my-2">
-                                                            <input type="text" name="" id="" placeholder="Peso (Opcional)" class="pesoProducto form-control strikeable_field">
+                                                            <input type="text" name="" id="" value="{{p.paquete}}" placeholder="Paquete (Opcional)" class="paqueteProducto form-control strikeable_field my-2">
+                                                            <input type="text" name="" id="" value="{{p.peso}}" placeholder="Peso (Opcional)" class="pesoProducto form-control strikeable_field">
                                                         </td>
                                                     {% else %}
                                                         <td>
@@ -692,8 +692,8 @@
                                                         <td class="modificarCantidadTd text-center">
                                                             <input type="hidden" name="" value="{{p.producto_id}}">
                                                             <input type="number" name="" id="" value="{{ p.cantidad }}" class="cantidadProducto form-control" placeholder="Cantidad (obligatorio)">
-                                                            <input type="text" name="" id="" value="" placeholder="Paquete (Opcional)" class="paqueteProducto form-control strikeable_field my-2">
-                                                            <input type="text" name="" id="" placeholder="Peso (Opcional)" class="pesoProducto form-control strikeable_field">
+                                                            <input type="text" name="" id="" value="{{p.paquete}}" placeholder="Paquete (Opcional)" class="paqueteProducto form-control strikeable_field my-2">
+                                                            <input type="text" name="" id="" value="{{p.peso}}" placeholder="Peso (Opcional)" class="pesoProducto form-control strikeable_field">
                                                         </td>
                                                     {% else %}
                                                         <td>
@@ -775,7 +775,7 @@
                                                     <form action="" method="POST" id="modificarCantidad">
                                                         {% csrf_token %}
                                                         <input type="hidden" name="modificarCantidad">
-                                                        <button type="submit" class="btnModificarCantidad btn btn-sm btn-warning text-white" >Actualizar cantidades</button>
+                                                        <button type="submit" class="btnModificarCantidad btn btn-sm btn-warning text-white" >Guardar información</button>
                                                     </form>
                                                 </td>
                                             {% endif %}
