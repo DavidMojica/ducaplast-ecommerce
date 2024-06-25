@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <script src="{% static 'javascript/orders.js' %}"defer></script>
 <section class="">
-    <main class="gradient-custom">
+    <main class="">
         {% if history and isAdmin or user.tipo_usuario_id == 5 %}
-            <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base" >
+            <section id="filterContainer" class="m-auto card my-4 p-4 col-md-6 col-lg-4 rounded-lg base" >
                 <form action="" method="GET" class="text-center filter-form row">
                     <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
                     
@@ -63,8 +63,8 @@
                     </fieldset>
                 </form>
             </section>
-        {% elif user.tipo_usuario_id == 0 or user.tipo_usuario_id == 1 %}
-        <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base" >
+        {% elif not history %}
+        <section id="filterContainer" class="m-auto card my-4 p-4 col-md-6 col-lg-4 rounded-lg base" >
             <form action="" method="GET" class="text-center filter-form row">
                 <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
                 
@@ -105,8 +105,8 @@
             </form>
         </section>
         {% endif %}
-        <section class="container py-5">
-            <article class="row d-flex justify-content-center my-4">
+        <section class="container ">
+            <article class="row d-flex justify-content-center">
                 <article class="card mb-4 bg-gray text-light col-md-8">
                     <header class="card-header">
                         <h5 class="text-center" id="productos_cantidad">

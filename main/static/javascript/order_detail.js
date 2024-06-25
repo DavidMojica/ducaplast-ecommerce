@@ -97,11 +97,13 @@ $('.btnModificarCantidad').on('click', function(e) {
         const cantidad = parseInt(fila.getElementsByClassName('cantidadProducto')[0].value);
         const paquete = fila.getElementsByClassName('paqueteProducto')[0].value;
         const peso = fila.getElementsByClassName('pesoProducto')[0].value;
+        const tipoCantidad = fila.parentElement.getElementsByClassName('tipoCantidadProducto')[0].value;
 
         productosActualizados[productoId] = {
             'cantidad': cantidad,
             'paquete': paquete,
-            'peso': peso
+            'peso': peso,
+            'tipo_cantidad': tipoCantidad
         };
 
         console.log(productosActualizados);

@@ -213,15 +213,18 @@ def updateCart(request, pedido, productos_modificados):
         cantidad = detalles['cantidad']
         paquete = detalles['paquete']
         peso = detalles['peso']
+        tipo_cantidad = detalles['tipo_cantidad']
         carrito[int(producto_id)] = {
             'cantidad': cantidad,
             'paquete':paquete,
-            'peso':peso
+            'peso':peso,
         }
         producto_en_pedido = productos_en_pedido.get(producto=producto_real)
+        tipo_cantidad_instance = get_object_or_404(TipoCantidad,pk=tipo_cantidad)
         producto_en_pedido.cantidad = cantidad
         producto_en_pedido.paquete = paquete
         producto_en_pedido.peso = peso
+        producto_en_pedido.tipo_cantidad=tipo_cantidad_instance
         producto_en_pedido.save()
         
     request.session['carrito'] = carrito
@@ -541,6 +544,7 @@ def OrderDetail(request, order):
     cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
     empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido)
     repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
+    tipos_cantidad = TipoCantidad.objects.all()
     carrito = loadCart(request, pedido)
     
     #GET   
@@ -551,6 +555,7 @@ def OrderDetail(request, order):
         'user': user,
         'empacadoresActivos': empacadores_activos,
         'repartidoresActivos': repartidores_activos,
+        'tipos_cantidad': tipos_cantidad,
         'isAdmin': False
     }
     #--Procesamiento de productos--#
@@ -804,8 +809,6 @@ def Orders(request, filtered=None):
     if not filtered:
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.exclude(estado_id__in=[6, 7]).order_by('-fecha')
-            if form.is_valid():
-                pedidos = filtrarPedidosOrders(request, pedidos, form)
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -814,7 +817,8 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(estado_id=2).order_by('-fecha')
         elif user.tipo_usuario_id == 5: #Despachador
             pedidos = Pedido.objects.filter(estado_id__in=[3, 4]).order_by('-fecha')
-            if form.is_valid():
+        
+        if form.is_valid():
                 pedidos = filtrarPedidosOrders(request, pedidos, form)
 
     elif filtered == "historial": 
