@@ -10,9 +10,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{% static 'javascript/cart_handler.js' %}" defer></script>
 <script src="{% static 'javascript/cart.js' %}" defer></script>
-
+<link rel="stylesheet" href="{% static 'styles/select2.css' %}">
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <main>
-    <section class="h-100 gradient-custom">
+    <section class="h-100">
         <article class="container py-5">
           <article class="row d-flex justify-content-center my-4">
             <section class="col-md-8">
@@ -91,11 +96,18 @@
                   </section>
 
                   <section class="card-body detalles" id="selectClient">
-                    <article class="input-group mb-2">
-                      <span class="badge bg-info">{{form.cliente.label_tag}}</span>
+                    <fieldset>
+                      {{form.urgente.label_tag}}
+                      {{form.urgente}}
+                    </fieldset>
+
+                    <fieldset class="form-group my-3">
                       {{form.cliente}}
-                    </article>
-                    {{form.nota}}
+                    </fieldset>
+                    
+                    <fieldset>
+                      {{form.nota}}
+                    </fieldset>
                     <!-- Button trigger modal -->
                     <span class="badge bg-danger mb-2">{{event_venta}}</span><br>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal" id="vender">

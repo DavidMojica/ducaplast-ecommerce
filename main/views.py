@@ -78,6 +78,7 @@ ERROR_19 = "El repartidor de este pedido ya fue elegido por alguien más"
 ERROR_20 = "JSON no válido"
 ERROR_21 = "No hay productos en el pedido."
 ERROR_22 = 'El nombre del cliente ya está registrado.'
+ERROR_23 = "Usted ya completó la parte del pedido de su bodega. Debe esperar a la que otra bodega complete su parte."
 
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
@@ -111,16 +112,16 @@ def unloginRequired(view_func):
     return wrapper
 
 #Obtener el precio de los articulos del carro y actualizar sus respectivos valores con puntos decimales.
-@login_required
-def getCartPrice(request):
-    carrito = request.session.get('carritoVenta', {})
-    total_productos = 0
-    if carrito:
-        for key, producto in carrito.items():
-            total_productos += int(producto['precio']) * int(producto['cantidad'])
-            producto['precio_str'] = numberWithPoints(producto['precio'])
-            producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
-        return total_productos
+# @login_required
+# def getCartPrice(request):
+#     carrito = request.session.get('carritoVenta', {})
+#     total_productos = 0
+#     if carrito:
+#         for key, producto in carrito.items():
+#             total_productos += int(producto['precio']) * int(producto['cantidad'])
+#             producto['precio_str'] = numberWithPoints(producto['precio'])
+#             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
+#         return total_productos
 
 def filtrarPedidosOrders(request, pedidos, form):
     id = form.cleaned_data.get('id')
@@ -131,6 +132,8 @@ def filtrarPedidosOrders(request, pedidos, form):
     estado_final = form.cleaned_data.get('estado_final')
     consecutivo = form.cleaned_data.get('consecutivo')
     tipo_consecutivo = form.cleaned_data.get('tipo_consecutivo')
+    estado = form.cleaned_data.get('estado')
+    urgente = form.cleaned_data.get('urgente')
     
     if id:
         pedidos = pedidos.filter(id=id)
@@ -148,6 +151,10 @@ def filtrarPedidosOrders(request, pedidos, form):
         pedidos = pedidos.filter(consecutivo=consecutivo)
     if tipo_consecutivo:
         pedidos = pedidos.filter(tipo_consecutivo_id=tipo_consecutivo)
+    if estado:
+        pedidos = pedidos.filter(estado_id=estado)
+    if urgente:
+        pedidos = pedidos.filter(urgente=True)
         
     return pedidos
   
@@ -190,10 +197,8 @@ def loadCart(request, pedido, initial=True):
     for producto_pedido in productos:
         producto_real = get_object_or_404(Producto, pk=producto_pedido.producto.id)
         carrito[producto_pedido.producto_id] = {
-            'precio': producto_real.precio,
             'cantidad_existencias': producto_real.cantidad,
             'cantidad': producto_pedido.cantidad,
-            'total_producto': int(producto_pedido.cantidad) * int(producto_real.precio)
         }
     request.session['carrito'] = carrito
     if not initial:
@@ -208,15 +213,18 @@ def updateCart(request, pedido, productos_modificados):
         cantidad = detalles['cantidad']
         paquete = detalles['paquete']
         peso = detalles['peso']
+        tipo_cantidad = detalles['tipo_cantidad']
         carrito[int(producto_id)] = {
             'cantidad': cantidad,
             'paquete':paquete,
-            'peso':peso
+            'peso':peso,
         }
         producto_en_pedido = productos_en_pedido.get(producto=producto_real)
+        tipo_cantidad_instance = get_object_or_404(TipoCantidad,pk=tipo_cantidad)
         producto_en_pedido.cantidad = cantidad
         producto_en_pedido.paquete = paquete
         producto_en_pedido.peso = peso
+        producto_en_pedido.tipo_cantidad=tipo_cantidad_instance
         producto_en_pedido.save()
         
     request.session['carrito'] = carrito
@@ -243,10 +251,10 @@ def filtrar_productos(request):
                 productos = Producto.objects.order_by('descripcion')
             elif ordenar == '3':
                 productos = Producto.objects.order_by('-descripcion')
-            elif ordenar == '4':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
-            elif ordenar == '5':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
+            # elif ordenar == '4':
+            #     productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
+            # elif ordenar == '5':
+            #     productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
             else: 
                 pass
         
@@ -536,6 +544,7 @@ def OrderDetail(request, order):
     cliente = get_object_or_404(Clientes, pk=pedido.cliente_id)
     empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido)
     repartidores_activos = HandlerReparto.objects.filter(pedido=pedido)
+    tipos_cantidad = TipoCantidad.objects.all()
     carrito = loadCart(request, pedido)
     
     #GET   
@@ -546,6 +555,7 @@ def OrderDetail(request, order):
         'user': user,
         'empacadoresActivos': empacadores_activos,
         'repartidoresActivos': repartidores_activos,
+        'tipos_cantidad': tipos_cantidad,
         'isAdmin': False
     }
     #--Procesamiento de productos--#
@@ -581,9 +591,25 @@ def OrderDetail(request, order):
                 empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if empacadores_activos.filter(empacador_id=user.id).exists():
-                        pedido.estado_id = 2
-                        pedido.empacado_hora = timezone.now()
-                        pedido.save()
+                        #Pedido con doble check necesaria
+                        if pedido.get_multiple_bodega():
+                            if pedido.check_bodega:
+                                if not pedido.checkeado_por == user:
+                                    pedido.estado_id = 2
+                                    pedido.empacado_hora = timezone.now()
+                                    pedido.save()
+                                else:
+                                    data['issue'] = ERROR_23
+                            else:
+                                pedido.checkeado_por = user
+                                pedido.check_bodega = True
+                                pedido.save()
+                            
+                        #Pedido sin doble check necesaria
+                        else:
+                            pedido.estado_id = 2
+                            pedido.empacado_hora = timezone.now()
+                            pedido.save()
                     else:
                         issue = ERROR_14
                 else:
@@ -632,7 +658,6 @@ def OrderDetail(request, order):
                     if user.tipo_usuario_id in adminIds:
                         data['isAdmin'] = True
                     if form.is_valid():
-                        print("benja1")
                         pedido.despachador_reparto = user
                         pedido.despacho_hora = timezone.now()
                         consecutivo = form.cleaned_data['consecutivo'].strip()
@@ -683,7 +708,6 @@ def OrderDetail(request, order):
                             
                         pedido.save()
                     else:
-                        print(form.errors)
                         data['success']=False
                         data['msg'] = ERROR_13
                         return render(request,HTMLORDERDETAIL,{**data})
@@ -736,7 +760,6 @@ def OrderDetail(request, order):
             elif 'completarPedido' in request.POST:
                 if not pedido.estado_id >= 7:
                     pedido.estado_id = 7
-                    pedido.actualizar_dinero_generado_cliente()
                     pedido.completado_por = user
                     pedido.completado_hora = timezone.now()
                     pedido.save()
@@ -786,8 +809,6 @@ def Orders(request, filtered=None):
     if not filtered:
         if user.tipo_usuario_id in adminIds:
             pedidos = Pedido.objects.exclude(estado_id__in=[6, 7]).order_by('-fecha')
-            if form.is_valid():
-                pedidos = filtrarPedidosOrders(request, pedidos, form)
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -796,7 +817,8 @@ def Orders(request, filtered=None):
             pedidos = Pedido.objects.filter(estado_id=2).order_by('-fecha')
         elif user.tipo_usuario_id == 5: #Despachador
             pedidos = Pedido.objects.filter(estado_id__in=[3, 4]).order_by('-fecha')
-            if form.is_valid():
+        
+        if form.is_valid():
                 pedidos = filtrarPedidosOrders(request, pedidos, form)
 
     elif filtered == "historial": 
@@ -990,15 +1012,12 @@ def CartHandler(request):
                 producto = Producto.objects.get(pk=producto_id)
                 cantidad = int(request.POST.get('cantidad', 1)) 
                 tipo_cantidad = int(request.POST.get('tipo_cantidad', 0))
-                total_producto = int(cantidad) * int(producto.precio)
                 
                 carrito[producto_id] = {
                     'descripcion': producto.descripcion,
-                    'precio': producto.precio,
                     'referencia_fabrica': producto.referencia_fabrica,
                     'cantidad': cantidad,
                     'tipo_cantidad': tipo_cantidad,
-                    'total_producto': total_producto,
                 }
                 event = "Producto añadido"
                 request.session['carritoVenta'] = carrito
@@ -1057,9 +1076,9 @@ def Cart(request):
     total_productos = 0
     iva = 0
     
-    if carrito:
-        total_productos = getCartPrice(request)
-        iva = int(round(total_productos * 0.19))
+    # if carrito:
+    #     total_productos = getCartPrice(request)
+    #     iva = int(round(total_productos * 0.19))
     
     data = {
             'productos':carrito,
@@ -1074,9 +1093,11 @@ def Cart(request):
             }
     
     if "confirmar_venta" in request.POST:
+        urgente = request.POST.get('urgente') == 'true'
         cliente = request.POST.get('cliente')
         pedido_nota = request.POST.get('nota')
         productos_dict = request.POST.get('productos')
+        
         try:
             productos_dict = json.loads(productos_dict)
         except json.JSONDecodeError:
@@ -1092,13 +1113,9 @@ def Cart(request):
             #Actualizar carrito mientras se comrpueba la existencia de los productos solicitados
             for producto_id, producto in productos_dict.items():
                 if producto_id in carrito:
-                    producto_real = get_object_or_404(Producto, pk=producto_id)
                     carrito[producto_id] = {
-                        'precio': producto_real.precio,
-                        'cantidad_existencias': producto_real.cantidad,
                         'cantidad': producto['cantidad'],
                         'tipo_cantidad': producto['tipo_cantidad'],
-                        'total_producto': int(producto['cantidad']) * int(producto_real.precio)
                     }
                 else: 
                     return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
@@ -1109,8 +1126,8 @@ def Cart(request):
                 cliente=cliente,
                 estado=estado,
                 direccion=cliente.direccion,
-                valor=getCartPrice(request) + getCartPrice(request)*0.19,
-                nota=pedido_nota
+                nota=pedido_nota,
+                urgente=urgente
             )
             nuevo_pedido.save()
             

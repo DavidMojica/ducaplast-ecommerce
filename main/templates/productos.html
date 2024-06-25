@@ -22,7 +22,10 @@
                 <span class="badge bg-info text-wrap badge-md">{{form.disponibles.label_tag}}</span>
                 {{form.disponibles}}
             </article>
-            <button type="submit" class="btn btn-primary col-md-5">Filtrar <i class="fa fa-search"></i></button>
+            <fieldset class="d-flex justify-content-center">
+                <input type="reset" value="Limpiar" class="btn btn-secondary me-1">
+                <button type="submit" class="btn btn-primary ms-1">Filtrar <i class="fa fa-search"></i></button>
+            </fieldset>
             <h3 class="text-center">- O -</h3>
             <a href="{% url 'product_add' %}" class="btn btn-success col-md-5">Crear nuevo producto <i class="fa fa-plus"></i></a>
 
@@ -78,14 +81,11 @@
                         <article class="col-md-2">
                             <span class="badge bg-primary">ID</span>
                         </article>
-                        <article class="col-md-2">
+                        <article class="col-md-3">
                             <span class="badge bg-primary">Descripcion</span>
                         </article>
-                        <article class="col-md-2">
+                        <article class="col-md-3">
                             <span class="badge bg-primary">Ref. Fabrica</span>
-                        </article>
-                        <article class="col-md-2">
-                            <span class="badge bg-primary">Precio unitario</span>
                         </article>
                         <article class="col-md-2">
                             <span class="badge bg-primary">Existencias</span>
@@ -102,9 +102,8 @@
                                 <article class="col-md-2">
                                     <h4><span class="badge bg-secondary">#{{p.id}}</span></h4>
                                 </article>
-                                <article class="col-md-2"><p>{{p.descripcion}}</p></article>
-                                <article class="col-md-2"><p>{{p.referencia_fabrica}}</p></article>
-                                <article class="col-md-2"><p>{{p.precio}}</p></article>
+                                <article class="col-md-3"><p>{{p.descripcion}}</p></article>
+                                <article class="col-md-3"><p>{{p.referencia_fabrica}}</p></article>
                                 <article class="col-md-2"><p>{{p.cantidad}}</p></article>
                                 <article class="col-md-2">
                                     <a href="{% url 'product_detail' productid=p.id %}" class="btn btn-warning text-white">Modificar</a>

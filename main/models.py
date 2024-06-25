@@ -23,7 +23,7 @@ class Clientes(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     direccion = models.CharField(max_length=200, default="")
-    dinero_generado = models.BigIntegerField(default=0)
+    #dinero_generado = models.BigIntegerField(default=0)
     
     def __str__(self):
             return f"{self.nombre} ID: {self.id}"
@@ -94,7 +94,6 @@ class Pedido(models.Model):
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
     direccion = models.CharField(max_length=300)
     fecha = models.DateTimeField(auto_now_add=True)
-    valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
     notaEmpacador = models.CharField(max_length=500, null=True, blank=True)
     empacado_hora = models.DateTimeField(null=True, blank=True)
@@ -109,6 +108,10 @@ class Pedido(models.Model):
     completado_hora = models.DateTimeField(null=True, blank=True)
     consecutivo = models.CharField(max_length=20, null=True, unique=True)    
     tipo_consecutivo = models.ForeignKey(TipoConsecutivo, on_delete=models.CASCADE, null=True, blank=True)
+    check_bodega = models.BooleanField(default=False, null=False)
+    checkeado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="checkeado_por")
+    urgente = models.BooleanField(default=False, null=False)
+    
     
     def get_status_tiempo(self):
         if self.completado_por:
@@ -134,6 +137,26 @@ class Pedido(models.Model):
         else:
             return 'bg-success'
     
+    def get_multiple_bodega(self):
+        """
+        Si contiene el tipo de producto 1 y tiene más de un tipo de producto (len(tipos_productos) > 1), devuelve True.
+        Si contiene solo el tipo de producto 1 (len(tipos_productos) == 1), devuelve False.
+        Si no contiene el tipo de producto 1, devuelve False
+
+        Returns:
+            boolean: boolean
+        """
+        productos_pedido = ProductosPedido.objects.filter(pedido=self)
+        tipos_productos = set(producto.producto.tipo.id for producto in productos_pedido)
+
+        if 1 in tipos_productos:
+            if len(tipos_productos) > 1:
+                return True
+            else:
+                return False
+        else:
+            return False
+    
     #Modulo cantidad
     # def descontar_cantidad_producto(self):
     #     productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
@@ -143,16 +166,16 @@ class Pedido(models.Model):
     #             raise ValidationError(f"No hay suficiente cantidad disponible para el producto {producto.nombre}.")
     #         producto.cantidad -= producto_pedido.cantidad
     #         producto.save()
-            
-    def actualizar_dinero_generado_cliente(self):
-        self.cliente.dinero_generado += self.valor
-        self.cliente.save()
+    
+    #Modulo precio  
+    # def actualizar_dinero_generado_cliente(self):
+    #     self.cliente.dinero_generado += self.valor
+    #     self.cliente.save()
             
 class Producto(models.Model):
     id = models.AutoField(primary_key=True)
     descripcion = models.CharField(max_length=400)
     referencia_fabrica = models.CharField(max_length=400)
-    precio = models.CharField(max_length=20)
     cantidad = models.IntegerField(default=0)
     tipo = models.ForeignKey(TipoProducto, on_delete=models.CASCADE, null=True)
     

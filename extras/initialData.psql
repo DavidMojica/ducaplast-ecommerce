@@ -37,6 +37,7 @@ insert into main_tipoconsecutivo(id, description) values (0, 'AE');
 insert into main_tipoconsecutivo(id, description) values (1, 'FE');
 insert into main_tipoconsecutivo(id, description) values (2, 'Cotización');
 insert into main_tipoconsecutivo(id, description) values (3, 'Remisión');
+insert into main_tipoconsecutivo(id, description) values (4, 'POS');
 
 --Deploy queries
 

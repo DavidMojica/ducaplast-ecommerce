@@ -33,8 +33,16 @@ class FiltrarRecibos(forms.ModelForm):
     
     estado_final = forms.ModelChoiceField(
         label='Estado final',
-        queryset=Estados.objects.filter(id__in=[5,6]),
+        queryset=Estados.objects.filter(id__in=[6,7]),
         empty_label= 'Ambos (Recibido y cancelado)',
+        required=False,
+        widget=forms.Select(attrs={'class':'form-select'})
+    )
+    
+    estado = forms.ModelChoiceField(
+        label="Estado",
+        queryset=Estados.objects.exclude(id__in=[6,7]),
+        empty_label= 'Todos',
         required=False,
         widget=forms.Select(attrs={'class':'form-select'})
     )
@@ -44,6 +52,12 @@ class FiltrarRecibos(forms.ModelForm):
         required=False,
         min_value=0,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Consecutivo del pedido'}),
+    )
+    
+    urgente = forms.BooleanField(
+        label="Solo pedidos urgentes",
+        widget=forms.CheckboxInput(attrs={'class':'form-check-input', 'id': 'urgente'}),
+        required=False 
     )
     
     tipo_consecutivo = forms.ModelChoiceField(
@@ -64,7 +78,7 @@ class FiltrarRecibos(forms.ModelForm):
         }
         widgets = {
             'vendedor': forms.Select(attrs={'class': 'form-select'}),
-            'cliente': forms.Select(attrs={'class':'form-select'}),
+            'cliente': forms.Select(attrs={'class':'js-select2', 'id': 'select2'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -76,7 +90,8 @@ class FiltrarRecibos(forms.ModelForm):
         self.fields['cliente'].empty_label = 'Cualquiera'
         self.fields['cliente'].required = False
         self.fields['cliente'].queryset = Clientes.objects.all()
-        
+ 
+    
 #Crear o modificar un producto
 class ProductoForm(forms.ModelForm):
     tipo = forms.ModelChoiceField(
@@ -88,18 +103,16 @@ class ProductoForm(forms.ModelForm):
     
     class Meta:
         model = Producto
-        fields = ['descripcion', 'referencia_fabrica', 'precio', 'cantidad', 'tipo']
+        fields = ['descripcion', 'referencia_fabrica', 'cantidad', 'tipo']
         labels = {
             'descripcion': 'Descripción',
             'referencia_fabrica': 'Referencia de fábrica',
-            'precio': 'Precio',
             'cantidad': 'Cantidad',
             'tipo':'Tipo de producto'
         }
         widgets = {
             'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
             'referencia_fabrica': forms.TextInput(attrs={'class': 'form-control'}),
-            'precio': forms.TextInput(attrs={'class': 'form-control'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         
@@ -159,14 +172,23 @@ class SeleccionarRepartidor(forms.Form):
 class DetallesPedido(forms.Form):
     cliente = forms.ModelChoiceField(
         label="Nombre del cliente",
-        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Pablo Perez', 'id': 'cliente'}),
+        widget=forms.Select(attrs={'class': 'js-select2', 'placeholder': 'Pablo Perez', 'id': 'cliente'}),
         queryset=Clientes.objects.all(),
-        empty_label= "Seleccione el cliente"
+        empty_label= "Seleccione el cliente",
+        required=True
+    )
+    
+    urgente = forms.BooleanField(
+        label="¿Este pedido es urgente?",
+        widget=forms.CheckboxInput(attrs={'class':'form-check-input', 'id': 'urgente'}),
+        required=False
     )
 
     nota = forms.CharField(
         label="Nota",
-        widget=forms.Textarea(attrs={'class': 'form-control','id':'nota', 'placeholder': 'Escribe detalles del pedido, de la dirección de entrega o lo que necesites. (500 carácteres máximo).', 'maxlength': '500'})
+        widget=forms.Textarea(attrs={'class': 'form-control','id':'nota', 'placeholder': 'Escribe detalles del pedido, de la dirección de entrega o lo que necesites. (500 carácteres máximo).', 'maxlength': '500'}),
+        required=False
+    
     )
 
 class ModificarCliente(forms.Form):
@@ -201,7 +223,7 @@ class FiltrarUsuarios(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     id = forms.IntegerField(
-        label="Codigo del usuario",
+        label="Codigo del usuario/cliente",
         required=False,
         min_value=0,
         widget=forms.NumberInput(attrs={'class': 'form-control'})
@@ -253,9 +275,7 @@ class FiltrarProductos(forms.Form):
     OPCIONES = (('0', 'Código de producto (Menor a mayor)'),
                 ('1', 'Código de producto (Mayor a menor)'),
                 ('2', 'Alfabéticamente (A-Z)'),
-                ('3', 'Alfabéticamente (Z-A)'),
-                ('4', 'Precio (Mayor a menor)'),
-                ('5', 'Precio (Menor a mayor)'))
+                ('3', 'Alfabéticamente (Z-A)'),)
     
     ordenar = forms.ChoiceField(
         label="Ordenar por:",
