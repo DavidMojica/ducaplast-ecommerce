@@ -157,7 +157,7 @@ class SeleccionarRepartidor(forms.Form):
 class DetallesPedido(forms.Form):
     cliente = forms.ModelChoiceField(
         label="Nombre del cliente",
-        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Pablo Perez', 'id': 'cliente'}),
+        widget=forms.Select(attrs={'class': 'js-select2', 'placeholder': 'Pablo Perez', 'id': 'cliente'}),
         queryset=Clientes.objects.all(),
         empty_label= "Seleccione el cliente",
         required=True

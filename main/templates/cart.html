@@ -6,11 +6,16 @@
 <link rel="stylesheet" href="{% static 'styles/cart.css' %}">
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <link rel="stylesheet" href="{% static 'styles/ToastNotify.css' %}">
+<link rel="stylesheet" href="{% static 'styles/select2.css' %}">
 <script src="{% static 'javascript/ToastNotify.js' %}" defer></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{% static 'javascript/cart_handler.js' %}" defer></script>
 <script src="{% static 'javascript/cart.js' %}" defer></script>
-
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <main>
     <section class="h-100 gradient-custom">
         <article class="container py-5">
@@ -96,8 +101,7 @@
                       {{form.urgente}}
                     </fieldset>
 
-                    <fieldset class="input-group my-3">
-                      <span class="badge bg-info">{{form.cliente.label_tag}}</span>
+                    <fieldset class="form-group my-3">
                       {{form.cliente}}
                     </fieldset>
                     

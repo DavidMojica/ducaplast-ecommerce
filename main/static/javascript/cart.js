@@ -163,6 +163,14 @@ try{
     });
 } catch {}
 
+//Selector con busqueda
+$(document).ready(function() {
+    $('#cliente').select2({
+        allowClear: true
+    });
+});
+
+
 const val_venta = () =>{
     if (cliente.value.trim() === "" || isNaN(cliente.value)){
         createToastNotify(1, "Error al vender", "Seleccione un cliente");
