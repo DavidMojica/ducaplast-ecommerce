@@ -78,6 +78,7 @@ ERROR_19 = "El repartidor de este pedido ya fue elegido por alguien más"
 ERROR_20 = "JSON no válido"
 ERROR_21 = "No hay productos en el pedido."
 ERROR_22 = 'El nombre del cliente ya está registrado.'
+ERROR_23 = "Usted ya completó la parte del pedido de su bodega. Debe esperar a la que otra bodega complete su parte."
 
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
@@ -581,9 +582,25 @@ def OrderDetail(request, order):
                 empacadores_activos = HandlerEmpaquetacion.objects.filter(pedido=pedido) 
                 if not pedido.estado_id >= 2:
                     if empacadores_activos.filter(empacador_id=user.id).exists():
-                        pedido.estado_id = 2
-                        pedido.empacado_hora = timezone.now()
-                        pedido.save()
+                        #Pedido con doble check necesaria
+                        if pedido.get_multiple_bodega():
+                            if pedido.check_bodega:
+                                if not pedido.checkeado_por == user:
+                                    pedido.estado_id = 2
+                                    pedido.empacado_hora = timezone.now()
+                                    pedido.save()
+                                else:
+                                    data['issue'] = ERROR_23
+                            else:
+                                pedido.checkeado_por = user
+                                pedido.check_bodega = True
+                                pedido.save()
+                            
+                        #Pedido sin doble check necesaria
+                        else:
+                            pedido.estado_id = 2
+                            pedido.empacado_hora = timezone.now()
+                            pedido.save()
                     else:
                         issue = ERROR_14
                 else:
@@ -632,7 +649,6 @@ def OrderDetail(request, order):
                     if user.tipo_usuario_id in adminIds:
                         data['isAdmin'] = True
                     if form.is_valid():
-                        print("benja1")
                         pedido.despachador_reparto = user
                         pedido.despacho_hora = timezone.now()
                         consecutivo = form.cleaned_data['consecutivo'].strip()
@@ -683,7 +699,6 @@ def OrderDetail(request, order):
                             
                         pedido.save()
                     else:
-                        print(form.errors)
                         data['success']=False
                         data['msg'] = ERROR_13
                         return render(request,HTMLORDERDETAIL,{**data})

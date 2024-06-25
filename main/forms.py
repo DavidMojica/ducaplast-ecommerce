@@ -201,7 +201,7 @@ class FiltrarUsuarios(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     id = forms.IntegerField(
-        label="Codigo del usuario",
+        label="Codigo del usuario/cliente",
         required=False,
         min_value=0,
         widget=forms.NumberInput(attrs={'class': 'form-control'})

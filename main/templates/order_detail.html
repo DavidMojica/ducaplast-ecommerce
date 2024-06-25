@@ -114,6 +114,16 @@
                             </li>
                             {% endfor %}          
                         </ul>
+                        <article class="py-4">
+                            {% if pedido.get_multiple_bodega %}
+                                <strong>Este pedido necesita la aprobación de las 2 bodegas.</strong> <br>
+                                {% if pedido.check_bodega %}
+                                    Este pedido ya fue completado por una de las 2 bodegas. <br>
+                                    Ya fue completado por: {{pedido.checkeado_por}}
+                                {% endif %}
+                            {% endif %}
+                            <span class="badge bg-danger text-wrap mx-4 my-2">{{issue}}</span>
+                        </article> 
                         {% for e in empacadoresActivos %}
                             {% if user.id == e.empacador.id %}
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalC">Marcar como completo</button>

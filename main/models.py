@@ -109,6 +109,10 @@ class Pedido(models.Model):
     completado_hora = models.DateTimeField(null=True, blank=True)
     consecutivo = models.CharField(max_length=20, null=True, unique=True)    
     tipo_consecutivo = models.ForeignKey(TipoConsecutivo, on_delete=models.CASCADE, null=True, blank=True)
+    check_bodega = models.BooleanField(default=False, null=False)
+    checkeado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="checkeado_por")
+    urgente = models.BooleanField(default=False, null=False)
+    
     
     def get_status_tiempo(self):
         if self.completado_por:
@@ -133,6 +137,26 @@ class Pedido(models.Model):
             return 'bg-pink'
         else:
             return 'bg-success'
+    
+    def get_multiple_bodega(self):
+        """
+        Si contiene el tipo de producto 1 y tiene más de un tipo de producto (len(tipos_productos) > 1), devuelve True.
+        Si contiene solo el tipo de producto 1 (len(tipos_productos) == 1), devuelve False.
+        Si no contiene el tipo de producto 1, devuelve False
+
+        Returns:
+            boolean: boolean
+        """
+        productos_pedido = ProductosPedido.objects.filter(pedido=self)
+        tipos_productos = set(producto.producto.tipo.id for producto in productos_pedido)
+
+        if 1 in tipos_productos:
+            if len(tipos_productos) > 1:
+                return True
+            else:
+                return False
+        else:
+            return False
     
     #Modulo cantidad
     # def descontar_cantidad_producto(self):
