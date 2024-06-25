@@ -134,39 +134,46 @@
                         <!-- Pedido -->
                         
                         <article class="card bg-gray">
-                            <header class="card-header bg-primary text-white d-flex justify-content-between">
-                                <h4>Pedido #{{p.id}} {% if isAdmin or user.tipo_usuario_id == 5 %}- {% if p.consecutivo %}Consecutivo:  {{p.consecutivo}} {% if p.tipo_consecutivo %}- {{p.tipo_consecutivo}} {% else %} Sin tipo de consecutivo {% endif %} {% else %} Sin consecutivo {% endif %}{% endif %}</h4>
-                                <button type="submit" class="eliminate btn btn-danger btn-sm cart-handler" data-bs-toggle="modal" data-bs-target="#modalDelete-{{p.id}}"> 
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                                <!-- Modal -->
-                                <section class="modal fade" id="modalDelete-{{p.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                                    <article class="modal-dialog modal-dialog-centered">
-                                        <article class="modal-content">
-                                            <section class="modal-header">
-                                                <h5 class="modal-title text-dark">Eliminar pedido</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </section>
-                                            <section class="modal-body text-dark">
-                                                <p>Está a punto de eliminar un pedido. Al eliminar un pedido, se eliminará toda su información respectiva. Esta acción no se puede deshacer.</p>
-                                                <h5 class="text-dark">Detalles del pedido</h5>
-                                                <p class="text-dark">
-                                                    Pedido #{{p.id}} <br>
-                                                    Consecutivo: {{p.consecutivo}}
-                                                </p>
-                                            </section>
-                                            <section class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                                <form action="" method="POST">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="delete_pedido">
-                                                    <input type="hidden" name="pedido_id" value="{{p.id}}">
-                                                    <button type="submit" class="btn btn-danger">Eliminar</button>                             
-                                                </form>  
-                                            </section>
+                            <header class="card-header bg-primary text-white ">
+                                <section class="d-flex justify-content-between">
+                                    <h4>Pedido #{{p.id}} {% if isAdmin or user.tipo_usuario_id == 5 %}- {% if p.consecutivo %}Consecutivo:  {{p.consecutivo}} {% if p.tipo_consecutivo %}- {{p.tipo_consecutivo}} {% else %} Sin tipo de consecutivo {% endif %} {% else %} Sin consecutivo {% endif %}{% endif %}</h4>
+                                    <button type="submit" class="eliminate btn btn-danger btn-sm cart-handler" data-bs-toggle="modal" data-bs-target="#modalDelete-{{p.id}}"> 
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                    <!-- Modal -->
+                                    <section class="modal fade" id="modalDelete-{{p.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                                        <article class="modal-dialog modal-dialog-centered">
+                                            <article class="modal-content">
+                                                <section class="modal-header">
+                                                    <h5 class="modal-title text-dark">Eliminar pedido</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </section>
+                                                <section class="modal-body text-dark">
+                                                    <p>Está a punto de eliminar un pedido. Al eliminar un pedido, se eliminará toda su información respectiva. Esta acción no se puede deshacer.</p>
+                                                    <h5 class="text-dark">Detalles del pedido</h5>
+                                                    <p class="text-dark">
+                                                        Pedido #{{p.id}} <br>
+                                                        Consecutivo: {{p.consecutivo}}
+                                                    </p>
+                                                </section>
+                                                <section class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                    <form action="" method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="delete_pedido">
+                                                        <input type="hidden" name="pedido_id" value="{{p.id}}">
+                                                        <button type="submit" class="btn btn-danger">Eliminar</button>                             
+                                                    </form>  
+                                                </section>
+                                            </article>
                                         </article>
-                                    </article>
+                                    </section>
                                 </section>
+                                {% if p.urgente %}
+                                    <section>
+                                        <span class="badge bg-danger text-wrap">Pedido urgente</span>
+                                    </section>
+                                {% endif %}
                             </header>
                             <a href="{% url 'order_detail' order=p.id %}" class="text-decoration-none text-white">                        
                                 <section class="card-body">
@@ -198,9 +205,7 @@
                                                     {% endfor %}
                                                 </section>
                         
-                                                {% if isAdmin %}
-                                                    <strong>Valor pedido:</strong> ${{p.valor}}
-                                                {% endif %}
+                                            
                                             </p>
                                         </aside>
                                     </section>

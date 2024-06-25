@@ -112,16 +112,16 @@ def unloginRequired(view_func):
     return wrapper
 
 #Obtener el precio de los articulos del carro y actualizar sus respectivos valores con puntos decimales.
-@login_required
-def getCartPrice(request):
-    carrito = request.session.get('carritoVenta', {})
-    total_productos = 0
-    if carrito:
-        for key, producto in carrito.items():
-            total_productos += int(producto['precio']) * int(producto['cantidad'])
-            producto['precio_str'] = numberWithPoints(producto['precio'])
-            producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
-        return total_productos
+# @login_required
+# def getCartPrice(request):
+#     carrito = request.session.get('carritoVenta', {})
+#     total_productos = 0
+#     if carrito:
+#         for key, producto in carrito.items():
+#             total_productos += int(producto['precio']) * int(producto['cantidad'])
+#             producto['precio_str'] = numberWithPoints(producto['precio'])
+#             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
+#         return total_productos
 
 def filtrarPedidosOrders(request, pedidos, form):
     id = form.cleaned_data.get('id')
@@ -191,10 +191,8 @@ def loadCart(request, pedido, initial=True):
     for producto_pedido in productos:
         producto_real = get_object_or_404(Producto, pk=producto_pedido.producto.id)
         carrito[producto_pedido.producto_id] = {
-            'precio': producto_real.precio,
             'cantidad_existencias': producto_real.cantidad,
             'cantidad': producto_pedido.cantidad,
-            'total_producto': int(producto_pedido.cantidad) * int(producto_real.precio)
         }
     request.session['carrito'] = carrito
     if not initial:
@@ -244,10 +242,10 @@ def filtrar_productos(request):
                 productos = Producto.objects.order_by('descripcion')
             elif ordenar == '3':
                 productos = Producto.objects.order_by('-descripcion')
-            elif ordenar == '4':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
-            elif ordenar == '5':
-                productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
+            # elif ordenar == '4':
+            #     productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
+            # elif ordenar == '5':
+            #     productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
             else: 
                 pass
         
@@ -751,7 +749,6 @@ def OrderDetail(request, order):
             elif 'completarPedido' in request.POST:
                 if not pedido.estado_id >= 7:
                     pedido.estado_id = 7
-                    pedido.actualizar_dinero_generado_cliente()
                     pedido.completado_por = user
                     pedido.completado_hora = timezone.now()
                     pedido.save()
@@ -1005,15 +1002,12 @@ def CartHandler(request):
                 producto = Producto.objects.get(pk=producto_id)
                 cantidad = int(request.POST.get('cantidad', 1)) 
                 tipo_cantidad = int(request.POST.get('tipo_cantidad', 0))
-                total_producto = int(cantidad) * int(producto.precio)
                 
                 carrito[producto_id] = {
                     'descripcion': producto.descripcion,
-                    'precio': producto.precio,
                     'referencia_fabrica': producto.referencia_fabrica,
                     'cantidad': cantidad,
                     'tipo_cantidad': tipo_cantidad,
-                    'total_producto': total_producto,
                 }
                 event = "Producto añadido"
                 request.session['carritoVenta'] = carrito
@@ -1072,9 +1066,9 @@ def Cart(request):
     total_productos = 0
     iva = 0
     
-    if carrito:
-        total_productos = getCartPrice(request)
-        iva = int(round(total_productos * 0.19))
+    # if carrito:
+    #     total_productos = getCartPrice(request)
+    #     iva = int(round(total_productos * 0.19))
     
     data = {
             'productos':carrito,
@@ -1089,9 +1083,11 @@ def Cart(request):
             }
     
     if "confirmar_venta" in request.POST:
+        urgente = request.POST.get('urgente') == 'true'
         cliente = request.POST.get('cliente')
         pedido_nota = request.POST.get('nota')
         productos_dict = request.POST.get('productos')
+        
         try:
             productos_dict = json.loads(productos_dict)
         except json.JSONDecodeError:
@@ -1107,13 +1103,9 @@ def Cart(request):
             #Actualizar carrito mientras se comrpueba la existencia de los productos solicitados
             for producto_id, producto in productos_dict.items():
                 if producto_id in carrito:
-                    producto_real = get_object_or_404(Producto, pk=producto_id)
                     carrito[producto_id] = {
-                        'precio': producto_real.precio,
-                        'cantidad_existencias': producto_real.cantidad,
                         'cantidad': producto['cantidad'],
                         'tipo_cantidad': producto['tipo_cantidad'],
-                        'total_producto': int(producto['cantidad']) * int(producto_real.precio)
                     }
                 else: 
                     return JsonResponse({'success': False, 'msg': "Hay productos que no existen"})
@@ -1124,8 +1116,8 @@ def Cart(request):
                 cliente=cliente,
                 estado=estado,
                 direccion=cliente.direccion,
-                valor=getCartPrice(request) + getCartPrice(request)*0.19,
-                nota=pedido_nota
+                nota=pedido_nota,
+                urgente=urgente
             )
             nuevo_pedido.save()
             

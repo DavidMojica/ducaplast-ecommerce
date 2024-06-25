@@ -91,11 +91,19 @@
                   </section>
 
                   <section class="card-body detalles" id="selectClient">
-                    <article class="input-group mb-2">
+                    <fieldset>
+                      {{form.urgente.label_tag}}
+                      {{form.urgente}}
+                    </fieldset>
+
+                    <fieldset class="input-group my-3">
                       <span class="badge bg-info">{{form.cliente.label_tag}}</span>
                       {{form.cliente}}
-                    </article>
-                    {{form.nota}}
+                    </fieldset>
+                    
+                    <fieldset>
+                      {{form.nota}}
+                    </fieldset>
                     <!-- Button trigger modal -->
                     <span class="badge bg-danger mb-2">{{event_venta}}</span><br>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal" id="vender">

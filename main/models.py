@@ -23,7 +23,7 @@ class Clientes(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     direccion = models.CharField(max_length=200, default="")
-    dinero_generado = models.BigIntegerField(default=0)
+    #dinero_generado = models.BigIntegerField(default=0)
     
     def __str__(self):
             return f"{self.nombre} ID: {self.id}"
@@ -94,7 +94,6 @@ class Pedido(models.Model):
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
     direccion = models.CharField(max_length=300)
     fecha = models.DateTimeField(auto_now_add=True)
-    valor = models.IntegerField(default=0)
     nota = models.CharField(max_length=500)
     notaEmpacador = models.CharField(max_length=500, null=True, blank=True)
     empacado_hora = models.DateTimeField(null=True, blank=True)
@@ -167,16 +166,16 @@ class Pedido(models.Model):
     #             raise ValidationError(f"No hay suficiente cantidad disponible para el producto {producto.nombre}.")
     #         producto.cantidad -= producto_pedido.cantidad
     #         producto.save()
-            
-    def actualizar_dinero_generado_cliente(self):
-        self.cliente.dinero_generado += self.valor
-        self.cliente.save()
+    
+    #Modulo precio  
+    # def actualizar_dinero_generado_cliente(self):
+    #     self.cliente.dinero_generado += self.valor
+    #     self.cliente.save()
             
 class Producto(models.Model):
     id = models.AutoField(primary_key=True)
     descripcion = models.CharField(max_length=400)
     referencia_fabrica = models.CharField(max_length=400)
-    precio = models.CharField(max_length=20)
     cantidad = models.IntegerField(default=0)
     tipo = models.ForeignKey(TipoProducto, on_delete=models.CASCADE, null=True)
     

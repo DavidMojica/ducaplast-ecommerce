@@ -15,6 +15,7 @@ const Productos = {};
 const ProductosParaEliminar = {};
 const nota = document.getElementById('nota');
 const cliente = document.getElementById('cliente');
+const urgente = document.getElementById('urgente');
 
 var myModal = document.getElementById('myModal')
 var myInput = document.getElementById('myInput')
@@ -131,6 +132,8 @@ try{
                     if (ProductosParaEliminar[id]) delete Productos[id];
                 }
 
+                const urgente_value = urgente.checked ? true : false;
+
                 $.ajax({
                     type: 'POST',
                     url: url,
@@ -138,6 +141,7 @@ try{
                         'productos': JSON.stringify(Productos),
                         'cliente':cliente.value.trim(),
                         'nota':nota.value.trim(),
+                        'urgente':urgente_value,
                         'confirmar_venta': true,
                         'csrfmiddlewaretoken': csfrtoken
                     },

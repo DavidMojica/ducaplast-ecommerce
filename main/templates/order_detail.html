@@ -114,7 +114,7 @@
                             </li>
                             {% endfor %}          
                         </ul>
-                        <article class="py-4">
+                        <article class="mb-4">
                             {% if pedido.get_multiple_bodega %}
                                 <strong>Este pedido necesita la aprobación de las 2 bodegas.</strong> <br>
                                 {% if pedido.check_bodega %}
@@ -126,7 +126,7 @@
                         </article> 
                         {% for e in empacadoresActivos %}
                             {% if user.id == e.empacador.id %}
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalC">Marcar como completo</button>
+                            <button class="btn btn-success" data-bs-toggle="modal" {% if pedido.checkeado_por == user %} disabled {% endif %} data-bs-target="#modalC">Marcar como completo</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalC" tabindex="-1" aria-labelledby="modalHLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
@@ -671,7 +671,7 @@
                 {% endif %}
                 <!-- Productos de bodega 2 -->
                 {% if productos_bodega_2 %}
-                    <article class="card">
+                    <article class="card mt-4">
                         <section class="card-body">
                             <h5 class="card-title">Productos de bodega 2</h5>
                             <table class="table table-striped table-hover">
@@ -800,7 +800,7 @@
                 {% endif %}
             {% else %}
             <!-- Productos en general -->
-                <article class="card my-4">
+                <article class="card">
                     <section class="card-body">
                         <h5 class="card-title">Productos en el pedido:</h5>
                         <table class="table table-striped table-hover">
