@@ -132,6 +132,8 @@ def filtrarPedidosOrders(request, pedidos, form):
     estado_final = form.cleaned_data.get('estado_final')
     consecutivo = form.cleaned_data.get('consecutivo')
     tipo_consecutivo = form.cleaned_data.get('tipo_consecutivo')
+    estado = form.cleaned_data.get('estado')
+    urgente = form.cleaned_data.get('urgente')
     
     if id:
         pedidos = pedidos.filter(id=id)
@@ -149,6 +151,10 @@ def filtrarPedidosOrders(request, pedidos, form):
         pedidos = pedidos.filter(consecutivo=consecutivo)
     if tipo_consecutivo:
         pedidos = pedidos.filter(tipo_consecutivo_id=tipo_consecutivo)
+    if estado:
+        pedidos = pedidos.filter(estado_id=estado)
+    if urgente:
+        pedidos = pedidos.filter(urgente=True)
         
     return pedidos
   

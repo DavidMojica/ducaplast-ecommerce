@@ -1,11 +1,69 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
+<link rel="stylesheet" href="{% static 'styles/select2.css' %}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <link rel="stylesheet" href="{% static 'styles/common.css' %}">
 <script src="{% static 'javascript/orders.js' %}"defer></script>
-<section class="gradient-custom">
-    <main class="">
+<section class="">
+    <main class="gradient-custom">
         {% if history and isAdmin or user.tipo_usuario_id == 5 %}
+            <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base" >
+                <form action="" method="GET" class="text-center filter-form row">
+                    <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
+                    
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.id.label_tag}}</legend>
+                        {{form.id}}
+                    </fieldset>
+                    
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.vendedor.label_tag}}</legend>
+                        {{form.vendedor}}
+                    </fieldset>
+                    
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.cliente.label_tag}}</legend>
+                        {{form.cliente}}
+                    </fieldset>
+                    
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.fecha.label_tag}}</legend>
+                        {{form.fecha}}
+                    </fieldset>
+        
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.completado_fecha.label_tag}}</legend>
+                        {{form.completado_fecha}}
+                    </fieldset>
+                    
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.estado_final.label_tag}}</legend>
+                        {{form.estado_final}}
+                    </fieldset>
+        
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.consecutivo.label_tag}}</legend>
+                        {{form.consecutivo}}
+                    </fieldset>
+
+                    <fieldset class="mb-3 col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.tipo_consecutivo.label_tag}}</legend>
+                        {{form.tipo_consecutivo}}
+                    </fieldset>
+                    <fieldset class="d-flex justify-content-center">
+                        <input type="reset" value="Limpiar" class="btn btn-secondary me-1">
+                        <button type="submit" class="btn btn-primary ms-1">Filtrar <i class="fa fa-search"></i></button>
+                    </fieldset>
+                </form>
+            </section>
+        {% elif user.tipo_usuario_id == 0 or user.tipo_usuario_id == 1 %}
         <section id="filterContainer" class="m-auto card p-4 col-md-6 col-lg-4 rounded-lg base" >
             <form action="" method="GET" class="text-center filter-form row">
                 <h2 class="text-primary font-weight-bold mb-4 ">Filtrar Pedidos</h2>
@@ -16,41 +74,34 @@
                 </fieldset>
                 
                 <fieldset class="mb-3 col-md-6">
-                    <legend class="badge bg-info text-white p-1">{{form.vendedor.label_tag}}</legend>
-                    {{form.vendedor}}
-                </fieldset>
-                
-                <fieldset class="mb-3 col-md-6">
                     <legend class="badge bg-info text-white p-1">{{form.cliente.label_tag}}</legend>
                     {{form.cliente}}
+                </fieldset>
+
+                <fieldset class="mb-3 col-md-6">
+                    <legend class="badge bg-info text-white p-1">{{form.vendedor.label_tag}}</legend>
+                    {{form.vendedor}}
                 </fieldset>
                 
                 <fieldset class="mb-3 col-md-6">
                     <legend class="badge bg-info text-white p-1">{{form.fecha.label_tag}}</legend>
                     {{form.fecha}}
                 </fieldset>
-    
-                <fieldset class="mb-3 col-md-6">
-                    <legend class="badge bg-info text-white p-1">{{form.completado_fecha.label_tag}}</legend>
-                    {{form.completado_fecha}}
-                </fieldset>
                 
                 <fieldset class="mb-3 col-md-6">
-                    <legend class="badge bg-info text-white p-1">{{form.estado_final.label_tag}}</legend>
-                    {{form.estado_final}}
-                </fieldset>
-    
-                <fieldset class="mb-3 col-md-6">
-                    <legend class="badge bg-info text-white p-1">{{form.consecutivo.label_tag}}</legend>
-                    {{form.consecutivo}}
+                    <legend class="badge bg-info text-white p-1">{{form.estado.label_tag}}</legend>
+                    {{form.estado}}
                 </fieldset>
 
-                <fieldset class="mb-3 col-md-6">
-                    <legend class="badge bg-info text-white p-1">{{form.tipo_consecutivo.label_tag}}</legend>
-                    {{form.tipo_consecutivo}}
+                <fieldset class="col-md-6">
+                    <legend class="badge bg-info text-white p-1">{{form.urgente.label_tag}}</legend>
+                    {{form.urgente}}
                 </fieldset>
 
-                <button type="submit" class="btn btn-primary col-md-5 m-auto">Filtrar <i class="fa fa-search"></i></button>
+                <fieldset class="d-flex justify-content-center">
+                    <input type="reset" value="Limpiar" class="btn btn-secondary me-1">
+                    <button type="submit" class="btn btn-primary ms-1">Filtrar <i class="fa fa-search"></i></button>
+                </fieldset>
             </form>
         </section>
         {% endif %}

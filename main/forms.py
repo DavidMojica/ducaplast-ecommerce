@@ -33,8 +33,16 @@ class FiltrarRecibos(forms.ModelForm):
     
     estado_final = forms.ModelChoiceField(
         label='Estado final',
-        queryset=Estados.objects.filter(id__in=[5,6]),
+        queryset=Estados.objects.filter(id__in=[6,7]),
         empty_label= 'Ambos (Recibido y cancelado)',
+        required=False,
+        widget=forms.Select(attrs={'class':'form-select'})
+    )
+    
+    estado = forms.ModelChoiceField(
+        label="Estado",
+        queryset=Estados.objects.exclude(id__in=[6,7]),
+        empty_label= 'Todos',
         required=False,
         widget=forms.Select(attrs={'class':'form-select'})
     )
@@ -44,6 +52,12 @@ class FiltrarRecibos(forms.ModelForm):
         required=False,
         min_value=0,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Consecutivo del pedido'}),
+    )
+    
+    urgente = forms.BooleanField(
+        label="Solo pedidos urgentes",
+        widget=forms.CheckboxInput(attrs={'class':'form-check-input', 'id': 'urgente'}),
+        required=False 
     )
     
     tipo_consecutivo = forms.ModelChoiceField(
@@ -64,7 +78,7 @@ class FiltrarRecibos(forms.ModelForm):
         }
         widgets = {
             'vendedor': forms.Select(attrs={'class': 'form-select'}),
-            'cliente': forms.Select(attrs={'class':'form-select'}),
+            'cliente': forms.Select(attrs={'class':'js-select2', 'id': 'select2'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -76,7 +90,8 @@ class FiltrarRecibos(forms.ModelForm):
         self.fields['cliente'].empty_label = 'Cualquiera'
         self.fields['cliente'].required = False
         self.fields['cliente'].queryset = Clientes.objects.all()
-        
+ 
+    
 #Crear o modificar un producto
 class ProductoForm(forms.ModelForm):
     tipo = forms.ModelChoiceField(
