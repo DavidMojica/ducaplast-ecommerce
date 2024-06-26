@@ -106,7 +106,7 @@ class Pedido(models.Model):
     credito_hora = models.DateTimeField(null=True, blank=True)
     completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="completado_por")
     completado_hora = models.DateTimeField(null=True, blank=True)
-    consecutivo = models.CharField(max_length=20, null=True, unique=True)    
+    consecutivo = models.CharField(max_length=500, null=True, unique=True)    
     tipo_consecutivo = models.ForeignKey(TipoConsecutivo, on_delete=models.CASCADE, null=True, blank=True)
     check_bodega = models.BooleanField(default=False, null=False)
     checkeado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="checkeado_por")
