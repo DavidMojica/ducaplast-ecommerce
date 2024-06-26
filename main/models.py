@@ -22,7 +22,7 @@ class Estados(models.Model):
 class Clientes(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
-    direccion = models.CharField(max_length=200, default="")
+    direccion = models.CharField(max_length=500, default="")
     #dinero_generado = models.BigIntegerField(default=0)
     
     def __str__(self):
@@ -68,7 +68,7 @@ class TipoProducto(models.Model):
 
 class TipoConsecutivo(models.Model):
     id = models.IntegerField(primary_key=True)
-    description = models.CharField(max_length=25)
+    description = models.CharField(max_length=500)
     
     def __str__(self):
         return self.description
@@ -92,7 +92,7 @@ class Pedido(models.Model):
     vendedor = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name="vendedor")
     cliente = models.ForeignKey(Clientes, on_delete=models.CASCADE)
     estado = models.ForeignKey(Estados, on_delete=models.CASCADE)
-    direccion = models.CharField(max_length=300)
+    direccion = models.CharField(max_length=500)
     fecha = models.DateTimeField(auto_now_add=True)
     nota = models.CharField(max_length=500)
     notaEmpacador = models.CharField(max_length=500, null=True, blank=True)
@@ -187,7 +187,7 @@ class ProductosPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)
     tipo_cantidad = models.ForeignKey(TipoCantidad, on_delete=models.CASCADE, null=True, blank=True)
-    paquete = models.CharField(max_length=20, default='', null=True, blank=True)
+    paquete = models.CharField(max_length=100, default='', null=True, blank=True)
     peso = models.CharField(max_length=100, default='', null=True, blank=True)
 
 class HandlerEmpaquetacion(models.Model):
