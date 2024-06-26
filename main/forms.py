@@ -41,7 +41,7 @@ class FiltrarRecibos(forms.ModelForm):
     
     estado = forms.ModelChoiceField(
         label="Estado",
-        queryset=Estados.objects.exclude(id__in=[6,7]),
+        queryset=Estados.objects.exclude(id__in=[6,7]).order_by('id'),
         empty_label= 'Todos',
         required=False,
         widget=forms.Select(attrs={'class':'form-select'})
