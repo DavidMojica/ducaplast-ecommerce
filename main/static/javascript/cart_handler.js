@@ -1,7 +1,3 @@
-const regexNumeros = input => {
-    return /^[0-9]+$/.test(input);
-}
-
 $(document).ready(()=> {
     $('.cart-handler').on('click', function(e) {
         e.preventDefault();
@@ -27,8 +23,7 @@ $(document).ready(()=> {
                             const productoElement = $('#p-' + producto_id);
                             if (productoElement.length) productoElement.remove();
                             delete Productos[producto_id];
-                            //updateGlobalPrice();
-                            createToastNotify(1, "Producto removido", "Producto removido del carrito correctamente.");
+                            createToastNotify(0, "Producto removido", "Producto removido del carrito correctamente.");
                         }
                     }
                     else if (action == "3"){

@@ -1032,12 +1032,8 @@ def CartHandler(request):
                 del carrito[producto_id]
                 event = "Producto borrado"
                 carrito_vacio = len(carrito) == 0  
-            total_productos_actualizado = sum(int(item['total_producto']) for item in carrito.values())
-            iva_actualizado = total_productos_actualizado * 0.19
-            total_actualizado = total_productos_actualizado + iva_actualizado
             request.session['carritoVenta'] = carrito
-            return JsonResponse({'success': True, 'event': event, 'total_productos': numberWithPoints(total_productos_actualizado),
-                                'iva': numberWithPoints(iva_actualizado), 'total_actualizado': numberWithPoints(total_actualizado), 'carrito_vacio': carrito_vacio,
+            return JsonResponse({'success': True, 'event': event, 'carrito_vacio': carrito_vacio,
                                 'productos_cantidad': len(request.session['carritoVenta'])})
         #borrar todo el carrito
         elif action == "3":
