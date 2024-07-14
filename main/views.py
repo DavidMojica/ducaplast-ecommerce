@@ -111,18 +111,6 @@ def unloginRequired(view_func):
             return view_func(request, *args, **kwargs)
     return wrapper
 
-#Obtener el precio de los articulos del carro y actualizar sus respectivos valores con puntos decimales.
-# @login_required
-# def getCartPrice(request):
-#     carrito = request.session.get('carritoVenta', {})
-#     total_productos = 0
-#     if carrito:
-#         for key, producto in carrito.items():
-#             total_productos += int(producto['precio']) * int(producto['cantidad'])
-#             producto['precio_str'] = numberWithPoints(producto['precio'])
-#             producto['total_producto_str'] = numberWithPoints(producto['total_producto'])
-#         return total_productos
-
 def filtrarPedidosOrders(request, pedidos, form):
     id = form.cleaned_data.get('id')
     vendedor = form.cleaned_data.get('vendedor')
@@ -251,10 +239,6 @@ def filtrar_productos(request):
                 productos = Producto.objects.order_by('descripcion')
             elif ordenar == '3':
                 productos = Producto.objects.order_by('-descripcion')
-            # elif ordenar == '4':
-            #     productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('-precio_num')
-            # elif ordenar == '5':
-            #     productos = productos.annotate(precio_num=Cast('precio', FloatField())).order_by('precio_num')
             else: 
                 pass
         
@@ -651,28 +635,33 @@ def OrderDetail(request, order):
                     issue = ERROR_17
 
         #----------------TAREAS DE DESPACHO, ESTADO 3----------------#
-        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4,5,6]: # Despachadores
+        elif user.tipo_usuario_id == 5 or user.tipo_usuario_id in adminIds and pedido.estado_id in [3,4,5]: # Despachadores
             if 'confirmarRepartidor' in request.POST or 'pendienteRepartidor' in request.POST:
                 form = SeleccionarRepartidor(request.POST)
                 if not pedido.estado_id >= 5:
                     if user.tipo_usuario_id in adminIds:
                         data['isAdmin'] = True
                     if form.is_valid():
-                        pedido.despachador_reparto = user
-                        pedido.despacho_hora = timezone.now()
+                        pedido.completado_por = user
+                        pedido.completado_hora = timezone.now()
                         consecutivo = form.cleaned_data['consecutivo'].strip()
-                        
+                        tipo_consecutivo = form.cleaned_data['tipo_consecutivo']
                         data['form'] = SeleccionarRepartidor()
                         
                         if consecutivo:
                             current_consecutivo = pedido.consecutivo
-                            if consecutivo != current_consecutivo:
-                                if not Pedido.objects.filter(consecutivo=consecutivo).exists():
-                                    pedido.consecutivo = consecutivo    
-                                    pedido.tipo_consecutivo = form.cleaned_data['tipo_consecutivo']
-                                else:
-                                    data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
-                                    return render(request, HTMLORDERDETAIL,{**data})
+                            if consecutivo != current_consecutivo:                                
+                                # Verificar si hay un pedido con el mismo consecutivo
+                                pedido_con_igual_consecutivo = Pedido.objects.filter(consecutivo=consecutivo, tipo_consecutivo=tipo_consecutivo).first()
+
+                                #si existe, verificamos si el numero de consecutivo y tipo de consecutivo coinciden
+                                if pedido_con_igual_consecutivo:
+                                    data['msg_secondary'] = "El consecutivo y tipo de consecutivo que ingresó ya existe. Los consecutivos con el mismo tipo de consecutivo no se deben repetir."
+                                    return render(request, HTMLORDERDETAIL, {**data})
+                                
+                                pedido.consecutivo = consecutivo    
+                                pedido.tipo_consecutivo = tipo_consecutivo
+                                
                         else:
                             data['msg_secondary'] = "El campo consecutivo no puede quedar vacío"
                             return render(request, HTMLORDERDETAIL,{**data}) 
@@ -695,6 +684,9 @@ def OrderDetail(request, order):
                                             rol_secundario = get_object_or_404(RolReparto, pk=1)
                                             handler_secundario = HandlerReparto(repartidor=repartidor_secundario, pedido=pedido, rol=rol_secundario)
                                             handler_secundario.save()
+                                
+                                pedido.completado_por = user
+                                pedido.completado_hora = timezone.now()
                                 pedido.estado_id = 5
                                 pedido.save()    
                             else:
@@ -722,15 +714,17 @@ def OrderDetail(request, order):
                     tipo_consecutivo = form.cleaned_data['tipo_consecutivo']
                     data['form'] = SeleccionarRepartidor(pedido=pedido)
                     
-                    if nuevo_consecutivo:
-                        if pedido.consecutivo == nuevo_consecutivo or not Pedido.objects.filter(consecutivo=nuevo_consecutivo).exists():
-                                pedido.consecutivo = nuevo_consecutivo    
-                        else:
-                            data['msg_secondary'] = "El consecutivo que ingresó ya existe. Nada fue guardado."
-                            return render(request, HTMLORDERDETAIL,{**data})
-                    else:
-                            data['msg_secondary'] = "El campo consecutivo no puede quedar vacío"
-                            return render(request, HTMLORDERDETAIL,{**data}) 
+                    if not nuevo_consecutivo:
+                        data['msg_secondary'] = "El campo consecutivo no puede quedar vacío"
+                        return render(request, HTMLORDERDETAIL, {**data})
+                    
+                    pedido_con_igual_consecutivo = Pedido.objects.filter(consecutivo=nuevo_consecutivo, tipo_consecutivo=tipo_consecutivo).first()
+                    
+                    if pedido_con_igual_consecutivo and pedido_con_igual_consecutivo != pedido:
+                        data['msg_secondary'] = "El consecutivo y tipo de consecutivo que ingresó ya existe. Los consecutivos con el mismo tipo de consecutivo no se deben repetir."
+                        return render(request, HTMLORDERDETAIL, {**data})
+                    
+                    pedido.consecutivo = nuevo_consecutivo    
                                                 
                     if repartidor_principal_nuevo :
                         rol_primario = get_object_or_404(RolReparto, pk=0)
@@ -748,20 +742,6 @@ def OrderDetail(request, order):
                     
                     pedido.tipo_consecutivo = tipo_consecutivo
                     pedido.despacho_modificado_hora = timezone.now()
-                    pedido.save()
-  
-            #---------Completacion-----#
-            elif 'credito' in request.POST:
-                if not pedido.estado_id >= 6:
-                    pedido.estado_id = 6
-                    pedido.credito_por = user
-                    pedido.credito_hora = timezone.now()
-                    pedido.save()
-            elif 'completarPedido' in request.POST:
-                if not pedido.estado_id >= 7:
-                    pedido.estado_id = 7
-                    pedido.completado_por = user
-                    pedido.completado_hora = timezone.now()
                     pedido.save()
             else:
                 data['success']=False
@@ -808,7 +788,7 @@ def Orders(request, filtered=None):
 
     if not filtered:
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.exclude(estado_id__in=[6, 7]).order_by('-fecha')
+            pedidos = Pedido.objects.exclude(estado_id=5).order_by('-fecha')
         elif user.tipo_usuario_id == 2:  # Vendedor
             pedidos = Pedido.objects.filter(vendedor=user.id).order_by('-fecha')
         elif user.tipo_usuario_id == 3: #Empacador
@@ -824,7 +804,7 @@ def Orders(request, filtered=None):
     elif filtered == "historial": 
         data['history'] = True
         if user.tipo_usuario_id in adminIds:
-            pedidos = Pedido.objects.filter(estado_id__in=[6, 7]).order_by('-fecha')
+            pedidos = Pedido.objects.filter(estado_id=5).order_by('-fecha')
             data['isAdmin'] = True
             if form.is_valid():
                 pedidos = filtrarPedidosOrders(request, pedidos, form)
@@ -836,7 +816,7 @@ def Orders(request, filtered=None):
         elif user.tipo_usuario_id == 4:
             pedidos = Pedido.objects.filter(facturado_por=user.id)
         elif user.tipo_usuario_id == 5:
-            pedidos = Pedido.objects.filter(despachador_reparto_id=user.id)
+            pedidos = Pedido.objects.filter(completado_por_id=user.id)
             
             if form.is_valid():
                 pedidos = filtrarPedidosOrders(request, pedidos, form)

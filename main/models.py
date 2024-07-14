@@ -99,14 +99,12 @@ class Pedido(models.Model):
     empacado_hora = models.DateTimeField(null=True, blank=True)
     facturado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="facturado_por")
     facturado_hora = models.DateTimeField(null=True, blank=True)
-    despachador_reparto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
-    despacho_hora = models.DateTimeField(null=True, blank=True)
+    completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="asignador_reparto")
+    completado_hora = models.DateTimeField(null=True, blank=True)
     despacho_modificado_hora = models.DateTimeField(null=True, blank=True)
     credito_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="credito_por")
     credito_hora = models.DateTimeField(null=True, blank=True)
-    completado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="completado_por")
-    completado_hora = models.DateTimeField(null=True, blank=True)
-    consecutivo = models.CharField(max_length=500, null=True, unique=True)    
+    consecutivo = models.CharField(max_length=500, null=True)    
     tipo_consecutivo = models.ForeignKey(TipoConsecutivo, on_delete=models.CASCADE, null=True, blank=True)
     check_bodega = models.BooleanField(default=False, null=False)
     checkeado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="checkeado_por")
@@ -157,20 +155,19 @@ class Pedido(models.Model):
         else:
             return False
     
-    #Modulo cantidad
-    # def descontar_cantidad_producto(self):
-    #     productos_pedido = ProductosPedido.objects.filter(id_pedido=self)
-    #     for producto_pedido in productos_pedido:
-    #         producto = producto_pedido.id_producto
-    #         if producto.cantidad < producto_pedido.cantidad:
-    #             raise ValidationError(f"No hay suficiente cantidad disponible para el producto {producto.nombre}.")
-    #         producto.cantidad -= producto_pedido.cantidad
-    #         producto.save()
-    
-    #Modulo precio  
-    # def actualizar_dinero_generado_cliente(self):
-    #     self.cliente.dinero_generado += self.valor
-    #     self.cliente.save()
+    def get_tiempo_pedido(self):
+        if self.completado_hora:
+            tiempo_transcurrido = self.completado_hora - self.fecha
+            if tiempo_transcurrido:
+                days = tiempo_transcurrido.days
+                seconds = tiempo_transcurrido.seconds
+                hours, remainder = divmod(seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                return f'Este pedido tomó {days} días, {hours} horas, {minutes} minutos, {seconds} segundos en ser completado.'
+            else:
+                return 'No se pudo obtener el tiempo empleado.'
+        else:
+            return 'El pedido no ha sido completado'
             
 class Producto(models.Model):
     id = models.AutoField(primary_key=True)

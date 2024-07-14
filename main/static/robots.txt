@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /secret/
+Allow: /
+Sitemap: https://ducaplast.com.co/sitemap.xml
