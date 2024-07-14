@@ -303,8 +303,8 @@
                         {% endif %}
                         <h6>Consecutivo: {%if pedido.consecutivo %} <span class="badge bg-info">{{pedido.consecutivo}} </span> {% else %} Sin consecutivo {% endif %}</h6>
                         <h6>Tipo de consecutivo: {% if pedido.tipo_consecutivo %} <span class="badge bg-info">{{pedido.tipo_consecutivo}}</span> {% else %} Sin tipo de consecutivo {% endif %}</h6>
-                        <p>Despachador: {{pedido.despachador_reparto}} <br>
-                        Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
+                        <p>Despachador: {{pedido.completado_por}} <br>
+                        Hora de despacho - <span class="badge bg-info">{{pedido.completado_hora}}</span><br>
                         {% if pedido.despacho_modificado_hora %}
                             Este pedido fue modificado - <span class="badge bg-warning">{{pedido.despacho_modificado_hora}}</span>
                         {% endif %}
@@ -404,46 +404,14 @@
                             </section>
                             {% endif %}
                         {% endif %} 
-                        {% if isAdmin %}
-                        <!-- trigger -->
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCompletarPedido1">Completar pedido</button>
-                        <!-- modal -->
-                        <section class="modal fade" id="modalCompletarPedido1" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                            <article class="modal-dialog modal-dialog-centered">
-                                <article class="modal-content">
-                                    <section class="modal-header">
-                                        <h5 class="modal-title">Completar pedido</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </section>
-                                    <section class="modal-body">
-                                        <p>¿Este pedido fue dado a crédito o ya fue pagado?</p>
-                                    </section>
-                                    <section class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                        <form action="" method="POST">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="credito">
-                                            <button type="submit" class="btn btn-warning">En crédito</button>
-                                        </form>
-                                        <form action="" method="POST" id="completarPedido">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="completarPedido">
-                                            <button type="submit" class="btn btn-success">Pagado</button>                             
-                                        </form>  
-                                    </section>
-                                </article>
-                            </article>
-                        </section>
-                        
-                        {% endif %}
                         <br>
                         <span class="badge bg-danger">{{issue5}}</span>
                     {% else %}
                     <h5>Este pedido fue repartido por:</h5>
                     <h6>Consecutivo: {%if pedido.consecutivo %} <span class="badge bg-info">{{pedido.consecutivo}} </span> {% else %} Sin consecutivo {% endif %}</h6>
                     <h6>Tipo de consecutivo: {% if pedido.tipo_consecutivo %} <span class="badge bg-info">{{pedido.tipo_consecutivo}}</span> {% else %} Sin tipo de consecutivo {% endif %}</h6>
-                    <p>Despachador: {{pedido.despachador_reparto}} <br>
-                    Hora de despacho - <span class="badge bg-info">{{pedido.despacho_hora}}</span><br>
+                    <p>Despachador: {{pedido.completado_por}} <br>
+                    Hora de despacho - <span class="badge bg-info">{{pedido.completado_hora}}</span><br>
                     {% if pedido.despacho_modificado_hora %}
                         Este pedido fue modificado - <span class="badge bg-warning">{{pedido.despacho_modificado_hora}}</span>
                     {% endif %}
@@ -464,74 +432,16 @@
             <!-- Completación -->
             <section class="card mb-3">
                 <article class="card-header text-center">
-                    <h5 class="card-title">Completación</h5>
+                    <h5 class="card-title">Resumen</h5>
                 </article>
                 <article class="card-body">
-                    {% if pedido.estado.id < 6 %}
+                    {% if pedido.estado.id < 5 %}
                         <h5>Este pedido no aún no se ha completado</h5>
-                    {% elif pedido.estado.id == 6 or pedido.estado.id == 7 %}
-                        {% if isAdmin %}
-                            {% if pedido.estado.id == 6 %}
-                                <h5>Este pedido está en crédito</h5>
-                                <hr>
-                                <p>
-                                    Marcó a crédito: {{ pedido.credito_por }} <br>
-                                    Fecha crédito: <span class="badge bg-warning">{{ pedido.credito_hora }}</span> 
-                                </p>
-                                <!-- trigger -->
-                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalPedidoPagado2">Marcar como pagado</button>
-                                <!-- modal -->
-                                <section class="modal fade" id="modalPedidoPagado2" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                                    <article class="modal-dialog modal-dialog-centered">
-                                        <article class="modal-content">
-                                            <section class="modal-header">
-                                                <h5 class="modal-title">Completar pedido</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </section>
-                                            <section class="modal-body">
-                                                <p>¿El crédito ya fue pagado?</p>
-                                            </section>
-                                            <section class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                                <form action="" method="POST" id="completarPedido">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="completarPedido">
-                                                    <button type="submit" class="btn btn-success">Pagado</button>                             
-                                                </form>  
-                                            </section>
-                                        </article>
-                                    </article>
-                                </section>
-                            {% elif pedido.estado.id == 7 %}
-                                {% if pedido.credito_por %}
-                                    <h5>Este pedido estuvo en crédito pero ya fue cancelado.</h5>
-                                    <h6>Crédito</h6>
-                                    <p>
-                                        Marcó a crédito: {{ pedido.credito_por }} <br>
-                                        Fecha crédito: <span class="badge bg-warning">{{ pedido.credito_hora }}</span> 
-                                    </p>
-                                {% else %}
-                                    <h5>Este pedido NO estuvo en crédito</h5>
-                                {% endif %}
-                                <h6>Pago</h6>
-                                <p class="card-text">
-                                    Marcó como completado: {{ pedido.completado_por }} <br>
-                                    Hora de completación: <span class="badge bg-info">{{ pedido.completado_hora }}</span>
-                                </p>
-                            {% endif %}
-                        {% else %}
-                            <h5>Este pedido ya fue completado. <br>
-                                Marcado como completado por:</h5>
-                            <p class="card-text">
-                                {% if pedido.completado_por %}
-                                    {{ pedido.completado_por }} <br>
-                                    <p class="card-text">Hora de completación: <span class="badge bg-info">{{ pedido.completado_hora }}</span></p>
-                                {% else %}
-                                    {{pedido.credito_por}}
-                                    <p class="card-text">Hora de completación: <span class="badge bg-info">{{ pedido.credito_hora }}</span></p>
-                                {% endif %}
-                            </p>
-                        {% endif %}
+                    {% else %}
+                        <h5>Este pedido ya fue completado</h5>
+                        <p>Hora de venta: {{pedido.fecha}}</p>
+                        <p>Hora de finalizacion: {{pedido.completado_hora}}</p>
+                        <p>{{ pedido.get_tiempo_pedido }}</p>
                     {% endif %}
                 </article>
             </section>

@@ -42,11 +42,6 @@
                         <legend class="badge bg-info text-white p-1">{{form.completado_fecha.label_tag}}</legend>
                         {{form.completado_fecha}}
                     </fieldset>
-                    
-                    <fieldset class="mb-3 col-md-6">
-                        <legend class="badge bg-info text-white p-1">{{form.estado_final.label_tag}}</legend>
-                        {{form.estado_final}}
-                    </fieldset>
         
                     <fieldset class="mb-3 col-md-6">
                         <legend class="badge bg-info text-white p-1">{{form.consecutivo.label_tag}}</legend>
@@ -57,6 +52,12 @@
                         <legend class="badge bg-info text-white p-1">{{form.tipo_consecutivo.label_tag}}</legend>
                         {{form.tipo_consecutivo}}
                     </fieldset>
+
+                    <fieldset class="col-md-6">
+                        <legend class="badge bg-info text-white p-1">{{form.urgente.label_tag}}</legend>
+                        {{form.urgente}}
+                    </fieldset>
+
                     <fieldset class="d-flex justify-content-center">
                         <input type="reset" value="Limpiar" class="btn btn-secondary me-1">
                         <button type="submit" class="btn btn-primary ms-1">Filtrar <i class="fa fa-search"></i></button>

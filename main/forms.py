@@ -31,17 +31,9 @@ class FiltrarRecibos(forms.ModelForm):
         input_formats=['%Y-%m-%d'],
     )
     
-    estado_final = forms.ModelChoiceField(
-        label='Estado final',
-        queryset=Estados.objects.filter(id__in=[6,7]),
-        empty_label= 'Ambos (Recibido y cancelado)',
-        required=False,
-        widget=forms.Select(attrs={'class':'form-select'})
-    )
-    
     estado = forms.ModelChoiceField(
         label="Estado",
-        queryset=Estados.objects.exclude(id__in=[6,7]).order_by('id'),
+        queryset=Estados.objects.exclude(id=5).order_by('id'),
         empty_label= 'Todos',
         required=False,
         widget=forms.Select(attrs={'class':'form-select'})

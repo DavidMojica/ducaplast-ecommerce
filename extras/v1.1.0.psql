@@ -13,9 +13,8 @@ insert into main_estados (id, description) values(1, 'Siendo empacado');
 insert into main_estados (id, description) values(2, 'En facturacion');
 insert into main_estados (id, description) values(3, 'Listo para despacho');
 insert into main_estados (id, description) values(4, 'Pendiente');
-insert into main_estados (id, description) values(5, 'En reparto');
-insert into main_estados (id, description) values(6, 'Recibido');
-insert into main_estados (id, description) values(7, 'Cancelado');
+insert into main_estados (id, description) values(5, 'Completado');
+
 --select * from main_estados
 insert into main_tipoproducto (id, description) values(0, 'Desechables');
 insert into main_tipoproducto (id, description) values(1, 'Bolsas');
@@ -52,3 +51,12 @@ update main_usuarios SET id = 1 where id = [id];
 ALTER SEQUENCE main_usuarios_id_seq RESTART WITH 2;
 ALTER SEQUENCE main_clientes_id_seq RESTART WITH 1;
 ALTER SEQUENCE main_pedido_id_seq RESTART WITH 1;
+
+
+
+------------------v.1.1.0-------------------//
+update main_pedido set estado_id = 5 where estado_id = 6;
+update main_pedido set estado_id = 5 where estado_id = 7;
+delete from main_estados where id = 6;
+delete from main_estados where id = 7;
+update main_estados set description = 'Completado' where id = 5;
