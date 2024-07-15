@@ -108,6 +108,8 @@ class Pedido(models.Model):
     tipo_consecutivo = models.ForeignKey(TipoConsecutivo, on_delete=models.CASCADE, null=True, blank=True)
     check_bodega = models.BooleanField(default=False, null=False)
     checkeado_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="checkeado_por")
+    check_factura = models.BooleanField(default=False,null=False)
+    check_factura_por = models.ForeignKey(Usuarios, on_delete=models.CASCADE, null=True, blank=True, related_name="check_factura_por")
     urgente = models.BooleanField(default=False, null=False)
     
     
