@@ -79,6 +79,7 @@ ERROR_20 = "JSON no válido"
 ERROR_21 = "No hay productos en el pedido."
 ERROR_22 = 'El nombre del cliente ya está registrado.'
 ERROR_23 = "Usted ya completó la parte del pedido de su bodega. Debe esperar a la que otra bodega complete su parte."
+ERROR_24 = "Usted ya marcó como facturado su parte del pedido. Debe esperar a que el otro facturador complete su parte."
 
 #-----------Functions----------#
 #Quita espacio al principio y al final de los campos de un formulario
@@ -543,7 +544,7 @@ def OrderDetail(request, order):
         'isAdmin': False
     }
     #--Procesamiento de productos--#
-    if pedido.estado_id in [0, 1]:
+    if pedido.estado_id in [0, 1, 2]:
         data['productos_bodega_1'] = ProductosPedido.objects.filter(pedido_id=order, producto__tipo__id=1)
         data['productos_bodega_2'] = ProductosPedido.objects.filter(pedido_id=order, producto__tipo__id__in=[0, 2])
         data['productos'] = ProductosPedido.objects.filter(pedido_id=order)
@@ -627,10 +628,25 @@ def OrderDetail(request, order):
         elif user.tipo_usuario_id == 4 or user.tipo_usuario_id in adminIds and pedido.estado_id == 2: #Facturadores
             if 'confirmarFacturacion' in request.POST:
                 if not pedido.estado_id >= 3:
-                    pedido.estado_id = 3
-                    pedido.facturado_por = user
-                    pedido.facturado_hora = timezone.now()
-                    pedido.save()
+                    if pedido.get_multiple_bodega():
+                        if pedido.check_factura:
+                            if not pedido.check_factura_por == user:
+                                pedido.estado_id = 3
+                                pedido.facturado_por = user
+                                pedido.facturado_hora = timezone.now()
+                                pedido.save()
+                            else:
+                                data['issue'] = ERROR_24
+                        else:
+                            pedido.check_factura_por = user
+                            pedido.check_factura = True
+                            pedido.save()
+                    else:
+                        pedido.estado_id = 3
+                        pedido.facturado_por = user
+                        pedido.facturado_hora = timezone.now()
+                        pedido.save()
+                    
                 else:
                     issue = ERROR_17
 

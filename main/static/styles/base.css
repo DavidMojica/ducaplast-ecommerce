@@ -6,3 +6,13 @@
 .bg-pink{
     background-color: palevioletred;
 }
+
+.header-link{
+    border-radius: 8px;
+    color: #fff;
+}
+
+.header-link:hover{
+    background-color: white;
+    color: black;
+}

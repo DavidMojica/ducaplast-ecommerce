@@ -206,9 +206,22 @@
                         <h5>Este pedido aún no puede ser facturado</h5>
                     {% elif pedido.estado.id == 2 %}
                         <h5>Este pedido está listo para ser facturado</h5>
+                        
+                        {% if pedido.get_multiple_bodega %}
+                        <article class="py-4">
+                            <strong>Este pedido necesita facturacion por parte de las dos bodegas.</strong>
+                            {% if pedido.check_factura %}
+                                <p>Este pedido ya fue facturado por uno de los 2 facturadores.</p>
+                                <p>Ya fue facturado por: {{pedido.check_factura_por}}</p>
+                            {% endif %}
+                            <span class="badge bg-danger text-wrap mx-4 my-2">{{issue}}</span>
+                        </article>
+                        {% endif %}
+
+
                         {% if user.tipo_usuario_id == 4 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Facturación lista</button>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion" {% if pedido.check_factura_por == user %} disabled {% endif %}>Facturación lista</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalFacturacion" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
@@ -449,7 +462,7 @@
         <!-- Productos va aquí -->
         <aside class="col-md-6">
             <!-- Filtrar por bodegas si esta en empaquetacion -->
-            {% if pedido.estado.id == 0 or pedido.estado.id == 1 %}
+            {% if pedido.estado.id == 0 or pedido.estado.id == 1 or pedido.estado.id == 2 %}
                 <!-- Productos de bodega 1 -->
                 {% if productos_bodega_1 %}
                 <article class="card">
