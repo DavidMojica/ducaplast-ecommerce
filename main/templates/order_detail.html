@@ -476,6 +476,9 @@
                                     <th scope="col">Tipo Cantidad</th>
                                     {% if pedido.estado_id == 1 %}
                                         <th scope="col">Acción</th>
+                                    {% else %}
+                                    <th scope="col">Paquete</th>
+                                    <th scope="col">Peso</th>
                                     {% endif %}
                                 </tr>
                             </thead>
@@ -570,6 +573,8 @@
                                         {% endif %}
                                         {% if pedido.estado_id != 1 %}
                                             <td>{{p.tipo_cantidad}}</td>
+                                            <td>{{p.paquete}}</td>
+                                            <td>{{p.peso}}</td>
                                         {% endif %}
                                     </tr>
                                 {% endfor %}
@@ -609,6 +614,9 @@
                                         <th scope="col">Tipo Cantidad</th>
                                         {% if pedido.estado_id == 1 %}
                                             <th scope="col">Acción</th>
+                                        {% else %}
+                                            <th scope="col">Paquete</th>
+                                            <th scope="col">Peso</th>
                                         {% endif %}
                                     </tr>
                                 </thead>
@@ -703,6 +711,8 @@
                                             {% endif %}
                                             {% if pedido.estado_id != 1 %}
                                                 <td>{{p.tipo_cantidad}}</td>
+                                                <td>{{p.paquete}}</td>
+                                                <td>{{p.peso}}</td>
                                             {% endif %}
                                         </tr>
                                     {% endfor %}
