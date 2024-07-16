@@ -630,13 +630,10 @@ def OrderDetail(request, order):
                 if not pedido.estado_id >= 3:
                     if pedido.get_multiple_bodega():
                         if pedido.check_factura:
-                            if not pedido.check_factura_por == user:
-                                pedido.estado_id = 3
-                                pedido.facturado_por = user
-                                pedido.facturado_hora = timezone.now()
-                                pedido.save()
-                            else:
-                                data['issue'] = ERROR_24
+                            pedido.estado_id = 3
+                            pedido.facturado_por = user
+                            pedido.facturado_hora = timezone.now()
+                            pedido.save()
                         else:
                             pedido.check_factura_por = user
                             pedido.check_factura = True

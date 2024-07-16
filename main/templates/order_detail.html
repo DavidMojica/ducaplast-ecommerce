@@ -221,7 +221,7 @@
 
                         {% if user.tipo_usuario_id == 4 or isAdmin %}
                             <!-- trigger -->
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion" {% if pedido.check_factura_por == user %} disabled {% endif %}>Facturación lista</button>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFacturacion">Facturación lista</button>
                             <!-- modal -->
                             <section class="modal fade" id="modalFacturacion" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                                 <article class="modal-dialog modal-dialog-centered">
